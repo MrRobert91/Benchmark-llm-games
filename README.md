@@ -21,6 +21,11 @@ Empieza por aquí:
   escalera de escape, el índice de contagio, el cuadrante que distingue coordinar de ser
   bueno, y El Rescate y La Carrera explicados a fondo.
 
+- **[La Carrera: diseño completo](docs/juego-la-carrera.md)** — el juego de carrera
+  armamentística. Por qué no es un dilema del prisionero sino un juego de confianza, el
+  umbral de miedo con su fórmula, los tres barridos experimentales y el experimento del
+  encuadre.
+
 Catálogo de ideas:
 
 - [Estado del arte y 5 ideas de benchmark-juego](docs/investigacion-y-ideas.md) — qué juegos
