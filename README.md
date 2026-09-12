@@ -25,6 +25,10 @@ Empieza por aquí:
   juego principal, en dos capas. Codicia y miedo a la vez, el tipo de juego como parámetro,
   el estado del arte (que es más denso de lo que parece), reglas concretas, y la capa de
   diseño de tratados con red team que convierte el benchmark en un buscador de mecanismos.
+- **[Reglas de los experimentos de referencia y la cuestión de la diversidad](docs/reglas-experimentos-referencia.md)**
+  — el modelo formal de Han/Pereira/Lenaerts con sus parámetros, el diseño de los dos
+  experimentos de 2026 (humanos y LLMs), la puerta de auditoría, y por qué meter ficheros de
+  persona para aumentar la diversidad rompe la medición si se hace como parche.
 - [La Carrera: primera versión](docs/juego-la-carrera.md) — el mismo juego modelado solo
   como juego de confianza. Superado por el anterior, pero el umbral de miedo, los barridos
   y la escalera de verificación siguen valiendo.
