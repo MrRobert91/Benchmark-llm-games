@@ -16,6 +16,9 @@ instrumento de medida. Y que sea divertido de ver.
   información asimétrica y engaño, con reglas cerradas: el Impostor Semántico, la Isla de
   las Tentaciones, el Topo, la Cumbre y Caza al Impostor. Incluye el formato de temporada
   con expediente de reputación entre pruebas.
+- [Cinco juegos de negociación y dilemas sociales](docs/ideas-negociacion.md) — dilema del
+  prisionero, regateo y bienes comunes: el Reparto, el Pozo, el Cártel, el Rescate y el
+  Velo. Todos con un óptimo teórico calculable, así que dan escala absoluta y no solo Elo.
 
 ## Estado
 
