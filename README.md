@@ -12,6 +12,10 @@ instrumento de medida. Y que sea divertido de ver.
   se usan hoy como benchmark, qué miden y por qué funcionan; dónde está el hueco; cinco
   propuestas concretas con métricas, coste y riesgos; y las trampas metodológicas a resolver
   antes de la primera partida.
+- [Cinco juegos sociales para la arena](docs/ideas-juegos-sociales.md) — roles ocultos,
+  información asimétrica y engaño, con reglas cerradas: el Impostor Semántico, la Isla de
+  las Tentaciones, el Topo, la Cumbre y Caza al Impostor. Incluye el formato de temporada
+  con expediente de reputación entre pruebas.
 
 ## Estado
 
