@@ -21,10 +21,13 @@ Empieza por aquí:
   escalera de escape, el índice de contagio, el cuadrante que distingue coordinar de ser
   bueno, y El Rescate y La Carrera explicados a fondo.
 
-- **[La Carrera: diseño completo](docs/juego-la-carrera.md)** — el juego de carrera
-  armamentística. Por qué no es un dilema del prisionero sino un juego de confianza, el
-  umbral de miedo con su fórmula, los tres barridos experimentales y el experimento del
-  encuadre.
+- **[El Proyecto: carrera por la superinteligencia](docs/el-proyecto-carrera-asi.md)** — el
+  juego principal, en dos capas. Codicia y miedo a la vez, el tipo de juego como parámetro,
+  el estado del arte (que es más denso de lo que parece), reglas concretas, y la capa de
+  diseño de tratados con red team que convierte el benchmark en un buscador de mecanismos.
+- [La Carrera: primera versión](docs/juego-la-carrera.md) — el mismo juego modelado solo
+  como juego de confianza. Superado por el anterior, pero el umbral de miedo, los barridos
+  y la escalera de verificación siguen valiendo.
 
 Catálogo de ideas:
 
