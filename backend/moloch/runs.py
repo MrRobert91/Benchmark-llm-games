@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import logging
 import queue
 import secrets
 import threading
@@ -12,9 +13,11 @@ from pathlib import Path
 from typing import Any
 
 from . import db
-from .agents.openrouter import BudgetGuard, OpenRouterAgent
+from .agents.openrouter import BudgetExceeded, BudgetGuard, OpenRouterAgent, OpenRouterError
 from .cli import LAB_NAMES
 from .engine import Game
+
+logger = logging.getLogger("uvicorn.error").getChild("moloch.runs")
 
 
 @dataclass
@@ -43,11 +46,17 @@ class RunQueue:
                 return
             conn = db.connect(self.database_path)
             try:
-                db.fail_interrupted_runs(conn)
+                interrupted = db.fail_interrupted_runs(conn)
             finally:
                 conn.close()
             threading.Thread(target=self._worker, name="moloch-runner", daemon=True).start()
             self._started = True
+            logger.info(
+                "run.worker.started database=%s queue_size=%s interrupted_runs=%s",
+                self.database_path,
+                self.max_waiting,
+                interrupted,
+            )
 
     def submit(
         self,
@@ -85,6 +94,13 @@ class RunQueue:
             finally:
                 conn.close()
             self.queue.put_nowait(item)
+        logger.info(
+            "run.queued run_id=%s models=%s budget_usd=%.2f waiting=%s",
+            item.game_id,
+            ",".join(item.models),
+            item.budget,
+            self.queue.qsize(),
+        )
         return item.game_id
 
     def _worker(self) -> None:
@@ -92,6 +108,8 @@ class RunQueue:
             item = self.queue.get()
             try:
                 self._play(item)
+            except Exception:  # noqa: BLE001 - el worker debe sobrevivir a cualquier trabajo
+                logger.exception("run.worker.unhandled run_id=%s", item.game_id)
             finally:
                 item.api_key = ""
                 self.queue.task_done()
@@ -115,27 +133,17 @@ class RunQueue:
             finally:
                 conn.close()
 
-        for index, model in enumerate(item.models):
-            agents.append(
-                OpenRouterAgent(
-                    player_id=f"p{index}",
-                    label=LAB_NAMES[index],
-                    model=model,
-                    budget=guard,
-                    api_key=item.api_key,
-                    timeout=float(os.environ.get("MOLOCH_OPENROUTER_TIMEOUT", "75")),
-                    audit_sink=audit_sink,
-                )
-            )
-
         def event_sink(event_type: str, detail: dict[str, Any]) -> None:
             assert game is not None
             round_index = detail.get("round")
             player_id = detail.get("player_id")
-            if event_type == "speech":
-                phase = f"Ronda {round_index}: habla {player_id}"
+            label = _player_label(player_id, item.models)
+            if event_type == "speaking":
+                phase = f"Ronda {round_index}: {label} prepara su intervención"
+            elif event_type == "speech":
+                phase = f"Ronda {round_index}: {label} ha intervenido"
             elif event_type == "thinking":
-                phase = f"Ronda {round_index}: decisión privada de {player_id}"
+                phase = f"Ronda {round_index}: {label} toma su decisión privada"
             elif event_type == "round_resolved":
                 phase = f"Ronda {round_index}: acciones reveladas"
             elif event_type == "finished":
@@ -156,15 +164,42 @@ class RunQueue:
                 )
             finally:
                 conn.close()
+            logger.info(
+                "run.progress run_id=%s event=%s phase=%s calls=%s spent_usd=%.6f",
+                item.game_id,
+                event_type,
+                phase,
+                guard.calls,
+                guard.spent_usd,
+            )
 
-        game = Game(
-            agents,
-            seed=item.seed,
-            backend="openrouter-web",
-            game_id=item.game_id,
-            event_sink=event_sink,
-        )
         try:
+            logger.info(
+                "run.started run_id=%s seed=%s models=%s budget_usd=%.2f",
+                item.game_id,
+                item.seed,
+                ",".join(item.models),
+                item.budget,
+            )
+            for index, model in enumerate(item.models):
+                agents.append(
+                    OpenRouterAgent(
+                        player_id=f"p{index}",
+                        label=LAB_NAMES[index],
+                        model=model,
+                        budget=guard,
+                        api_key=item.api_key,
+                        timeout=float(os.environ.get("MOLOCH_OPENROUTER_TIMEOUT", "75")),
+                        audit_sink=audit_sink,
+                    )
+                )
+            game = Game(
+                agents,
+                seed=item.seed,
+                backend="openrouter-web",
+                game_id=item.game_id,
+                event_sink=event_sink,
+            )
             record = game.play()
             payload = record.to_dict()
             payload["budget"] = guard.summary()
@@ -184,9 +219,24 @@ class RunQueue:
                 )
             finally:
                 conn.close()
+            logger.info(
+                "run.completed run_id=%s calls=%s spent_usd=%.6f outcome=%s",
+                item.game_id,
+                guard.calls,
+                guard.spent_usd,
+                payload.get("outcome", {}).get("kind", "unknown"),
+            )
         except Exception as exc:  # noqa: BLE001 - el fallo forma parte del registro
             message = _public_error(exc)
-            partial = game.record.to_dict()
+            partial = game.record.to_dict() if game is not None else None
+            logger.exception(
+                "run.failed run_id=%s calls=%s spent_usd=%.6f error_type=%s public_error=%s",
+                item.game_id,
+                guard.calls,
+                guard.spent_usd,
+                type(exc).__name__,
+                message,
+            )
             conn = db.connect(self.database_path)
             try:
                 db.update_web_run(
@@ -209,7 +259,26 @@ class RunQueue:
 
 
 def _public_error(exc: Exception) -> str:
-    text = str(exc).strip()
-    if not text:
-        return "La ejecución falló sin un mensaje del proveedor."
-    return text[:800]
+    if isinstance(exc, OpenRouterError):
+        return exc.public_message()
+    if isinstance(exc, BudgetExceeded):
+        return (
+            "La partida se detuvo antes de una nueva llamada porque alcanzó el presupuesto "
+            f"máximo configurado. Detalle: {str(exc).strip()}. Aumenta el límite de la "
+            "partida o elige modelos más económicos."
+        )[:800]
+    return (
+        "La partida se detuvo por un error interno inesperado. No se ha incluido en las "
+        "métricas. Consulta el identificador de esta ejecución en los logs del backend y "
+        "vuelve a intentarlo."
+    )
+
+
+def _player_label(player_id: object, models: list[str]) -> str:
+    if isinstance(player_id, str) and player_id.startswith("p"):
+        try:
+            index = int(player_id[1:])
+            return f"{LAB_NAMES[index]} ({models[index]})"
+        except (ValueError, IndexError):
+            pass
+    return str(player_id or "un laboratorio")

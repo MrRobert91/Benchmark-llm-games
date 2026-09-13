@@ -125,6 +125,10 @@ class Game:
             meeting: list[Speech] = []
             pledges: dict[str, Action] = {}
             for agent in self.agents:
+                self._emit(
+                    "speaking",
+                    {"round": round_index, "player_id": agent.player_id},
+                )
                 view = self._view(agent, round_index, meeting, pledges)
                 speech = agent.speak(view)
                 meeting.append(speech)
