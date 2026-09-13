@@ -94,7 +94,7 @@ export function RunExperimentForm() {
         body: JSON.stringify({
           api_key: apiKey,
           nick,
-          url: url || null,
+          url: url.trim() ? `https://${url.trim()}` : null,
           models,
           budget_usd: budget,
         }),
@@ -186,13 +186,18 @@ export function RunExperimentForm() {
           </label>
           <label>
             Web pública <span>(opcional, solo HTTPS)</span>
-            <input
-              type="url"
-              pattern="https://.*"
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
-              placeholder="https://tu-web.example"
-            />
+            <div className="website-input">
+              <span aria-hidden="true">https://</span>
+              <input
+                type="text"
+                inputMode="url"
+                value={url}
+                onChange={(e) => setUrl(e.target.value.replace(/^https?:\/\//i, ""))}
+                placeholder="www.tu-web.example"
+                autoCapitalize="none"
+                spellCheck={false}
+              />
+            </div>
           </label>
         </div>
       </section>

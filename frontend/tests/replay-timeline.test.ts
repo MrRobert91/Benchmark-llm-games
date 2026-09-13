@@ -103,3 +103,16 @@ test("live timeline never invents a terminal outcome", () => {
   assert.notEqual(beats.at(-1)?.kind, "outcome");
   assert.equal(beats.filter((beat) => beat.kind === "outcome").length, 0);
 });
+
+
+test("live updates retain the previous score until the next round resolves", () => {
+  const replay = structuredClone(games.find((g) => g.rounds.length > 1)!);
+  const first = replay.rounds[0];
+  const next = replay.rounds[1];
+  replay.rounds = [first, { ...next, actions: [], state_after: [], events: [] }];
+  const waiting = buildTimeline(replay, false).at(-1)!;
+  assert.deepEqual(waiting.states, first.state_after);
+  assert.notEqual(waiting.kind, "resolution");
+  replay.rounds[1] = next;
+  assert.deepEqual(buildTimeline(replay, false).at(-1)!.states, next.state_after);
+});

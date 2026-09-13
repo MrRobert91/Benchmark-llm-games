@@ -735,3 +735,8 @@ code {
 .archive-empty p { font-size: 13px; }
 @media(max-width:850px) { .archive-filters { grid-template-columns: repeat(2,minmax(0,1fr)); padding: 18px; } }
 @media(max-width:520px) { .archive-filters { grid-template-columns: 1fr; gap: 15px; } .archive-models { grid-template-columns: 1fr; } .archive-pagination .btn { padding: 10px; font-size: 11px; } .archive-pagination span { font-size: 10px; } .archive-filter-footer .btn { font-size: 11px; } }
+
+.website-input { display: flex; align-items: center; border: 1px solid #334057; border-radius: 8px; overflow: hidden; }
+.website-input > span { padding-left: 12px; color: var(--muted); font-family: var(--mono); }
+.website-input input { min-width: 0; border: 0; flex: 1; }
+.live-ending { padding: 24px; margin-top: 24px; }

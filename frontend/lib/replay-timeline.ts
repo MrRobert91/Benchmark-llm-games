@@ -104,6 +104,8 @@ export function buildTimeline(replay: Replay, includeOutcome = true): ReplayBeat
         verdicts,
       });
     }
+    // An in-flight round has no resolved balance yet. Keep the last public score.
+    if (!round.state_after.length) continue;
     states = round.state_after;
     // The terminal events can include the outcome; reserve them for the ending.
     beats.push({

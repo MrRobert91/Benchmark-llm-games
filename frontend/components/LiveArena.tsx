@@ -54,6 +54,7 @@ export function LiveArena({ initialRun }: { initialRun: WebRun }) {
           <strong>La partida no pudo completarse.</strong>
           <p>{run.error_message}</p>
           <p>No se incluye en las métricas ni en el leaderboard.</p>
+          <a className="btn" href="/run">Preparar nueva partida</a>
         </div>
       )}
 
@@ -61,6 +62,8 @@ export function LiveArena({ initialRun }: { initialRun: WebRun }) {
         <ReplayViewer
           replay={run.replay as Replay}
           live={run.status !== "completed"}
+          completed={run.status === "completed"}
+          thinking={run.status === "running"}
         />
       ) : (
         <div className="queued-council card">

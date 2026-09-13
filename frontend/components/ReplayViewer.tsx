@@ -28,22 +28,27 @@ const PHASE = {
   outcome: "El desenlace",
 };
 
-export function ReplayViewer({ replay, live = false }: { replay: Replay; live?: boolean }) {
+export function ReplayViewer({ replay, live = false, completed = false, thinking = false }: { replay: Replay; live?: boolean; completed?: boolean; thinking?: boolean }) {
   const playerRef = useRef<HTMLDivElement>(null);
+  const resultsRef = useRef<HTMLDivElement>(null);
   const beats = useMemo(() => buildTimeline(replay, !live), [replay, live]);
-  const [step, setStep] = useState(0);
+  const [step, setStep] = useState(completed ? beats.length - 1 : 0);
   const [playing, setPlaying] = useState(false);
   const [overview, setOverview] = useState(false);
   const [speed, setSpeed] = useState(1);
-  const beat = beats[Math.min(step, beats.length - 1)];
+  const currentStep = live ? beats.length - 1 : Math.min(step, beats.length - 1);
+  const beat = beats[currentStep];
   const resolved = !live && beat.kind === "outcome";
+  useEffect(() => {
+    if (resolved) resultsRef.current?.focus();
+  }, [resolved]);
   const seat = replay.players.findIndex((p) => p.player_id === beat.playerId);
   const player = replay.players[seat];
   const color = player ? labColor(seat) : "#d8b87f";
   useEffect(() => {
-    setStep(live ? Math.max(0, beats.length - 1) : 0);
+    setStep(completed ? Math.max(0, beats.length - 1) : 0);
     setPlaying(false);
-  }, [replay, live, beats.length]);
+  }, [replay.game_id, completed]);
   useEffect(() => {
     if (!playing) return;
     if (step >= beats.length - 1) {
@@ -67,6 +72,7 @@ export function ReplayViewer({ replay, live = false }: { replay: Replay; live?: 
     setPlaying((p) => !p);
   };
   const keyboard = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (live) return;
     if ((event.target as HTMLElement).closest("button,input,select,summary,a"))
       return;
     if (event.key === "ArrowRight") {
@@ -92,17 +98,38 @@ export function ReplayViewer({ replay, live = false }: { replay: Replay; live?: 
   };
   return (
     <div className="viewer">
+      {resolved && (
+        <div data-testid="replay-results" ref={resultsRef} tabIndex={-1} aria-label="Resultados finales">
+          {replay.rounds.at(-1)?.events.length ? (
+            <ul className="events">
+              {replay.rounds.at(-1)!.events.map((event, i) => (
+                <li key={i}>{event}</li>
+              ))}
+            </ul>
+          ) : null}
+          <section className="card live-ending" role="status">
+            <p className="eyebrow">Partida finalizada</p>
+            <h2>{OUTCOME_LABEL[replay.outcome.kind]}</h2>
+            <p>{replay.outcome.headline}</p>
+            <p>Ronda final: {replay.outcome.final_round} · {replay.outcome.kind === "aligned_win" ? `Ganador: ${replay.outcome.winner_label}` : "Sin ganador"}</p>
+            <button className="btn" onClick={() => seek(0)}>Reiniciar visualización</button>{" "}
+            <a className="btn btn-primary" href="/run">Preparar nueva partida</a>
+          </section>
+          <ReplayResults replay={replay} />
+        </div>
+      )}
+
       <div
         ref={playerRef}
         className="council-player"
         tabIndex={0}
         onKeyDown={keyboard}
-        aria-label="Reproductor de jugadas. Flechas para avanzar o retroceder y espacio para reproducir."
+        aria-label={live ? "Partida en directo. Actualización automática." : "Reproductor de jugadas. Flechas para avanzar o retroceder y espacio para reproducir."}
         data-phase={beat.kind}
         data-speaker={beat.playerId ?? "council"}
       >
         <div className="council-stage">
-          <Arena3D replay={replay} beat={beat} overview={overview} />
+          <Arena3D replay={replay} beat={beat} overview={live || overview} thinking={thinking} />
           <div className="council-vignette" />
           <div className="council-topline">
             <div>
@@ -115,14 +142,14 @@ export function ReplayViewer({ replay, live = false }: { replay: Replay; live?: 
                 : "PRÓLOGO"}
             </span>
           </div>
-          <button
+          {!live && <button
             className="council-camera"
             onClick={() => setOverview((v) => !v)}
             aria-pressed={overview}
           >
             {overview ? "◎ Cámara narrativa" : "◉ Ver toda la mesa"}
-          </button>
-          {beat.kind === "intro" && (
+          </button>}
+          {!live && beat.kind === "intro" && (
             <div className="council-intro">
               <span>EL PRECIO DE AVANZAR</span>
               <h2>
@@ -175,15 +202,15 @@ export function ReplayViewer({ replay, live = false }: { replay: Replay; live?: 
             className="dialogue-content"
             aria-live="polite"
             aria-atomic="true"
-            key={step}
+            key={currentStep}
           >
             <p className="dialogue-text">
-              {beat.kind === "speech" ? `“${beat.text}”` : beat.text}
+              {live && beat.kind === "intro" ? "El consejo está reunido. Esperando las primeras respuestas de los modelos." : live && beat.kind === "resolution" ? "Balance actualizado. Esperando la siguiente intervención." : beat.kind === "speech" ? `“${beat.text}”` : beat.text}
             </p>
             <div className="dialogue-tags">
               {player && (
                 <span className="tag gesture-tag">
-                  {GESTURE_LABEL[robotGesture(beat, player.player_id)]}
+                  {GESTURE_LABEL[thinking ? "thinking" : robotGesture(beat, player.player_id)]}
                 </span>
               )}
               {beat.speech && beat.kind === "vote" && (
@@ -230,7 +257,7 @@ export function ReplayViewer({ replay, live = false }: { replay: Replay; live?: 
               )}
             </div>
           </div>
-          <button
+          {!live && <button
             className="dialogue-next"
             aria-label={
               resolved ? "Volver al inicio" : "Siguiente intervención"
@@ -238,9 +265,10 @@ export function ReplayViewer({ replay, live = false }: { replay: Replay; live?: 
             onClick={() => seek(resolved ? 0 : step + 1)}
           >
             {resolved ? "↻" : "→"}
-          </button>
+          </button>}
         </div>
-        <div className="council-controls">
+        {live && <div className="council-controls" role="status"><span className="live-pulse" /> {thinking ? "Los modelos están pensando…" : "Esperando actualizaciones"} · Actualización automática</div>}
+        {!live && <div className="council-controls">
           <button className="btn btn-primary" onClick={toggle}>
             {playing ? "Ⅱ Pausa" : resolved ? "↻ Repetir" : "▶ Reproducir"}
           </button>
@@ -297,6 +325,7 @@ export function ReplayViewer({ replay, live = false }: { replay: Replay; live?: 
             ⛶
           </button>
         </div>
+        }
         <div className="council-balance" aria-label="Último balance revelado">
           {replay.players.map((p, i) => {
             const state = beat.states.find((s) => s.player_id === p.player_id);
@@ -352,23 +381,11 @@ export function ReplayViewer({ replay, live = false }: { replay: Replay; live?: 
           })}
         </div>
       </div>
-      {resolved && (
-        <div data-testid="replay-results">
-          {replay.rounds.at(-1)?.events.length ? (
-            <ul className="events">
-              {replay.rounds.at(-1)!.events.map((event, i) => (
-                <li key={i}>{event}</li>
-              ))}
-            </ul>
-          ) : null}
-          <ReplayResults replay={replay} />
-        </div>
-      )}
       <details className="council-history">
-        <summary>Acta de la sesión · {step} pasos reproducidos</summary>
+        <summary>Acta de la sesión · {currentStep} pasos {live ? "recibidos" : "reproducidos"}</summary>
         <div>
-          {beats.slice(1, step + 1).map((b, i) => (
-            <button key={i} onClick={() => seek(i + 1)}>
+          {beats.slice(1, currentStep + 1).map((b, i) => (
+            <button key={i} disabled={live} onClick={() => seek(i + 1)}>
               <span>
                 R{b.round} · {PHASE[b.kind]}{" "}
                 {replay.players.find((p) => p.player_id === b.playerId)?.label}
