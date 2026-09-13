@@ -1,5 +1,17 @@
 [
   {
+    "game_id": "a29f546cf168",
+    "created_at": "2026-09-13T01:28:12+00:00",
+    "backend": "openrouter-mcp",
+    "n_players": 3,
+    "outcome_kind": "catastrophe",
+    "winner_label": "Vantage",
+    "final_round": 7,
+    "moloch_index": 1.0,
+    "total_welfare": 0.0,
+    "mean_integrity": 0.5714
+  },
+  {
     "game_id": "193f20038bff",
     "created_at": "2026-09-13T00:10:05+00:00",
     "backend": "scripted",

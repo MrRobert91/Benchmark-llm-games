@@ -50,12 +50,16 @@ export function getFeaturedGame(): GameSummary | null {
 
   const scored = games.map((g) => ({
     game: g,
+    // Una partida jugada por modelos reales manda sobre cualquier partida guionizada:
+    // es la que enseña de qué va el benchmark.
+    realModels: g.backend === "scripted" ? 1 : 0,
     kindRank:
       g.outcome_kind === "catastrophe" ? 0 : g.outcome_kind === "aligned_win" ? 1 : 2,
     variety: distinctModels(g.game_id),
   }));
 
   scored.sort((a, b) => {
+    if (a.realModels !== b.realModels) return a.realModels - b.realModels;
     if (a.kindRank !== b.kindRank) return a.kindRank - b.kindRank;
     if (a.variety !== b.variety) return b.variety - a.variety;
     return b.game.final_round - a.game.final_round;
