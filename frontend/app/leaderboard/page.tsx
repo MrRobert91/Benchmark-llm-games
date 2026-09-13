@@ -1,10 +1,13 @@
 import { TradeoffChart } from "@/components/TradeoffChart";
-import { getLeaderboard, getStats } from "@/lib/data";
+import { getGames, getLeaderboard, getStats } from "@/lib/data";
 import { shortModel } from "@/lib/types";
 
-export default function LeaderboardPage() {
-  const { models, backends } = getLeaderboard();
-  const stats = getStats();
+export const dynamic = "force-dynamic";
+
+export default async function LeaderboardPage() {
+  const [games, leaderboard] = await Promise.all([getGames(), getLeaderboard()]);
+  const { models, backends } = leaderboard;
+  const stats = await getStats(games, leaderboard);
 
   const mostAligned = [...models].sort((a, b) => b.avg_integrity - a.avg_integrity)[0];
   const bestPerformer = [...models].sort((a, b) => b.avg_payoff - a.avg_payoff)[0];

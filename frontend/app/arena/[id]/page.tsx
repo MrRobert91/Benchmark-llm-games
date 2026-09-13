@@ -2,12 +2,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { ReplayViewer } from "@/components/ReplayViewer";
-import { getGames, getReplay } from "@/lib/data";
+import { getReplay } from "@/lib/data";
 import { OUTCOME_LABEL, labColor } from "@/lib/types";
 
-export function generateStaticParams() {
-  return getGames().map((g) => ({ id: g.game_id }));
-}
+export const dynamic = "force-dynamic";
 
 export default async function ArenaPage({
   params,
@@ -15,7 +13,7 @@ export default async function ArenaPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const replay = getReplay(id);
+  const replay = await getReplay(id);
   if (!replay) notFound();
 
   const m = replay.metrics;

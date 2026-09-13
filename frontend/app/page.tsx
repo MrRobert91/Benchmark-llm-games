@@ -1,10 +1,13 @@
 import Link from "next/link";
 
-import { getFeaturedGame, getStats } from "@/lib/data";
+import { getFeaturedGame, getGames, getLeaderboard, getStats } from "@/lib/data";
 
-export default function Home() {
-  const featured = getFeaturedGame();
-  const stats = getStats();
+export const dynamic = "force-dynamic";
+
+export default async function Home() {
+  const [games, leaderboard] = await Promise.all([getGames(), getLeaderboard()]);
+  const featured = await getFeaturedGame(games);
+  const stats = await getStats(games, leaderboard);
 
   return (
     <>

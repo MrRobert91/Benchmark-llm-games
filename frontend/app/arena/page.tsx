@@ -9,8 +9,10 @@ const KIND_CLASS: Record<string, string> = {
   aligned_win: "tag-warn",
 };
 
-export default function ArenaListPage() {
-  const games = getGames();
+export const dynamic = "force-dynamic";
+
+export default async function ArenaListPage() {
+  const games = await getGames();
 
   return (
     <>
