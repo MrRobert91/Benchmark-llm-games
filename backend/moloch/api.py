@@ -24,7 +24,7 @@ from .openrouter_catalog import list_text_models, validate_key
 from .runs import RunQueue
 
 DB_PATH = Path(os.environ.get("MOLOCH_DB", str(db.DEFAULT_DB)))
-MAX_BUDGET_USD = float(os.environ.get("MOLOCH_MAX_BUDGET_USD", "2.00"))
+MAX_BUDGET_USD = float(os.environ.get("MOLOCH_MAX_BUDGET_USD", "0.50"))
 DEFAULT_BUDGET_USD = min(0.50, MAX_BUDGET_USD)
 RUN_QUEUE = RunQueue(DB_PATH)
 

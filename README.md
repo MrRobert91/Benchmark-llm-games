@@ -210,7 +210,7 @@ ajustar sin reconstruir la imagen:
 
 | Variable | Valor inicial | Uso |
 |---|---:|---|
-| `MOLOCH_MAX_BUDGET_USD` | `2.00` | máximo seleccionable por partida |
+| `MOLOCH_MAX_BUDGET_USD` | `0.50` | máximo seleccionable por partida |
 | `MOLOCH_QUEUE_SIZE` | `8` | ejecuciones que pueden esperar |
 | `MOLOCH_OPENROUTER_TIMEOUT` | `75` | timeout por llamada, en segundos |
 

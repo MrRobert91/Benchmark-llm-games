@@ -6,7 +6,7 @@ services:
     environment:
       PORT: "8000"
       MOLOCH_DB: /app/data/moloch.db
-      MOLOCH_MAX_BUDGET_USD: "2.00"
+      MOLOCH_MAX_BUDGET_USD: "0.50"
       MOLOCH_QUEUE_SIZE: "8"
       MOLOCH_OPENROUTER_TIMEOUT: "75"
     volumes:

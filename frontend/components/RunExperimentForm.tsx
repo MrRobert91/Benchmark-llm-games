@@ -239,7 +239,7 @@ export function RunExperimentForm() {
               <input
                 type="number"
                 min={0.05}
-                max={limits?.max_budget_usd ?? 2}
+                max={limits?.max_budget_usd ?? 0.5}
                 step={0.05}
                 value={budget}
                 onChange={(e) => setBudget(Number(e.target.value))}
