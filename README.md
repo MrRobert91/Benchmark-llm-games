@@ -65,6 +65,10 @@ Configuración de producción:
 El backend inicializa SQLite con las partidas versionadas dentro de la imagen. No necesita
 claves externas para servir el archivo, el leaderboard y los replays.
 
+En producción, monta un volumen persistente en `/app/data`. Las ejecuciones lanzadas desde
+la web se guardan en `/app/data/moloch.db`; el arranque importa los snapshots versionados
+solo cuando la base está vacía.
+
 ## Las reglas
 
 | Elemento | Valor |
@@ -189,6 +193,33 @@ python -m moloch.cli export  [--out DIR]
 | `GET /api/games` | lista de partidas |
 | `GET /api/games/{id}` | replay completo |
 | `GET /api/leaderboard` | ranking por modelo y por backend |
+| `GET /api/openrouter/models` | catálogo de chat con precios y contexto |
+| `POST /api/runs` | valida una clave efímera y encola una partida web |
+| `GET /api/runs/{id}` | estado y replay público incremental |
+| `GET /api/runs/{id}/events` | directo SSE de una ejecución |
+
+### Ejecuciones web con clave propia
+
+La página `/run` permite elegir entre tres y cinco modelos —incluido self-play—, aportar un
+nick y una URL HTTPS opcional, y fijar un presupuesto. La clave se valida directamente con
+OpenRouter y permanece solamente en memoria hasta que termina o falla esa ejecución. Nunca
+se añade al replay, SQLite, archivos ni logs.
+
+El backend procesa una partida a la vez y conserva una cola acotada. Estos límites se pueden
+ajustar sin reconstruir la imagen:
+
+| Variable | Valor inicial | Uso |
+|---|---:|---|
+| `MOLOCH_MAX_BUDGET_USD` | `2.00` | máximo seleccionable por partida |
+| `MOLOCH_QUEUE_SIZE` | `8` | ejecuciones que pueden esperar |
+| `MOLOCH_OPENROUTER_TIMEOUT` | `75` | timeout por llamada, en segundos |
+
+OpenRouter comunica el coste real después de cada respuesta, por lo que el presupuesto del
+servidor impide iniciar nuevas llamadas al alcanzarlo, pero la última puede rebasarlo
+ligeramente. Para un límite duro se recomienda usar una clave dedicada con límite propio en
+OpenRouter. Los prompts, respuestas y el razonamiento que el proveedor devuelve
+explícitamente se guardan por separado para investigación y nunca se exponen en las APIs
+públicas.
 
 ## Pruebas
 

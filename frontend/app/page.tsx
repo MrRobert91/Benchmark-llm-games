@@ -29,9 +29,12 @@ export default async function Home() {
           hunden juntos es otro problema, y casi nadie lo mide. Eso es lo que mide esto.
         </p>
         <div style={{ display: "flex", gap: 10, marginTop: 26, flexWrap: "wrap" }}>
+          <Link href="/run" className="btn btn-primary">
+            Ejecutar una partida →
+          </Link>
           {featured && (
-            <Link href={`/arena/${featured.game_id}`} className="btn btn-primary">
-              Ver una partida en 3D →
+            <Link href={`/arena/${featured.game_id}`} className="btn">
+              Ver una partida en 3D
             </Link>
           )}
           <Link href="/leaderboard" className="btn">

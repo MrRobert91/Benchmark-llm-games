@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
 
 export default async function LeaderboardPage() {
   const [games, leaderboard] = await Promise.all([getGames(), getLeaderboard()]);
-  const { models, backends } = leaderboard;
+  const { models, backends, contributors = [] } = leaderboard;
   const stats = await getStats(games, leaderboard);
 
   const mostAligned = [...models].sort((a, b) => b.avg_integrity - a.avg_integrity)[0];
@@ -21,6 +21,10 @@ export default async function LeaderboardPage() {
           Dos ejes, porque una sola cifra no distingue a un agente que coopera de uno que
           simplemente es predecible. El rendimiento dice cuánto se lleva. La integridad dice
           cuánto de lo que prometió cumplió.
+        </p>
+        <p className="note" style={{ marginTop: 14 }}>
+          El ranking principal incluye únicamente partidas completadas con modelos de
+          OpenRouter. Los agentes guionizados siguen disponibles como referencia.
         </p>
       </section>
 
@@ -155,6 +159,63 @@ export default async function LeaderboardPage() {
                     <td className="num" style={{ color: "var(--fast)" }}>{b.catastrophes}</td>
                     <td className="num" style={{ color: "var(--safe)" }}>{b.restraints}</td>
                     <td className="num" style={{ paddingRight: 22 }}>{b.aligned_wins}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      )}
+
+      {contributors.length > 0 && (
+        <section>
+          <p className="eyebrow">Créditos de ejecución</p>
+          <h2>Personas colaboradoras</h2>
+          <p style={{ maxWidth: "70ch" }}>
+            Cada fila representa una aportación independiente, aunque el nick o la URL se
+            repitan. No existen cuentas ni se intenta vincular identidades entre partidas.
+          </p>
+          <div className="card scroll-x" style={{ padding: 0 }}>
+            <table>
+              <thead>
+                <tr>
+                  <th style={{ paddingLeft: 22 }}>Colaboración</th>
+                  <th>Partida</th>
+                  <th className="num">Modelos</th>
+                  <th className="num">Índice de Moloch</th>
+                  <th className="num" style={{ paddingRight: 22 }}>Integridad</th>
+                </tr>
+              </thead>
+              <tbody>
+                {contributors.map((contribution) => (
+                  <tr key={contribution.game_id}>
+                    <td style={{ paddingLeft: 22 }}>
+                      <strong>
+                        {contribution.url ? (
+                          <a
+                            className="link"
+                            href={contribution.url}
+                            target="_blank"
+                            rel="nofollow noreferrer"
+                          >
+                            {contribution.nick} ↗
+                          </a>
+                        ) : contribution.nick}
+                      </strong>
+                      <div style={{ fontSize: 11, color: "var(--text-faint)", marginTop: 4 }}>
+                        {new Date(contribution.created_at).toLocaleDateString("es-ES")}
+                      </div>
+                    </td>
+                    <td>
+                      <a className="archive-game-id" href={`/arena/${contribution.game_id}`}>
+                        {contribution.game_id}
+                      </a>
+                    </td>
+                    <td className="num">{contribution.n_players}</td>
+                    <td className="num">{contribution.moloch_index.toFixed(3)}</td>
+                    <td className="num" style={{ paddingRight: 22 }}>
+                      {Math.round(contribution.mean_integrity * 100)}%
+                    </td>
                   </tr>
                 ))}
               </tbody>

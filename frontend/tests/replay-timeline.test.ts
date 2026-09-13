@@ -96,3 +96,10 @@ test("empty meetings and missing participant speeches still reveal real actions"
     ["intro", "outcome"],
   );
 });
+
+test("live timeline never invents a terminal outcome", () => {
+  const replay = structuredClone(games[0]);
+  const beats = buildTimeline(replay, false);
+  assert.notEqual(beats.at(-1)?.kind, "outcome");
+  assert.equal(beats.filter((beat) => beat.kind === "outcome").length, 0);
+});

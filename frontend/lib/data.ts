@@ -7,7 +7,14 @@
 import fs from "node:fs";
 import path from "node:path";
 
-import type { BackendRow, GameSummary, ModelRow, Replay } from "./types";
+import type {
+  BackendRow,
+  ContributionRow,
+  GameSummary,
+  ModelRow,
+  Replay,
+  WebRun,
+} from "./types";
 
 const DATA_DIR = path.join(process.cwd(), "public", "data");
 const API_BASE_URL = (
@@ -116,9 +123,10 @@ function enrichSnapshotSummary(game: GameSummary): GameSummary {
 export async function getLeaderboard(): Promise<{
   models: ModelRow[];
   backends: BackendRow[];
+  contributors: ContributionRow[];
 }> {
   return liveOrSnapshot("/api/leaderboard", () =>
-    readJson("leaderboard.json", { models: [], backends: [] }),
+    readJson("leaderboard.json", { models: [], backends: [], contributors: [] }),
   );
 }
 
@@ -126,6 +134,14 @@ export async function getReplay(gameId: string): Promise<Replay | null> {
   return liveOrSnapshot(`/api/games/${encodeURIComponent(gameId)}`, () =>
     readJson<Replay | null>(`games/${gameId}.json`, null),
   );
+}
+
+export async function getWebRun(gameId: string): Promise<WebRun | null> {
+  try {
+    return await fetchFromApi<WebRun>(`/api/runs/${encodeURIComponent(gameId)}`);
+  } catch {
+    return null;
+  }
 }
 
 /** Partida destacada de la portada: prioriza modelos reales, catástrofes y partidas largas. */
@@ -151,7 +167,11 @@ export async function getFeaturedGame(
 
 export async function getStats(
   games?: GameSummary[],
-  leaderboard?: { models: ModelRow[]; backends: BackendRow[] },
+  leaderboard?: {
+    models: ModelRow[];
+    backends: BackendRow[];
+    contributors: ContributionRow[];
+  },
 ) {
   const sourceGames = games ?? (await getGames());
   const sourceLeaderboard = leaderboard ?? (await getLeaderboard());
