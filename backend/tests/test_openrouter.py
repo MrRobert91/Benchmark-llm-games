@@ -11,6 +11,7 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
+import httpx
 import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -18,6 +19,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from moloch.agents.openrouter import (  # noqa: E402
     BudgetExceeded,
     BudgetGuard,
+    OpenRouterAgent,
+    OpenRouterError,
     _as_action,
     _parse_json,
 )
@@ -108,8 +111,52 @@ def test_budget_summary_is_serialisable():
 
 
 def test_agent_requires_an_api_key(monkeypatch):
-    from moloch.agents.openrouter import OpenRouterAgent
-
     monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
     with pytest.raises(RuntimeError, match="OPENROUTER_API_KEY"):
         OpenRouterAgent("p0", "Helios", "un/modelo", BudgetGuard())
+
+
+def test_403_preserves_provider_context_and_returns_actionable_message(caplog):
+    def handler(request):
+        assert request.headers["x-openrouter-metadata"] == "enabled"
+        assert "test-secret" not in str(request.url)
+        return httpx.Response(
+            403,
+            headers={"x-request-id": "req-safe-123"},
+            json={
+                "error": {
+                    "code": 403,
+                    "message": "Provider not allowed by API key allowlist",
+                    "metadata": {"prompt": "must not leak"},
+                },
+                "openrouter_metadata": {"pipeline": [{"data": {"secret": "hidden"}}]},
+            },
+        )
+
+    agent = OpenRouterAgent(
+        "p0",
+        "Helios",
+        "deepseek/deepseek-v4.1-flash",
+        BudgetGuard(),
+        api_key="test-secret",
+    )
+    agent._client.close()
+    agent._client = httpx.Client(transport=httpx.MockTransport(handler))
+    with caplog.at_level("INFO"):
+        with pytest.raises(OpenRouterError) as caught:
+            agent._call([], phase="round_1_meeting")
+    agent.close()
+
+    message = str(caught.value)
+    assert "HTTP 403" in message
+    assert "deepseek/deepseek-v4.1-flash" in message
+    assert "ronda 1, intervención pública" in message
+    assert "Provider not allowed by API key allowlist" in message
+    assert "req-safe-123" in message
+    assert "Privacy" in message and "Guardrails" in message
+    logs = caplog.text
+    assert "openrouter.request.started" in logs
+    assert "openrouter.request.failed" in logs
+    assert "test-secret" not in logs
+    assert "must not leak" not in logs
+    assert "hidden" not in logs

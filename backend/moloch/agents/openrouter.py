@@ -7,6 +7,7 @@ dólares, porque una carrera con varios agentes y varias rondas multiplica llama
 from __future__ import annotations
 
 import json
+import logging
 import os
 import re
 import time
@@ -19,6 +20,7 @@ from ..rules import Action
 from .base import Agent, GameView, Speech
 
 API_URL = "https://openrouter.ai/api/v1/chat/completions"
+logger = logging.getLogger("uvicorn.error").getChild("moloch.openrouter")
 
 #: Modelos baratos por defecto. Se pueden cambiar desde la CLI.
 CHEAP_MODELS = [
@@ -32,6 +34,75 @@ CHEAP_MODELS = [
 
 class BudgetExceeded(RuntimeError):
     """Se alcanzó el techo de gasto configurado."""
+
+
+class OpenRouterError(RuntimeError):
+    """Fallo de OpenRouter con contexto seguro para logs y para el usuario."""
+
+    def __init__(
+        self,
+        *,
+        model: str,
+        phase: str,
+        status_code: int | None = None,
+        provider_message: str | None = None,
+        request_id: str | None = None,
+        kind: str = "http",
+    ) -> None:
+        self.model = model
+        self.phase = phase
+        self.status_code = status_code
+        self.provider_message = _single_line(provider_message)
+        self.request_id = _single_line(request_id)
+        self.kind = kind
+        super().__init__(self.public_message())
+
+    def public_message(self) -> str:
+        moment = _phase_label(self.phase)
+        code = f" (HTTP {self.status_code})" if self.status_code else ""
+        if self.kind == "timeout":
+            explanation = "OpenRouter tardó demasiado en responder."
+        elif self.kind == "network":
+            explanation = "No se pudo conectar con OpenRouter."
+        elif self.kind == "response":
+            explanation = "OpenRouter devolvió una respuesta que no se pudo interpretar."
+        elif self.status_code == 401:
+            explanation = "OpenRouter rechazó la clave API; puede haber caducado o sido revocada."
+        elif self.status_code == 402:
+            explanation = "OpenRouter indica que la cuenta no tiene crédito suficiente."
+        elif self.status_code == 403:
+            explanation = (
+                "OpenRouter bloqueó la solicitud. Suele deberse a límites o permisos de la "
+                "clave, modelos/proveedores no permitidos, ajustes de privacidad o un guardrail."
+            )
+        elif self.status_code == 404:
+            explanation = "OpenRouter no encontró un proveedor disponible para este modelo."
+        elif self.status_code == 408:
+            explanation = "OpenRouter agotó el tiempo de espera de la solicitud."
+        elif self.status_code == 429:
+            explanation = "OpenRouter aplicó un límite temporal de solicitudes."
+        elif self.status_code and self.status_code >= 500:
+            explanation = "OpenRouter o el proveedor seleccionado tuvo un fallo temporal."
+        else:
+            explanation = "OpenRouter no pudo completar la solicitud."
+
+        parts = [
+            f"{explanation}{code}",
+            f"Modelo: {self.model}.",
+            f"Momento: {moment}.",
+        ]
+        if self.provider_message:
+            parts.append(f"Detalle del proveedor: {self.provider_message}.")
+        if self.request_id:
+            parts.append(f"Referencia: {self.request_id}.")
+        if self.status_code == 403:
+            parts.append(
+                "Revisa en OpenRouter los límites y la allowlist de la clave, Privacy y "
+                "Guardrails; después prueba el modelo por separado."
+            )
+        elif self.status_code in {408, 429} or self.kind in {"timeout", "network"}:
+            parts.append("Espera un momento y vuelve a intentarlo.")
+        return " ".join(parts)[:800]
 
 
 @dataclass
@@ -150,23 +221,95 @@ class OpenRouterAgent(Agent):
     ) -> CompletionResult:
         self.budget.check()
         started = time.monotonic()
-        resp = self._client.post(
-            API_URL,
-            headers={
-                "Authorization": f"Bearer {self.api_key}",
-                "Content-Type": "application/json",
-                "X-Title": "Moloch Arena",
-            },
-            json={
-                "model": self.model,
-                "messages": messages,
-                "temperature": self.temperature,
-                "max_tokens": max_tokens,
-                "usage": {"include": True},
-            },
+        logger.info(
+            "openrouter.request.started player_id=%s model=%s phase=%s max_tokens=%s",
+            self.player_id,
+            self.model,
+            phase,
+            max_tokens,
         )
-        resp.raise_for_status()
-        data = resp.json()
+        try:
+            resp = self._client.post(
+                API_URL,
+                headers={
+                    "Authorization": f"Bearer {self.api_key}",
+                    "Content-Type": "application/json",
+                    "X-Title": "Moloch Arena",
+                    "X-OpenRouter-Metadata": "enabled",
+                },
+                json={
+                    "model": self.model,
+                    "messages": messages,
+                    "temperature": self.temperature,
+                    "max_tokens": max_tokens,
+                    "usage": {"include": True},
+                },
+            )
+        except httpx.TimeoutException as exc:
+            latency_ms = round((time.monotonic() - started) * 1000)
+            logger.warning(
+                "openrouter.request.failed player_id=%s model=%s phase=%s kind=timeout latency_ms=%s",
+                self.player_id,
+                self.model,
+                phase,
+                latency_ms,
+            )
+            raise OpenRouterError(model=self.model, phase=phase, kind="timeout") from exc
+        except httpx.RequestError as exc:
+            latency_ms = round((time.monotonic() - started) * 1000)
+            logger.warning(
+                "openrouter.request.failed player_id=%s model=%s phase=%s kind=network latency_ms=%s error_type=%s",
+                self.player_id,
+                self.model,
+                phase,
+                latency_ms,
+                type(exc).__name__,
+            )
+            raise OpenRouterError(model=self.model, phase=phase, kind="network") from exc
+
+        request_id = (
+            resp.headers.get("x-request-id")
+            or resp.headers.get("x-generation-id")
+            or resp.headers.get("cf-ray")
+        )
+        if not resp.is_success:
+            provider_message = _error_message(resp)
+            latency_ms = round((time.monotonic() - started) * 1000)
+            logger.warning(
+                "openrouter.request.failed player_id=%s model=%s phase=%s status=%s latency_ms=%s request_id=%s provider_message=%s",
+                self.player_id,
+                self.model,
+                phase,
+                resp.status_code,
+                latency_ms,
+                request_id or "-",
+                provider_message or "-",
+            )
+            raise OpenRouterError(
+                model=self.model,
+                phase=phase,
+                status_code=resp.status_code,
+                provider_message=provider_message,
+                request_id=request_id,
+            )
+        try:
+            data = resp.json()
+        except (json.JSONDecodeError, ValueError) as exc:
+            logger.warning(
+                "openrouter.request.failed player_id=%s model=%s phase=%s status=%s kind=response request_id=%s",
+                self.player_id,
+                self.model,
+                phase,
+                resp.status_code,
+                request_id or "-",
+            )
+            raise OpenRouterError(
+                model=self.model,
+                phase=phase,
+                status_code=resp.status_code,
+                request_id=request_id,
+                kind="response",
+            ) from exc
         usage = data.get("usage") or {}
         cost = float(usage.get("cost") or 0.0)
         prompt_tokens = int(usage.get("prompt_tokens") or 0)
@@ -204,6 +347,20 @@ class OpenRouterAgent(Agent):
                     "latency_ms": round((time.monotonic() - started) * 1000),
                 }
             )
+        logger.info(
+            "openrouter.request.completed player_id=%s model=%s served_model=%s provider=%s phase=%s status=%s latency_ms=%s prompt_tokens=%s completion_tokens=%s cost_usd=%.6f request_id=%s",
+            self.player_id,
+            self.model,
+            result.served_model or "-",
+            result.provider or "-",
+            phase,
+            resp.status_code,
+            round((time.monotonic() - started) * 1000),
+            prompt_tokens,
+            completion_tokens,
+            cost,
+            request_id or result.response_id or "-",
+        )
         return result
 
     def close(self) -> None:
@@ -300,6 +457,38 @@ class OpenRouterAgent(Agent):
 
 
 # ------------------------------------------------------------------ utilidades
+
+
+def _single_line(value: object, limit: int = 300) -> str | None:
+    if not isinstance(value, str):
+        return None
+    cleaned = " ".join(value.split()).strip()
+    return cleaned[:limit] or None
+
+
+def _error_message(response: httpx.Response) -> str | None:
+    """Extrae solo el mensaje del error; nunca vuelca prompts, clave ni metadatos completos."""
+    try:
+        payload = response.json()
+    except (json.JSONDecodeError, ValueError):
+        return _single_line(response.text)
+    if not isinstance(payload, dict):
+        return None
+    error = payload.get("error")
+    if isinstance(error, dict):
+        return _single_line(error.get("message"))
+    if isinstance(error, str):
+        return _single_line(error)
+    return _single_line(payload.get("message"))
+
+
+def _phase_label(phase: str) -> str:
+    match = re.fullmatch(r"round_(\d+)_(meeting|action)", phase)
+    if not match:
+        return phase.replace("_", " ")
+    round_index, step = match.groups()
+    label = "intervención pública" if step == "meeting" else "decisión privada"
+    return f"ronda {round_index}, {label}"
 
 
 def _parse_json(raw: str) -> dict:

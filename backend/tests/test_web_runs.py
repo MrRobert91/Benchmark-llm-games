@@ -4,6 +4,7 @@ from pathlib import Path
 from fastapi.testclient import TestClient
 
 from moloch import api, db, runs
+from moloch.agents.openrouter import OpenRouterError
 from moloch.agents.base import Speech
 from moloch.rules import Action
 
@@ -210,7 +211,89 @@ def test_runner_persists_live_events_result_and_private_trace(tmp_path, monkeypa
     assert "private" not in json.dumps(public)
     assert len(db.get_private_analysis(conn, "played-live")) > 0
     event_types = [event["event_type"] for event in db.get_events_after(conn, "played-live", 0)]
+    assert "speaking" in event_types
     assert "speech" in event_types
     assert "round_resolved" in event_types
     assert event_types[-1] == "completed"
     conn.close()
+
+
+def test_runner_persists_descriptive_openrouter_failure_and_logs_context(
+    tmp_path, monkeypatch, caplog
+):
+    database = tmp_path / "failed-run.db"
+
+    class ForbiddenAgent:
+        def __init__(self, player_id, label, model, **_kwargs):
+            self.player_id = player_id
+            self.label = label
+            self.model = model
+
+        def speak(self, _view):
+            raise OpenRouterError(
+                model=self.model,
+                phase="round_1_meeting",
+                status_code=403,
+                provider_message="Model disabled for this API key",
+                request_id="req-403-test",
+            )
+
+        def close(self):
+            pass
+
+    monkeypatch.setattr(runs, "OpenRouterAgent", ForbiddenAgent)
+    conn = db.connect(database)
+    db.create_web_run(
+        conn,
+        game_id="failed-live",
+        seed=3,
+        nick="Grace",
+        url=None,
+        models=[
+            "deepseek/deepseek-v4.1-flash",
+            "meta/muse-spark-1.3-contributor",
+            "anthropic/claude-haiku-4.5",
+        ],
+        budget_limit=0.5,
+    )
+    conn.close()
+    runner = runs.RunQueue(database)
+    item = runs.WorkItem(
+        game_id="failed-live",
+        api_key="ephemeral-secret",
+        nick="Grace",
+        url=None,
+        models=[
+            "deepseek/deepseek-v4.1-flash",
+            "meta/muse-spark-1.3-contributor",
+            "anthropic/claude-haiku-4.5",
+        ],
+        seed=3,
+        budget=0.5,
+    )
+
+    with caplog.at_level("INFO"):
+        runner._play(item)
+
+    conn = db.connect(database)
+    public = db.get_web_run(conn, "failed-live")
+    assert public is not None and public["status"] == "failed"
+    assert "HTTP 403" in public["error_message"]
+    assert "deepseek/deepseek-v4.1-flash" in public["error_message"]
+    assert "ronda 1, intervención pública" in public["error_message"]
+    assert "Model disabled for this API key" in public["error_message"]
+    event_types = [
+        event["event_type"] for event in db.get_events_after(conn, "failed-live", 0)
+    ]
+    assert event_types == ["queued", "started", "speaking", "failed"]
+    conn.close()
+    assert "run.started run_id=failed-live" in caplog.text
+    assert "run.progress run_id=failed-live event=speaking" in caplog.text
+    assert "run.failed run_id=failed-live" in caplog.text
+    assert "ephemeral-secret" not in caplog.text
+
+
+def test_public_budget_error_explains_how_to_continue():
+    message = runs._public_error(runs.BudgetExceeded("presupuesto agotado: 0.50 / 0.50 USD"))
+    assert "presupuesto máximo" in message
+    assert "modelos más económicos" in message

@@ -8,6 +8,7 @@ from __future__ import annotations
 import os
 import asyncio
 import json
+import logging
 import queue
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -28,6 +29,7 @@ MIN_BUDGET_USD = 0.50
 MAX_BUDGET_USD = float(os.environ.get("MOLOCH_MAX_BUDGET_USD", "10.00"))
 DEFAULT_BUDGET_USD = MIN_BUDGET_USD
 RUN_QUEUE = RunQueue(DB_PATH)
+logger = logging.getLogger("uvicorn.error").getChild("moloch.api")
 
 
 @asynccontextmanager
@@ -175,15 +177,30 @@ def openrouter_models() -> dict:
 @app.post("/api/runs", status_code=202)
 def create_run(request: CreateRunRequest) -> dict:
     api_key = request.api_key.get_secret_value()
+    logger.info(
+        "run.request.received models=%s budget_usd=%.2f",
+        ",".join(request.models),
+        request.budget_usd,
+    )
     try:
         key_info = validate_key(api_key)
     except httpx.HTTPStatusError as exc:
         status = 401 if exc.response.status_code in {401, 403} else 502
+        logger.warning(
+            "run.request.rejected stage=key_validation openrouter_status=%s models=%s",
+            exc.response.status_code,
+            ",".join(request.models),
+        )
         raise HTTPException(
             status_code=status,
             detail="La clave de OpenRouter no es válida o no está disponible.",
         ) from exc
     except httpx.HTTPError as exc:
+        logger.warning(
+            "run.request.rejected stage=key_validation error_type=%s models=%s",
+            type(exc).__name__,
+            ",".join(request.models),
+        )
         raise HTTPException(
             status_code=502, detail="No se pudo validar la clave con OpenRouter."
         ) from exc
@@ -191,13 +208,24 @@ def create_run(request: CreateRunRequest) -> dict:
     try:
         allowed = {model["id"] for model in list_text_models()}
     except httpx.HTTPError as exc:
+        logger.warning(
+            "run.request.rejected stage=catalog_validation error_type=%s models=%s",
+            type(exc).__name__,
+            ",".join(request.models),
+        )
         raise HTTPException(status_code=502, detail="No se pudo validar el catálogo.") from exc
     unknown = [model for model in request.models if model not in allowed]
     if unknown:
+        logger.warning("run.request.rejected stage=model_validation model=%s", unknown[0])
         raise HTTPException(status_code=400, detail=f"Modelo no disponible: {unknown[0]}")
 
     remaining = key_info.get("limit_remaining")
     if isinstance(remaining, (int, float)) and remaining < request.budget_usd:
+        logger.warning(
+            "run.request.rejected stage=budget_validation remaining_usd=%.4f budget_usd=%.2f",
+            remaining,
+            request.budget_usd,
+        )
         raise HTTPException(
             status_code=400,
             detail=(
@@ -214,10 +242,12 @@ def create_run(request: CreateRunRequest) -> dict:
             budget=request.budget_usd,
         )
     except queue.Full as exc:
+        logger.warning("run.request.rejected stage=queue queue_size=%s", RUN_QUEUE.max_waiting)
         raise HTTPException(
             status_code=503,
             detail="La cola está completa. Inténtalo de nuevo en unos minutos.",
         ) from exc
+    logger.info("run.request.accepted run_id=%s", game_id)
     return {"game_id": game_id, "url": f"/arena/{game_id}", "status": "queued"}
 
 
