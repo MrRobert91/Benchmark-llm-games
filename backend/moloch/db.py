@@ -107,14 +107,38 @@ def save_game(conn: sqlite3.Connection, record: dict[str, Any]) -> str:
     return record["game_id"]
 
 
-def list_games(conn: sqlite3.Connection, limit: int = 50) -> list[dict[str, Any]]:
+def list_games(
+    conn: sqlite3.Connection, limit: int | None = 50, offset: int = 0
+) -> list[dict[str, Any]]:
     rows = conn.execute(
         """SELECT game_id, created_at, backend, n_players, outcome_kind, winner_label,
-                  final_round, moloch_index, total_welfare, mean_integrity
-           FROM games ORDER BY created_at DESC, rowid DESC LIMIT ?""",
-        (limit,),
+                  final_round, moloch_index, total_welfare, mean_integrity,
+                  json_extract(replay_json, '$.outcome.winner_id') AS winner_id
+           FROM games ORDER BY created_at DESC, rowid DESC LIMIT ? OFFSET ?""",
+        (-1 if limit is None else limit, offset),
     ).fetchall()
-    return [dict(r) for r in rows]
+    # One joined query for the selected page, rather than one replay fetch per game.
+    players = conn.execute(
+        """SELECT gp.game_id, gp.player_id, gp.model FROM game_players gp
+           JOIN (SELECT game_id FROM games ORDER BY created_at DESC, rowid DESC
+                 LIMIT ? OFFSET ?) page ON page.game_id = gp.game_id
+           ORDER BY gp.rowid""",
+        (-1 if limit is None else limit, offset),
+    ).fetchall()
+    by_game: dict[str, list[sqlite3.Row]] = {}
+    for player in players:
+        by_game.setdefault(player["game_id"], []).append(player)
+    result = []
+    for row in rows:
+        game = dict(row)
+        winner_id = game.pop("winner_id")
+        participants = by_game.get(game["game_id"], [])
+        game["participant_models"] = list(dict.fromkeys(p["model"] for p in participants))
+        game["winner_model"] = next(
+            (p["model"] for p in participants if p["player_id"] == winner_id), None
+        )
+        result.append(game)
+    return result
 
 
 def get_game(conn: sqlite3.Connection, game_id: str) -> dict[str, Any] | None:

@@ -111,6 +111,9 @@ export interface GameSummary {
   moloch_index: number;
   total_welfare: number;
   mean_integrity: number;
+  participant_models?: string[];
+  /** Recorded first finisher. A catastrophe is not an aligned victory. */
+  winner_model?: string | null;
 }
 
 export interface ModelRow {

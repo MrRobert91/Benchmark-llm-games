@@ -8,7 +8,7 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 
 from . import db
@@ -49,10 +49,12 @@ def health() -> dict[str, object]:
 
 
 @app.get("/api/games")
-def games(limit: int = 50) -> list[dict]:
+def games(
+    limit: int = Query(50, ge=1, le=500), offset: int = Query(0, ge=0)
+) -> list[dict]:
     conn = _conn()
     try:
-        return db.list_games(conn, limit=limit)
+        return db.list_games(conn, limit=limit, offset=offset)
     finally:
         conn.close()
 
