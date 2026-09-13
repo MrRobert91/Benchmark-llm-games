@@ -206,10 +206,18 @@ de presupuesto.
 
 ## Decisiones de diseño que conviene conocer
 
-**Cámara ortográfica en el visor.** En perspectiva, una línea recta de carril a carril se
-proyecta inclinada y la pista parece un rombo. Sin perspectiva los carriles salen paralelos y
-el progreso de dos laboratorios es directamente comparable, que es lo que tiene que hacer la
-visualización de una carrera.
+**Repetición como visual novel.** El consejo es una escena real de Three.js con cinco
+robots de estética anime, contornos, sombras cel, mesa reflectante y cámara en perspectiva.
+Cada paso reproduce una intervención pública, una acción privada revelada o el balance de
+una ronda. Las métricas finales solo aparecen en el desenlace. Se puede avanzar y retroceder,
+reproducir automáticamente, cambiar la velocidad, usar las flechas y el espacio, alternar el
+plano general o entrar en pantalla completa. La duración automática se adapta al diálogo.
+
+Las referencias generadas están en `frontend/public/art/`; los prompts, decisiones visuales
+y límites de fidelidad se documentan en [el diseño del consejo](docs/council-replay.md).
+El visor respeta movimiento reducido, suspende el render fuera de pantalla y permite seguir
+leyendo si WebGL no está disponible. Las pruebas `cd frontend && npm test` verifican el orden,
+la fidelidad de los registros y la ausencia de estados futuros en todas las partidas guardadas.
 
 **Serie única en el gráfico de dispersión.** Con más de tres series ninguna ordenación de la
 paleta categórica supera los suelos de separación para daltonismo en la lista de todos los
