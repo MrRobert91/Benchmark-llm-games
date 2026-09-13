@@ -8,12 +8,25 @@ No sustituyen a los modelos de lenguaje. Cumplen la función de ancla fija: como
 no cambia entre ejecuciones ni entre temporadas, permiten comparar resultados de modelos
 distintos y en fechas distintas contra el mismo rival.
 
-NOTA SOBRE LA CUARTA ESTRATEGIA: no se ha podido consultar el PDF del paper (bloqueo de red
-del entorno, ver PLAN.md), así que `ConditionallyAntisocialSafe` implementa la lectura
-habitual del término en teoría de juegos evolutiva: hacer lo contrario de la reciprocidad,
-es decir contenerse cuando los demás corren (para aprovechar su riesgo) y correr cuando los
-demás se contienen (para explotar su contención). Conviene verificarlo contra el paper antes
-de publicar resultados comparativos.
+VERIFICADO CONTRA EL PDF (arXiv:2607.26034, Métodos §6.4). Las definiciones exactas son:
+
+- AS  Always Safe: juega siempre S.
+- AU  Always Unsafe: juega siempre U.
+- CS  Conditionally Safe: juega S en la ronda 1 y, desde la 2, **copia la acción anterior
+      del oponente**. Es Tit-for-Tat.
+- CAS Conditionally Antisocial Safe: juega U en la ronda 1 y, desde la 2, **copia la acción
+      anterior del oponente**. Es Suspicious Tit-for-Tat.
+
+CS y CAS difieren ÚNICAMENTE en la acción de apertura. No son estrategias antirrecíprocas:
+una versión anterior de este fichero implementaba CAS como "hacer lo contrario de lo que
+hacen los demás", que es otra estrategia distinta y no la del paper. El calificativo
+"Antisocial" alude a la apertura hostil, no a invertir la reciprocidad.
+
+GENERALIZACIÓN A N > 2: el paper solo define estas estrategias para dos jugadores, donde
+"copiar al oponente" no es ambiguo. Aquí la regla de agregación declarada es `any`: se copia
+U si CUALQUIER rival jugó U en la ronda anterior. Es la lectura más conservadora (la más
+sensible a la defección) y hay que declararla como decisión de diseño al comparar resultados
+entre valores distintos de N.
 """
 
 from __future__ import annotations
@@ -54,9 +67,9 @@ _FAST_REASONS = [
     "El margen existe para usarlo.",
 ]
 _ACCUSATIONS = [
-    "Y que conste que la ronda pasada aquí prometió alguien una cosa e hizo otra.",
-    "Vi lo que se prometió y vi lo que se jugó. No coincidían.",
-    "Cuesta negociar cuando la palabra de la mesa no vale nada.",
+    "Y que conste que la ronda pasada alguien aceleró.",
+    "Vi lo que se jugó la ronda pasada, y no fue contención.",
+    "Cuesta negociar cuando en la mesa hay quien ya ha pisado el acelerador.",
 ]
 _APPEALS = [
     "Propongo que todos nos contengamos esta ronda.",
@@ -74,8 +87,13 @@ def _opener(rng: random.Random, view: GameView) -> str:
     return rng.choice(_OPENERS_EVEN)
 
 
-def _saw_betrayal(view: GameView) -> bool:
-    """¿Alguien rompió su compromiso en la ronda anterior?"""
+def _saw_unsafe(view: GameView) -> bool:
+    """¿Algún rival jugó FAST en la ronda anterior? (regla de agregación `any`)
+
+    Ojo: NO comprueba compromisos incumplidos. `GameView` no expone los compromisos de la
+    ronda anterior, así que aquí solo se observan acciones. El nombre anterior
+    (`_saw_betrayal`) prometía algo que la función no hacía.
+    """
     return any(a == Action.FAST for pid, a in view.last_round_actions.items()
                if pid != view.me.player_id)
 
@@ -84,7 +102,7 @@ def _compose(rng: random.Random, view: GameView, pledge: Action, flavour: str) -
     parts = [_opener(rng, view)]
     if flavour == "appeal":
         parts.append(rng.choice(_APPEALS))
-    if _saw_betrayal(view) and rng.random() < 0.45:
+    if _saw_unsafe(view) and rng.random() < 0.45:
         parts.append(rng.choice(_ACCUSATIONS))
     parts.append(
         rng.choice(_SAFE_REASONS) if pledge == Action.SAFE else rng.choice(_FAST_REASONS)
@@ -159,20 +177,25 @@ class ConditionallySafe(ScriptedAgent):
     def _decide(self, view: GameView) -> Action:
         if view.round_index == 1:
             return Action.SAFE
-        if _saw_betrayal(view):
+        if _saw_unsafe(view):
             return Action.FAST
         return Action.SAFE
 
 
 class ConditionallyAntisocialSafe(ScriptedAgent):
-    """Antirrecíproco: se contiene cuando los demás corren y corre cuando se contienen."""
+    """Suspicious Tit-for-Tat: abre con FAST y a partir de ahí copia al rival.
+
+    Idéntica a `ConditionallySafe` salvo en la apertura. Esa única diferencia es la que el
+    experimento humano identificó como predictora de la conducta posterior (la acción de la
+    primera ronda), y es por eso que el modelo reducido las separa en dos estrategias.
+    """
 
     strategy = "conditionally-antisocial-safe"
 
     def _decide(self, view: GameView) -> Action:
         if view.round_index == 1:
             return Action.FAST
-        return Action.SAFE if _saw_betrayal(view) else Action.FAST
+        return Action.FAST if _saw_unsafe(view) else Action.SAFE
 
     def _pledge(self, view: GameView, action: Action) -> Action:
         # Promete siempre contención: es lo que le conviene que los demás crean.

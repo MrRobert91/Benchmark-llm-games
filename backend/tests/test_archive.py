@@ -54,3 +54,19 @@ def test_paginated_api_and_export_include_games_beyond_200(tmp_path, monkeypatch
     assert cmd_export(argparse.Namespace(db=str(database), out=str(out))) == 0
     assert len(json.loads((out / "games.json").read_text(encoding="utf-8"))) == 205
     assert len(list((out / "games").glob("*.json"))) == 205
+
+
+def test_snapshot_matches_the_declared_design():
+    """El snapshot guionizado tiene que seguir siendo lo que produce el motor actual.
+
+    Las partidas guardadas se generaron una vez a mano y quedaron desfasadas dos veces: al
+    corregir `ConditionallyAntisocialSafe` y al cambiar el conteo del leaderboard. Esta
+    prueba es lo que impide que vuelva a pasar en silencio; si falla, hay que ejecutar
+    `python -m tools.regenerate_snapshot` desde `backend/` y revisar el diff.
+    """
+    import sys
+
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+    from tools.regenerate_snapshot import main as regenerate
+
+    assert regenerate(["--check"]) == 0

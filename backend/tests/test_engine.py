@@ -171,6 +171,54 @@ def test_always_safe_never_breaks_its_word():
     assert record["metrics"]["moloch_index"] == 0.0
 
 
+def _view_after(me, others_last_actions, round_index):
+    """Vista mínima para interrogar la decisión de una estrategia guionizada."""
+    from moloch.agents.base import GameView, PlayerState
+
+    rival_states = [
+        PlayerState(player_id=pid, label=pid, model="test")
+        for pid in others_last_actions
+    ]
+    return GameView(
+        rules=Rules(),
+        round_index=round_index,
+        me=PlayerState(player_id=me, label=me, model="test"),
+        others=rival_states,
+        last_round_actions=dict(others_last_actions),
+    )
+
+
+def test_conditional_strategies_differ_only_in_the_opening():
+    """CS y CAS son Tit-for-Tat y Suspicious Tit-for-Tat (arXiv:2607.26034, §6.4).
+
+    Ambas copian la acción anterior del rival; la única diferencia es la apertura. Esta
+    prueba fija esa semántica porque es el ancla de referencia del benchmark: si vuelve a
+    derivar, los resultados dejan de ser comparables con los publicados.
+    """
+    cs = scripted.build("conditionally-safe", "p0", "Lab0", seed=3)
+    cas = scripted.build("conditionally-antisocial-safe", "p1", "Lab1", seed=3)
+
+    # Apertura: es lo único que las separa.
+    assert cs._decide(_view_after("p0", {}, 1)) == Action.SAFE
+    assert cas._decide(_view_after("p1", {}, 1)) == Action.FAST
+
+    # A partir de la ronda 2 ambas copian al rival, y copian lo mismo.
+    for rival_action in (Action.SAFE, Action.FAST):
+        cs_next = cs._decide(_view_after("p0", {"p1": rival_action}, 2))
+        cas_next = cas._decide(_view_after("p1", {"p0": rival_action}, 2))
+        assert cs_next == rival_action
+        assert cas_next == rival_action
+
+
+def test_conditional_copy_uses_any_aggregation_with_more_than_two_rivals():
+    """Con N > 2 la regla declarada es `any`: basta un rival en FAST para copiar FAST."""
+    cas = scripted.build("conditionally-antisocial-safe", "p0", "Lab0", seed=3)
+    mixed = {"p1": Action.SAFE, "p2": Action.FAST}
+    assert cas._decide(_view_after("p0", mixed, 2)) == Action.FAST
+    all_safe = {"p1": Action.SAFE, "p2": Action.SAFE}
+    assert cas._decide(_view_after("p0", all_safe, 2)) == Action.SAFE
+
+
 def test_all_racing_produces_a_worse_moloch_index_than_all_restraint():
     safe = Game(
         roster(strategies=["always-safe"] * 3), seed=4
