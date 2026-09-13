@@ -136,6 +136,25 @@ def test_contributor_url_must_use_https():
         raise AssertionError("HTTP URLs must be rejected")
 
 
+def test_run_budget_accepts_only_values_between_fifty_cents_and_server_maximum():
+    common = {
+        "api_key": "test-openrouter-key-shape",
+        "nick": "Ada",
+        "models": ["vendor/model"] * 3,
+    }
+    assert api.CreateRunRequest(**common, budget_usd=0.5).budget_usd == 0.5
+    assert api.CreateRunRequest(**common, budget_usd=10).budget_usd == 10
+
+    for invalid_budget in (0.49, 10.01):
+        try:
+            api.CreateRunRequest(**common, budget_usd=invalid_budget)
+        except ValueError as error:
+            assert "0.50" in str(error)
+            assert "10.00" in str(error)
+        else:
+            raise AssertionError(f"Budget {invalid_budget} should be rejected")
+
+
 def test_runner_persists_live_events_result_and_private_trace(tmp_path, monkeypatch):
     database = tmp_path / "runner.db"
 

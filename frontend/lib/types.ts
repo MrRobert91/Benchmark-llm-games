@@ -175,6 +175,7 @@ export interface ModelCatalog {
   limits: {
     min_players: number;
     max_players: number;
+    min_budget_usd: number;
     default_budget_usd: number;
     max_budget_usd: number;
     queue_size: number;

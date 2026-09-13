@@ -24,8 +24,9 @@ from .openrouter_catalog import list_text_models, validate_key
 from .runs import RunQueue
 
 DB_PATH = Path(os.environ.get("MOLOCH_DB", str(db.DEFAULT_DB)))
-MAX_BUDGET_USD = float(os.environ.get("MOLOCH_MAX_BUDGET_USD", "0.50"))
-DEFAULT_BUDGET_USD = min(0.50, MAX_BUDGET_USD)
+MIN_BUDGET_USD = 0.50
+MAX_BUDGET_USD = float(os.environ.get("MOLOCH_MAX_BUDGET_USD", "10.00"))
+DEFAULT_BUDGET_USD = MIN_BUDGET_USD
 RUN_QUEUE = RunQueue(DB_PATH)
 
 
@@ -96,9 +97,10 @@ class CreateRunRequest(BaseModel):
     @field_validator("budget_usd")
     @classmethod
     def allowed_budget(cls, value: float) -> float:
-        if value < 0.05 or value > MAX_BUDGET_USD:
+        if value < MIN_BUDGET_USD or value > MAX_BUDGET_USD:
             raise ValueError(
-                f"el presupuesto debe estar entre 0.05 y {MAX_BUDGET_USD:.2f} USD"
+                f"el presupuesto debe estar entre {MIN_BUDGET_USD:.2f} y "
+                f"{MAX_BUDGET_USD:.2f} USD"
             )
         return round(value, 2)
 
@@ -158,6 +160,7 @@ def openrouter_models() -> dict:
         "limits": {
             "min_players": 3,
             "max_players": 5,
+            "min_budget_usd": MIN_BUDGET_USD,
             "default_budget_usd": DEFAULT_BUDGET_USD,
             "max_budget_usd": MAX_BUDGET_USD,
             "queue_size": RUN_QUEUE.max_waiting,
