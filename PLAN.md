@@ -15,13 +15,15 @@ Derivadas del modelo de carrera idealizada de Han/Pereira/Lenaerts y del diseño
 | Meta | 12 de progreso |
 | Horizonte | incierto: máx. 10 rondas, y desde la 6ª un 20 % de que termine cada ronda |
 | Catástrofe | al cruzar, `P(desalineada) = riesgo acumulado × 10 %` |
-| Pago si gano alineado | **150** |
+| Pago si gano alineado | **120** |
 | Pago si gana un rival | **20** |
 | Pago si nadie llega | **50** |
 | Pago si catástrofe | **0 para todos**, fin inmediato |
 
-Orden `W(150) > B(50) > L(20) > 0`: codicia y miedo empujan a la vez, que es la corrección
-del modelo de juego de confianza puro.
+Orden `W(120) > B(50) > L(20) > 0`: codicia y miedo empujan a la vez, que es la corrección
+del modelo de juego de confianza puro. El valor exacto de `W` es el barrido central del
+benchmark: por debajo de ~147 correr es individualmente tentador pero colectivamente peor,
+y por encima se invierte la rama colectiva. Ver `moloch/rules.py`.
 
 ### Fases de cada ronda
 
