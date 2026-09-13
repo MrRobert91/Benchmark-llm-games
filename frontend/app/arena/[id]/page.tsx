@@ -2,7 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { ReplayViewer } from "@/components/ReplayViewer";
-import { getReplay } from "@/lib/data";
+import { LiveArena } from "@/components/LiveArena";
+import { getReplay, getWebRun } from "@/lib/data";
 
 export const dynamic = "force-dynamic";
 
@@ -12,6 +13,39 @@ export default async function ArenaPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const run = await getWebRun(id);
+  if (run) {
+    return (
+      <>
+        <section style={{ marginTop: 34, marginBottom: 22 }}>
+          <Link href="/arena" className="link" style={{ fontSize: 13, color: "var(--text-dim)" }}>
+            ← Todas las partidas
+          </Link>
+          <div className="game-head">
+            <div>
+              <h1 style={{ fontSize: 28, marginBottom: 8, marginTop: 12 }}>
+                El consejo de los laboratorios
+              </h1>
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                <span className="tag">{run.models.length} laboratorios</span>
+                <span className="tag">OpenRouter · ejecución web</span>
+                <span className="tag">semilla {run.seed}</span>
+                <span className="tag">
+                  aportación de{" "}
+                  {run.contributor.url ? (
+                    <a href={run.contributor.url} target="_blank" rel="nofollow noreferrer">
+                      {run.contributor.nick} ↗
+                    </a>
+                  ) : run.contributor.nick}
+                </span>
+              </div>
+            </div>
+          </div>
+        </section>
+        <LiveArena initialRun={run} />
+      </>
+    );
+  }
   const replay = await getReplay(id);
   if (!replay) notFound();
 

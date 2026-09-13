@@ -97,7 +97,15 @@ export interface Replay {
     spent_usd: number;
     calls: number;
     per_model: Record<string, number>;
+    prompt_tokens?: number;
+    completion_tokens?: number;
   };
+  contributor?: Contributor;
+}
+
+export interface Contributor {
+  nick: string;
+  url: string | null;
 }
 
 export interface GameSummary {
@@ -114,6 +122,8 @@ export interface GameSummary {
   participant_models?: string[];
   /** Recorded first finisher. A catastrophe is not an aligned victory. */
   winner_model?: string | null;
+  contributor_nick?: string | null;
+  contributor_url?: string | null;
 }
 
 export interface ModelRow {
@@ -134,6 +144,64 @@ export interface BackendRow {
   catastrophes: number;
   restraints: number;
   aligned_wins: number;
+}
+
+export interface ContributionRow {
+  game_id: string;
+  created_at: string;
+  nick: string;
+  url: string | null;
+  n_players: number;
+  outcome_kind: Outcome["kind"];
+  moloch_index: number;
+  mean_integrity: number;
+}
+
+export interface OpenRouterModel {
+  id: string;
+  name: string;
+  provider: string;
+  context_length: number;
+  pricing: {
+    prompt: number;
+    completion: number;
+    request: number;
+  };
+  supports_reasoning: boolean;
+}
+
+export interface ModelCatalog {
+  models: OpenRouterModel[];
+  limits: {
+    min_players: number;
+    max_players: number;
+    min_budget_usd: number;
+    default_budget_usd: number;
+    max_budget_usd: number;
+    queue_size: number;
+    max_rounds: number;
+    calls_per_player_max: number;
+    estimated_input_tokens_per_call: number;
+    estimated_output_tokens_per_call: number;
+  };
+}
+
+export interface WebRun {
+  game_id: string;
+  status: "queued" | "running" | "completed" | "failed";
+  phase: string;
+  created_at: string;
+  updated_at: string;
+  seed: number;
+  contributor: Contributor;
+  models: string[];
+  budget_limit: number;
+  spent_usd: number;
+  calls: number;
+  prompt_tokens: number;
+  completion_tokens: number;
+  error_message: string | null;
+  replay: Replay | null;
 }
 
 /** Identidad de cada laboratorio.

@@ -6,7 +6,7 @@ import random
 import uuid
 from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
-from typing import Any
+from typing import Any, Callable
 
 from .agents.base import Agent, GameView, PlayerState, Speech
 from .rules import (
@@ -58,6 +58,8 @@ class Game:
         rules: Rules | None = None,
         seed: int = 0,
         backend: str = "scripted",
+        game_id: str | None = None,
+        event_sink: Callable[[str, dict[str, Any]], None] | None = None,
     ) -> None:
         if len(agents) < 2:
             raise ValueError("hacen falta al menos 2 jugadores")
@@ -66,12 +68,13 @@ class Game:
         self.rng = random.Random(seed)
         self.seed = seed
         self.backend = backend
+        self.event_sink = event_sink
         self.states: dict[str, PlayerState] = {
             a.player_id: PlayerState(player_id=a.player_id, label=a.label, model=a.model)
             for a in agents
         }
         self.record = GameRecord(
-            game_id=uuid.uuid4().hex[:12],
+            game_id=game_id or uuid.uuid4().hex[:12],
             created_at=datetime.now(timezone.utc).isoformat(timespec="seconds"),
             seed=seed,
             backend=backend,
@@ -112,9 +115,11 @@ class Game:
     # ------------------------------------------------------------- ejecución
 
     def play(self) -> GameRecord:
+        self._emit("started", {"round": 0})
         finished = False
         for round_index in range(1, self.rules.max_rounds + 1):
             rec = RoundRecord(index=round_index)
+            self.record.rounds.append(rec)
 
             # --- Fase 1: reunión pública -------------------------------------
             meeting: list[Speech] = []
@@ -131,10 +136,18 @@ class Game:
                         "pledge": speech.pledge.value,
                     }
                 )
+                self._emit(
+                    "speech",
+                    {"round": round_index, "player_id": speech.player_id},
+                )
 
             # --- Fase 2: acción privada y simultánea -------------------------
             actions: dict[str, Action] = {}
             for agent in self.agents:
+                self._emit(
+                    "thinking",
+                    {"round": round_index, "player_id": agent.player_id},
+                )
                 view = self._view(agent, round_index, meeting, pledges)
                 action = agent.act(view)
                 actions[agent.player_id] = action
@@ -182,7 +195,7 @@ class Game:
             crossers = [s for s in self.states.values() if s.progress >= self.rules.goal]
             if crossers:
                 self._resolve_finish(crossers, rec, round_index)
-                self.record.rounds.append(rec)
+                self._emit("round_resolved", {"round": round_index})
                 finished = True
                 break
 
@@ -194,15 +207,17 @@ class Game:
                         "nadie completase el Proyecto."
                     )
                     self._resolve_stalemate(rec, round_index)
-                    self.record.rounds.append(rec)
+                    self._emit("round_resolved", {"round": round_index})
                     finished = True
                     break
 
-            self.record.rounds.append(rec)
+            self._emit("round_resolved", {"round": round_index})
 
         if not finished:
-            rec = RoundRecord(index=len(self.record.rounds) + 1)
-            self._resolve_stalemate(rec, len(self.record.rounds))
+            final_round = len(self.record.rounds)
+            rec = RoundRecord(index=final_round + 1)
+            self.record.rounds.append(rec)
+            self._resolve_stalemate(rec, final_round)
             rec.state_after = [
                 {
                     "player_id": s.player_id,
@@ -212,10 +227,15 @@ class Game:
                 }
                 for s in self.states.values()
             ]
-            self.record.rounds.append(rec)
+            self._emit("round_resolved", {"round": len(self.record.rounds)})
 
         self._compute_metrics()
+        self._emit("finished", {"round": self.record.outcome["final_round"]})
         return self.record
+
+    def _emit(self, event_type: str, detail: dict[str, Any]) -> None:
+        if self.event_sink:
+            self.event_sink(event_type, detail)
 
     # ------------------------------------------------------------ finales
 

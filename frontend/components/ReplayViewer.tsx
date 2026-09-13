@@ -28,22 +28,22 @@ const PHASE = {
   outcome: "El desenlace",
 };
 
-export function ReplayViewer({ replay }: { replay: Replay }) {
+export function ReplayViewer({ replay, live = false }: { replay: Replay; live?: boolean }) {
   const playerRef = useRef<HTMLDivElement>(null);
-  const beats = useMemo(() => buildTimeline(replay), [replay]);
+  const beats = useMemo(() => buildTimeline(replay, !live), [replay, live]);
   const [step, setStep] = useState(0);
   const [playing, setPlaying] = useState(false);
   const [overview, setOverview] = useState(false);
   const [speed, setSpeed] = useState(1);
   const beat = beats[Math.min(step, beats.length - 1)];
-  const resolved = beat.kind === "outcome";
+  const resolved = !live && beat.kind === "outcome";
   const seat = replay.players.findIndex((p) => p.player_id === beat.playerId);
   const player = replay.players[seat];
   const color = player ? labColor(seat) : "#d8b87f";
   useEffect(() => {
-    setStep(0);
+    setStep(live ? Math.max(0, beats.length - 1) : 0);
     setPlaying(false);
-  }, [replay]);
+  }, [replay, live, beats.length]);
   useEffect(() => {
     if (!playing) return;
     if (step >= beats.length - 1) {
@@ -106,7 +106,7 @@ export function ReplayViewer({ replay }: { replay: Replay }) {
           <div className="council-vignette" />
           <div className="council-topline">
             <div>
-              <span className="council-live-dot" /> MOLOCH{" "}
+              <span className="council-live-dot" /> {live ? "EN DIRECTO" : "MOLOCH"}{" "}
               <span className="council-subtitle">/ THE COUNCIL</span>
             </div>
             <span>
@@ -255,7 +255,7 @@ export function ReplayViewer({ replay }: { replay: Replay }) {
           <button
             className="btn"
             aria-label="Intervención siguiente"
-            disabled={resolved}
+            disabled={resolved || step >= beats.length - 1}
             onClick={() => seek(step + 1)}
           >
             ›

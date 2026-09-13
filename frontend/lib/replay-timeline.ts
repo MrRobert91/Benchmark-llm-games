@@ -28,7 +28,7 @@ export interface ReplayBeat {
 
 /** Reveal public speeches, then private decisions, then the engine's resolved state.
  * Never infer dialogue, invent a decision, or leak later-round metrics. */
-export function buildTimeline(replay: Replay): ReplayBeat[] {
+export function buildTimeline(replay: Replay, includeOutcome = true): ReplayBeat[] {
   let publicVotes: ReplayBeat["publicVotes"] = {};
   let revealedActions: ReplayBeat["revealedActions"] = {};
   let verdicts: ReplayBeat["verdicts"] = {};
@@ -120,15 +120,17 @@ export function buildTimeline(replay: Replay): ReplayBeat[] {
       verdicts,
     });
   }
-  beats.push({
-    kind: "outcome",
-    round: replay.outcome.final_round,
-    text: replay.outcome.headline,
-    states,
-    publicVotes,
-    revealedActions,
-    verdicts,
-  });
+  if (includeOutcome) {
+    beats.push({
+      kind: "outcome",
+      round: replay.outcome.final_round,
+      text: replay.outcome.headline,
+      states,
+      publicVotes,
+      revealedActions,
+      verdicts,
+    });
+  }
   return beats;
 }
 

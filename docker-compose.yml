@@ -5,6 +5,12 @@ services:
       dockerfile: backend/Dockerfile
     environment:
       PORT: "8000"
+      MOLOCH_DB: /app/data/moloch.db
+      MOLOCH_MAX_BUDGET_USD: "10.00"
+      MOLOCH_QUEUE_SIZE: "8"
+      MOLOCH_OPENROUTER_TIMEOUT: "75"
+    volumes:
+      - moloch-data:/app/data
     ports:
       - "8000:8000"
     healthcheck:
@@ -39,4 +45,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+
+volumes:
+  moloch-data:
 

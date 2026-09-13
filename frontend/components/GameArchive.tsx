@@ -296,6 +296,21 @@ export function GameArchive({ games }: { games: GameSummary[] }) {
                           ? "scriptados"
                           : "modelos reales"}
                       </small>
+                      {game.contributor_nick && (
+                        <small>
+                          aportación de{" "}
+                          {game.contributor_url ? (
+                            <a
+                              className="link"
+                              href={game.contributor_url}
+                              target="_blank"
+                              rel="nofollow noreferrer"
+                            >
+                              {game.contributor_nick} ↗
+                            </a>
+                          ) : game.contributor_nick}
+                        </small>
+                      )}
                     </td>
                     <td>
                       <strong className="archive-model-name">
