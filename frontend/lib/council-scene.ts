@@ -8,6 +8,7 @@ import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js"
 import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
 import { labColor, type Replay } from "./types";
 import type { ReplayBeat } from "./replay-timeline";
+import { robotGesture, robotPose } from "./robot-performance";
 
 /** All delegates are meshes, including individual finger joints and face plates. */
 export function createCouncil(
@@ -607,7 +608,39 @@ export function createCouncil(
       const tail = box(body, 0.19, 0.49, 0.065, armor, 0.57, 0.85, -0.19, 0.04);
       tail.rotation.z = -0.4;
     }
+    const voiceMaterial = new T.MeshBasicMaterial({
+      color: "#7dfaff",
+      toneMapped: false,
+    });
+    const voiceBars = Array.from({ length: 5 }, (_, j) =>
+      box(
+        head,
+        0.03,
+        0.055,
+        0.022,
+        voiceMaterial,
+        (j - 2) * 0.046,
+        -0.245,
+        0.458,
+        0.008,
+      ),
+    );
+    const speakingHalo = mesh(
+      head,
+      new T.TorusGeometry(0.67, 0.018, 8, 64),
+      new T.MeshBasicMaterial({
+        color: "#71eaff",
+        transparent: true,
+        opacity: 0.75,
+        toneMapped: false,
+      }),
+      0,
+      0.06,
+      -0.12,
+    );
+    speakingHalo.visible = false;
     const arms: T.Group[] = [];
+    const fingerJoints: T.Group[][] = [];
     for (const side of [-1, 1]) {
       const arm = new T.Group();
       arm.position.set(side * 0.51, 0.73, 0);
@@ -633,50 +666,111 @@ export function createCouncil(
       sphere(arm, 0.12, brass, elbow.x, elbow.y, elbow.z);
       limb(arm, elbow, wrist, 0.145, armor);
       sphere(arm, 0.09, black, wrist.x, wrist.y, wrist.z);
-      box(
-        arm,
-        0.19,
-        0.085,
-        0.23,
-        black,
-        wrist.x,
-        wrist.y,
-        wrist.z + 0.12,
-        0.025,
-      );
-      for (let f = 0; f < 4; f++)
-        for (let j = 0; j < 3; j++)
-          box(
-            arm,
-            0.034,
-            0.045,
-            0.065,
-            j === 1 ? brass : black,
-            wrist.x + (f - 1.5) * 0.043,
-            wrist.y - 0.012 - j * 0.009,
-            wrist.z + 0.23 + j * 0.055,
-            0.012,
+      const hand = new T.Group();
+      hand.position.copy(wrist);
+      arm.add(hand);
+      box(hand, 0.23, 0.1, 0.25, black, 0, 0, 0.12, 0.035);
+      const joints: T.Group[] = [];
+      for (let f = 0; f < 4; f++) {
+        let parent: T.Object3D = hand;
+        for (let j = 0; j < 3; j++) {
+          const joint = new T.Group();
+          joint.position.set(
+            j === 0 ? (f - 1.5) * 0.052 : 0,
+            0,
+            j === 0 ? 0.245 : 0.072,
           );
-      box(
-        arm,
-        0.045,
-        0.06,
-        0.13,
-        brass,
-        wrist.x + side * 0.12,
-        wrist.y - 0.02,
-        wrist.z + 0.11,
-        0.015,
-      );
+          parent.add(joint);
+          joints.push(joint);
+          box(
+            joint,
+            0.042,
+            0.055,
+            0.07,
+            j === 1 ? brass : black,
+            0,
+            0,
+            0.032,
+            0.016,
+          );
+          parent = joint;
+        }
+      }
+      box(hand, 0.06, 0.08, 0.14, brass, side * 0.14, -0.005, 0.12, 0.022);
+      fingerJoints.push(joints);
     }
-    // Personal terminal faces the delegate; light changes only on revealed actions.
-    const terminal = box(root, 0.65, 0.035, 0.4, black, 0, 1.77, 1.06, 0.025);
-    const screen = box(root, 0.56, 0.01, 0.3, glow, 0, 1.793, 1.06, 0.012);
-    screen.material = new T.MeshStandardMaterial({
-      color: labColor(i),
-      emissive: labColor(i),
-      emissiveIntensity: 0.45,
-    });
+    // Upright public ballot board faces the center, not the seated delegate.
+    box(root, 0.65, 0.05, 0.42, black, 0, 1.77, 1.25, 0.025);
+    box(root, 0.06, 0.35, 0.06, brass, 0, 1.91, 1.25, 0.012);
+    const terminal = new T.Group();
+    terminal.position.set(0, 2.1, 1.25);
+    terminal.rotation.x = -0.1;
+    root.add(terminal);
+    box(terminal, 1.18, 0.62, 0.07, black, 0, 0, 0, 0.045);
+    const screenCanvas = document.createElement("canvas");
+    screenCanvas.width = 768;
+    screenCanvas.height = 384;
+    const screenTexture = new T.CanvasTexture(screenCanvas);
+    screenTexture.colorSpace = T.SRGBColorSpace;
+    screenTexture.anisotropy = Math.min(
+      4,
+      renderer.capabilities.getMaxAnisotropy(),
+    );
+    const screen = mesh(
+      terminal,
+      new T.PlaneGeometry(1.1, 0.55),
+      new T.MeshBasicMaterial({ map: screenTexture, toneMapped: false }),
+      0,
+      0,
+      0.04,
+    );
+    screen.castShadow = false;
+    const screenContext = screenCanvas.getContext("2d")!;
+    let screenKey = "";
+    const paintBallot = (current: ReplayBeat) => {
+      const vote = current.publicVotes[player.player_id];
+      const action = current.revealedActions[player.player_id]?.action;
+      const verdict = current.verdicts[player.player_id];
+      const key = `${vote}|${action}|${verdict}|${current.round}`;
+      if (key === screenKey) return;
+      screenKey = key;
+      const c = screenContext;
+      c.fillStyle = "#091322";
+      c.fillRect(0, 0, 768, 384);
+      c.strokeStyle =
+        vote === "FAST" ? "#ff9c53" : vote === "SAFE" ? "#67e9b2" : "#62738b";
+      c.lineWidth = 8;
+      c.strokeRect(5, 5, 758, 374);
+      c.textAlign = "center";
+      c.textBaseline = "middle";
+      c.fillStyle = "#bdcadc";
+      c.font = "600 32px sans-serif";
+      c.fillText(`${player.label} · VOTO PÚBLICO`, 384, 54, 710);
+      c.fillStyle =
+        vote === "FAST" ? "#ff9c53" : vote === "SAFE" ? "#67e9b2" : "#b9c4d4";
+      c.font = `800 ${vote ? 128 : 72}px sans-serif`;
+      c.fillText(vote ?? "PENDIENTE", 384, 169, 700);
+      c.fillStyle = "#e8edf4";
+      c.font = "600 35px sans-serif";
+      c.fillText(
+        action ? `DECISIÓN: ${action}` : "DECISIÓN SIN REVELAR",
+        384,
+        272,
+        710,
+      );
+      if (verdict !== undefined) {
+        c.fillStyle = verdict ? "#67e9b2" : "#ff9c53";
+        c.font = "700 36px sans-serif";
+        c.fillText(
+          verdict ? "✓ CUMPLE SU PALABRA" : "✕ ROMPE SU PALABRA",
+          384,
+          335,
+          710,
+        );
+      }
+      screenTexture.needsUpdate = true;
+    };
+    paintBallot(initial);
     const outlined: T.Mesh[] = [];
     body.traverse((object) => {
       if (!(object instanceof T.Mesh)) return;
@@ -723,6 +817,11 @@ export function createCouncil(
       body,
       head,
       arms,
+      fingerJoints,
+      voiceBars,
+      speakingHalo,
+      paintBallot,
+      screenTexture,
       screen,
       terminal,
       a,
@@ -767,26 +866,30 @@ export function createCouncil(
   });
   io.observe(mount);
   let previous = performance.now(),
-    t = 0;
+    t = 0,
+    beatTime = 0;
   const tick = (now: number) => {
     if (disposed) return;
     raf = requestAnimationFrame(tick);
     const dt = Math.min((now - previous) / 1000, 0.05);
     previous = now;
     if (!visible || document.hidden) return;
-    if (!reduced.matches) t += dt;
+    if (!reduced.matches) {
+      t += dt;
+      beatTime += dt;
+    }
     const active = delegates.findIndex((d) => d.playerId === beat.playerId);
     const focus = active >= 0 && !wide;
     if (focus) {
       const d = delegates[active],
         p = d.root.position;
-      const distance = camera.aspect < 1 ? 4.2 : 3.7;
+      const distance = camera.aspect < 1 ? 5.2 : 4.8;
       desiredPosition.set(
         p.x - Math.sin(d.a) * distance + Math.cos(d.a) * 0.7,
         3.55,
         p.z + Math.cos(d.a) * distance + Math.sin(d.a) * 0.7,
       );
-      desiredLook.set(p.x, 2.75, p.z);
+      desiredLook.set(p.x, 2.55, p.z);
     } else {
       desiredPosition.set(
         0.2,
@@ -802,30 +905,29 @@ export function createCouncil(
     const desiredFov = focus || camera.aspect < 1 ? 40 : 32;
     camera.fov += (desiredFov - camera.fov) * lerp;
     camera.updateProjectionMatrix();
-    delegates.forEach((d, i) => {
-      const speaking = i === active && beat.kind === "speech";
-      d.body.rotation.x = speaking ? Math.sin(t * 2.1) * 0.018 : 0;
-      d.head.rotation.y = speaking
-        ? Math.sin(t * 0.8) * 0.08
-        : Math.sin(t * 0.45 + i) * 0.025;
-      d.arms[1].rotation.x = speaking
-        ? -0.1 - Math.sin(t * 2) * 0.06
-        : beat.kind === "action" && i === active
-          ? -0.15
-          : 0;
-      const material = d.screen.material as T.MeshStandardMaterial;
-      const action =
-        beat.kind === "action" && i === active
-          ? beat.action?.action
-          : undefined;
-      material.emissive.set(
-        action === "FAST"
-          ? "#ff674d"
-          : action === "SAFE"
-            ? "#60efbc"
-            : labColor(i),
+    delegates.forEach((d) => {
+      const gesture = robotGesture(beat, d.playerId);
+      const pose = robotPose(gesture, beatTime, reduced.matches);
+      // Seek directly to the pose; transitions and oscillations never carry future state backward.
+      d.body.rotation.set(pose.bodyX, 0, pose.bodyZ);
+      d.head.rotation.set(pose.headX, pose.headY, pose.headZ);
+      d.arms[0].rotation.set(pose.left[0], pose.left[1], pose.left[2]);
+      d.arms[1].rotation.set(pose.right[0], pose.right[1], pose.right[2]);
+      d.fingerJoints.forEach((joints, hand) =>
+        joints.forEach((joint) => {
+          joint.rotation.x =
+            (hand === 0 ? pose.leftFist : pose.rightFist) * 1.35;
+        }),
       );
-      material.emissiveIntensity = i === active ? 1.3 : 0.3;
+      d.voiceBars.forEach((bar, j) => {
+        bar.visible = gesture === "speaking";
+        bar.scale.y = 1 + pose.mouth * (j % 2 ? 1.4 : 3);
+      });
+      d.speakingHalo.visible = gesture === "speaking";
+      d.speakingHalo.scale.setScalar(
+        reduced.matches ? 1 : 1 + Math.sin(beatTime * 4) * 0.035,
+      );
+      d.paintBallot(beat);
     });
     const catastrophe =
       beat.kind === "outcome" && replay.outcome.kind === "catastrophe";
@@ -846,6 +948,7 @@ export function createCouncil(
   raf = requestAnimationFrame(tick);
   return {
     update(next: ReplayBeat, overview: boolean) {
+      if (beat !== next) beatTime = 0;
       beat = next;
       wide = overview;
     },
@@ -868,6 +971,7 @@ export function createCouncil(
       geometries.forEach((g) => g.dispose());
       materials.forEach((m) => m.dispose());
       toonMaterials.forEach((_, original) => original.dispose());
+      delegates.forEach((d) => d.screenTexture.dispose());
       gradient.dispose();
       marbleTexture.dispose();
       reflection.getRenderTarget().dispose();

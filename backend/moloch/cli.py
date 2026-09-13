@@ -116,7 +116,7 @@ def cmd_export(args: argparse.Namespace) -> int:
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
 
-    games = db.list_games(conn, limit=200)
+    games = db.list_games(conn, limit=None)
     (out / "games.json").write_text(
         json.dumps(games, ensure_ascii=False, indent=2), encoding="utf-8"
     )

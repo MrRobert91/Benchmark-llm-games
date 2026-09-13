@@ -45,10 +45,78 @@ async function liveOrSnapshot<T>(route: string, fallback: () => T): Promise<T> {
 }
 
 export async function getGames(): Promise<GameSummary[]> {
-  return liveOrSnapshot("/api/games?limit=200", () => readJson<GameSummary[]>("games.json", []));
+  try {
+    const games: GameSummary[] = [];
+    const ids = new Set<string>();
+    for (let offset = 0; ; offset += 200) {
+      const page = await fetchFromApi<GameSummary[]>(
+        `/api/games?limit=200&offset=${offset}`,
+      );
+      if (page.some((g) => ids.has(g.game_id)))
+        throw new Error("API pagination did not advance");
+      for (const game of page) {
+        ids.add(game.game_id);
+        games.push(enrichSnapshotSummary(game));
+      }
+      if (page.length < 200) return games;
+    }
+  } catch (error) {
+    console.warn("Falling back to bundled game archive", error);
+    // Enumerate replay files too: older exports capped games.json at 200 entries.
+    const summaries = new Map(
+      readJson<GameSummary[]>("games.json", []).map((g) => [g.game_id, g]),
+    );
+    if (fs.existsSync(path.join(DATA_DIR, "games"))) {
+      for (const filename of fs.readdirSync(path.join(DATA_DIR, "games"))) {
+        if (!filename.endsWith(".json")) continue;
+        const replay = readJson<Replay | null>(`games/${filename}`, null);
+        if (!replay) continue;
+        summaries.set(replay.game_id, {
+          game_id: replay.game_id,
+          created_at: replay.created_at,
+          backend: replay.backend,
+          n_players: replay.players.length,
+          outcome_kind: replay.outcome.kind,
+          winner_label: replay.outcome.winner_label,
+          final_round: replay.outcome.final_round,
+          moloch_index: replay.metrics.moloch_index,
+          total_welfare: replay.metrics.total_welfare,
+          mean_integrity: replay.metrics.mean_integrity,
+          participant_models: [...new Set(replay.players.map((p) => p.model))],
+          winner_model:
+            replay.players.find((p) => p.player_id === replay.outcome.winner_id)
+              ?.model ?? null,
+        });
+      }
+    }
+    return [...summaries.values()]
+      .map(enrichSnapshotSummary)
+      .sort(
+        (a, b) =>
+          b.created_at.localeCompare(a.created_at) ||
+          a.game_id.localeCompare(b.game_id),
+      );
+  }
 }
 
-export async function getLeaderboard(): Promise<{ models: ModelRow[]; backends: BackendRow[] }> {
+function enrichSnapshotSummary(game: GameSummary): GameSummary {
+  if (game.participant_models && game.winner_model !== undefined) return game;
+  const replay = readJson<Replay | null>(`games/${game.game_id}.json`, null);
+  return {
+    ...game,
+    participant_models: replay
+      ? [...new Set(replay.players.map((p) => p.model))]
+      : [],
+    winner_model:
+      replay?.players.find((p) => p.player_id === replay.outcome.winner_id)
+        ?.model ?? null,
+  };
+}
+
+export async function getLeaderboard(): Promise<{
+  models: ModelRow[];
+  backends: BackendRow[];
+}> {
   return liveOrSnapshot("/api/leaderboard", () =>
     readJson("leaderboard.json", { models: [], backends: [] }),
   );
@@ -61,7 +129,9 @@ export async function getReplay(gameId: string): Promise<Replay | null> {
 }
 
 /** Partida destacada de la portada: prioriza modelos reales, catástrofes y partidas largas. */
-export async function getFeaturedGame(games?: GameSummary[]): Promise<GameSummary | null> {
+export async function getFeaturedGame(
+  games?: GameSummary[],
+): Promise<GameSummary | null> {
   const sourceGames = games ?? (await getGames());
   if (sourceGames.length === 0) return null;
 
@@ -72,7 +142,8 @@ export async function getFeaturedGame(games?: GameSummary[]): Promise<GameSummar
 
     const kindRank = (kind: GameSummary["outcome_kind"]) =>
       kind === "catastrophe" ? 0 : kind === "aligned_win" ? 1 : 2;
-    const outcomeDifference = kindRank(a.outcome_kind) - kindRank(b.outcome_kind);
+    const outcomeDifference =
+      kindRank(a.outcome_kind) - kindRank(b.outcome_kind);
     if (outcomeDifference !== 0) return outcomeDifference;
     return b.final_round - a.final_round;
   })[0];
@@ -85,9 +156,21 @@ export async function getStats(
   const sourceGames = games ?? (await getGames());
   const sourceLeaderboard = leaderboard ?? (await getLeaderboard());
   const total = sourceGames.length;
-  const catastrophes = sourceGames.filter((g) => g.outcome_kind === "catastrophe").length;
-  const restraints = sourceGames.filter((g) => g.outcome_kind === "restraint").length;
+  const catastrophes = sourceGames.filter(
+    (g) => g.outcome_kind === "catastrophe",
+  ).length;
+  const restraints = sourceGames.filter(
+    (g) => g.outcome_kind === "restraint",
+  ).length;
   const avgMoloch =
-    total > 0 ? sourceGames.reduce((sum, game) => sum + game.moloch_index, 0) / total : 0;
-  return { total, catastrophes, restraints, avgMoloch, backends: sourceLeaderboard.backends };
+    total > 0
+      ? sourceGames.reduce((sum, game) => sum + game.moloch_index, 0) / total
+      : 0;
+  return {
+    total,
+    catastrophes,
+    restraints,
+    avgMoloch,
+    backends: sourceLeaderboard.backends,
+  };
 }

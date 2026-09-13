@@ -10,6 +10,7 @@ import dynamic from "next/dynamic";
 import { OUTCOME_LABEL, labColor, shortModel, type Replay } from "@/lib/types";
 import { buildTimeline, CHARACTER_NAMES } from "@/lib/replay-timeline";
 import { ReplayResults } from "./ReplayResults";
+import { robotGesture, GESTURE_LABEL } from "@/lib/robot-performance";
 
 const Arena3D = dynamic(() => import("./Arena3D").then((m) => m.Arena3D), {
   ssr: false,
@@ -20,7 +21,9 @@ const Arena3D = dynamic(() => import("./Arena3D").then((m) => m.Arena3D), {
 const PHASE = {
   intro: "Apertura de la sesión",
   speech: "Compromiso público",
+  vote: "Voto público",
   action: "Decisión privada · revelada",
+  integrity: "¿Cumple su palabra?",
   resolution: "Balance de la ronda",
   outcome: "El desenlace",
 };
@@ -178,7 +181,12 @@ export function ReplayViewer({ replay }: { replay: Replay }) {
               {beat.kind === "speech" ? `“${beat.text}”` : beat.text}
             </p>
             <div className="dialogue-tags">
-              {beat.speech && (
+              {player && (
+                <span className="tag gesture-tag">
+                  {GESTURE_LABEL[robotGesture(beat, player.player_id)]}
+                </span>
+              )}
+              {beat.speech && beat.kind === "vote" && (
                 <span
                   className={`tag tag-${beat.speech.pledge === "SAFE" ? "safe" : "fast"}`}
                 >
@@ -192,13 +200,15 @@ export function ReplayViewer({ replay }: { replay: Replay }) {
                   >
                     Juega {beat.action.action}
                   </span>
-                  <span
-                    className={`tag ${beat.action.kept_pledge ? "tag-safe" : "tag-warn"}`}
-                  >
-                    {beat.action.kept_pledge
-                      ? "Palabra cumplida"
-                      : `Prometió ${beat.action.pledge} · palabra rota`}
-                  </span>
+                  {beat.kind === "integrity" && (
+                    <span
+                      className={`tag ${beat.action.kept_pledge ? "tag-safe" : "tag-warn"}`}
+                    >
+                      {beat.action.kept_pledge
+                        ? "Palabra cumplida"
+                        : `Prometió ${beat.action.pledge} · palabra rota`}
+                    </span>
+                  )}
                 </>
               )}
               {resolved && (
@@ -303,6 +313,23 @@ export function ReplayViewer({ replay }: { replay: Replay }) {
                   {state?.progress ?? 0}
                   <small> / {replay.rules.goal}</small>
                 </strong>
+                <span className="balance-model">{p.model}</span>
+                <span className="balance-public-vote">
+                  Voto público:{" "}
+                  <b>{beat.publicVotes[p.player_id] ?? "Pendiente"}</b>
+                  {beat.revealedActions[p.player_id] && (
+                    <>
+                      {" "}
+                      · Juega <b>{beat.revealedActions[p.player_id].action}</b>
+                    </>
+                  )}
+                  {beat.verdicts[p.player_id] !== undefined && (
+                    <>
+                      {" "}
+                      · {beat.verdicts[p.player_id] ? "✓ Cumple" : "✕ Rompe"}
+                    </>
+                  )}
+                </span>
                 <div className="meter">
                   <span
                     style={{

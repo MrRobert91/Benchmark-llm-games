@@ -1,7 +1,8 @@
 # El consejo — repetición narrativa
 
 La repetición recorre los registros originales en este orden: apertura, intervenciones
-públicas, decisiones privadas reveladas, balance de ronda y desenlace. Cada intervención
+públicas, votos públicos, decisiones privadas reveladas, comprobación de cada promesa,
+balance de ronda y desenlace. Cada intervención
 enfoca al robot del laboratorio. Los valores de progreso y riesgo se mantienen en el último
 balance publicado hasta resolver la ronda. Retroceder también retrocede la información
 visible. Los nombres de los personajes son identidades visuales, no agentes adicionales.
@@ -47,6 +48,17 @@ Referencia de entrada: `character-reference.png`.
 - `replay-timeline.ts` conserva los registros del motor y crea pasos deterministas.
 - `ReplayViewer.tsx` contiene diálogo, controles, acta, marcador y resultados.
 - `council-scene.ts` construye y libera la escena. La cámara interpola hacia cada participante.
+- `robot-performance.ts` distingue conversación, SAFE con manos abiertas, FAST con puño
+  alzado, palabra cumplida con mano al pecho y palabra rota con brazos cruzados. Las manos
+  articulan los dedos; la voz anima cabeza, brazos, barras del rostro y un halo luminoso.
+- Cada robot tiene una pantalla 3D con su voto público, decisión revelada y cumplimiento.
+  Las pantallas se reconstruyen al buscar cualquier paso, sin filtrar información futura.
+  El marcador inferior incluye el nombre completo del modelo y los mismos datos accesibles.
+- El archivo de partidas incluye modelos reales y estrategias scriptadas, selección del
+  modelo ganador o primer clasificado, participantes (todos o cualquiera), texto, desenlace,
+  integridad e intervalo de Moloch, incluidos valores negativos. Muestra 20 filas por página.
+- La API admite `limit` (1–500) y `offset`. El frontend recorre todas las páginas y la
+  exportación incluye todos los registros; el archivo ya no queda limitado a 200 partidas.
 - La carga 3D es dinámica. El render se suspende fuera del viewport o con la pestaña oculta.
 - Movimiento reducido desactiva oscilaciones e interpolación de cámara. La pérdida de WebGL
   ofrece reintento y mantiene accesible el reproductor de texto.
@@ -60,9 +72,20 @@ Referencia de entrada: `character-reference.png`.
 `npm test` comprueba todas las partidas guardadas: orden de fases, cada diálogo y acción,
 estado previo a la resolución, desenlace único, entradas vacías e inmutabilidad. GitHub
 Actions ejecuta esas pruebas, TypeScript, build de Next.js y las pruebas Python del motor.
+Las pruebas del archivo cubren 205 registros en API/exportación y 451 en los filtros,
+intersecciones de filtros, estrategias scriptadas y poses deterministas al retroceder.
 La revisión del navegador cubre avance, retroceso, búsqueda al final, resultados ocultos al
 retroceder y el diseño móvil sin desbordamiento horizontal, con mesas de tres y cinco robots.
 
 ### Captura real del navegador
 
 ![Reunión 3D en pantalla completa](img/council/meeting.png)
+
+![Voto público SAFE](img/council/ballot-safe.jpg)
+
+![Promesa incumplida](img/council/ballot-broken.jpg)
+
+![Filtros combinados del archivo](img/council/archive.jpg)
+
+[Animación real del robot hablando](img/council/speaking.webm): 36 capturas del navegador
+durante unos 10 segundos, codificadas a 3,47 fps; la captura no mide los fps del render.

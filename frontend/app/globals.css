@@ -565,7 +565,7 @@ code {
 .council-intro > span { font: 9px var(--mono); letter-spacing: .24em; color: #e7c894; }
 .council-intro h2 { font-size: clamp(23px,3.5vw,40px); line-height: 1.08; font-weight: 500; margin: 12px 0; letter-spacing: -.04em; color: #fff2df; }
 .council-intro p { font-size: 12px; color: #b9bdc9; }
-.council-cast { position: absolute; bottom: 17px; left: 24px; right: 24px; display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; }
+.council-cast { position: absolute; top: 17px; left: 220px; right: 220px; display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; }
 .council-cast > span { background: #0a101bbd; border: 1px solid #ffffff20; border-radius: 7px; padding: 7px 11px; font-size: 11px; display: flex; align-items: center; gap: 7px; backdrop-filter: blur(8px); }
 .council-cast > span[data-active=true] { background: #192131ee; }
 .council-cast small { color: #a9b0c0; font: 9px var(--mono); }
@@ -609,7 +609,7 @@ code {
   .council-intro { left: 18px; top: 95px; }
   .council-intro h2 { font-size: 25px; }
   .council-camera { right: 14px; }
-  .council-cast { left: 10px; right: 10px; gap: 4px; bottom: 12px; }
+  .council-cast { display: none; }
   .council-cast > span { padding: 6px; font-size: 9px; }
   .council-cast small { display: none; }
   .council-dialogue { grid-template-columns: 1fr 40px; gap: 12px; padding: 19px 17px; }
@@ -628,3 +628,47 @@ code {
 .council-player:fullscreen .council-dialogue { flex-shrink: 0; }
 .council-player:fullscreen .dialogue-text { max-height: 24vh; }
 @media(max-width:420px) { .council-controls .btn { padding: 8px 10px; } .council-controls select { padding: 7px 3px; } }
+
+/* Ballots and model identities remain legible alongside the live score. */
+.council-balance > div > .balance-model { grid-column: 1 / -1; display: block; color: #c1cddd; font: 10px/1.5 var(--mono); overflow-wrap: anywhere; min-height: 2.7em; }
+.council-balance > div > .balance-public-vote { grid-column: 1 / -1; display: block; color: #adb9cb; font-size: 10px; line-height: 1.6; }
+.balance-public-vote b { color: #ece2d3; }
+.gesture-tag { color: #93ddef; border-color: #4c798b; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.archive-stats { display: flex; gap: 24px; flex-wrap: wrap; font-size: 12px; color: #a6b1c4; margin-bottom: 22px; }
+.archive-stats b { font: 23px var(--mono); color: #eddbb8; margin-right: 5px; }
+.archive-filters { background: linear-gradient(145deg,#151c2a,#0e141f); border: 1px solid #2b3547; border-radius: 14px; padding: 24px; display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 18px; }
+.archive-filters label { display: flex; flex-direction: column; gap: 8px; color: #c2cbd9; font-size: 11px; line-height: 1.5; min-width: 0; }
+.archive-filters .archive-search { grid-column: 1 / -1; }
+.archive-filters input:not([type=checkbox]), .archive-filters select { width: 100%; min-width: 0; padding: 11px 12px; border: 1px solid #354155; border-radius: 7px; background: #0a101a; color: #edf0f6; font: 12px var(--sans); min-height: 42px; }
+.archive-filters input:focus-visible, .archive-filters select:focus-visible { outline: 2px solid #d9ba82; outline-offset: 2px; }
+.archive-filters .archive-search input { font-size: 14px; padding: 14px; }
+.archive-participants { grid-column: 1 / -1; padding: 15px; border: 1px solid #2e394c; border-radius: 8px; }
+.archive-participants summary { cursor: pointer; font-size: 12px; color: #e3d4b7; }
+.archive-participants > label { margin-top: 17px; max-width: 380px; }
+.archive-models { margin-top: 15px; display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 9px; }
+.archive-models > label { flex-direction: row; align-items: center; gap: 10px; background: #090e1770; padding: 9px; border-radius: 5px; font: 11px/1.5 var(--mono); overflow-wrap: anywhere; cursor: pointer; }
+.archive-models input { accent-color: #d9ba82; width: 16px; height: 16px; flex-shrink: 0; }
+.archive-filter-footer { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center; gap: 15px; color: #d4dceb; font: 12px var(--mono); }
+.archive-selected { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 8px; }
+.archive-selected button { cursor: pointer; background: #233047; color: #e2e8f2; border: 1px solid #465675; border-radius: 20px; padding: 8px 11px; font: 11px var(--mono); overflow-wrap: anywhere; }
+.archive-range-error { grid-column: 1 / -1; margin: 0; color: #ffb4a7; font-size: 12px; }
+.archive-explainer { color: #a9b4c8; font-size: 12px; margin: 20px 0; }
+.archive-table { position: relative; padding: 0; }
+.archive-table table { min-width: 860px; }
+.archive-table th { padding-top: 16px; white-space: normal; }
+.archive-table td { vertical-align: top; padding: 18px 12px; }
+.archive-table td:first-child { min-width: 158px; }
+.archive-table td small { display: block; color: #a4afc1; font-size: 10px; line-height: 1.7; margin-top: 5px; }
+.archive-game-id { display: block; color: #e1d3b8; font: 11px var(--mono); margin-top: 10px; }
+.archive-model-name { display: block; font: 12px/1.6 var(--mono); overflow-wrap: anywhere; max-width: 220px; }
+.archive-model-list { display: flex; flex-direction: column; gap: 6px; max-width: 270px; }
+.archive-model-list > span { font: 10px/1.5 var(--mono); color: #bdcbe0; overflow-wrap: anywhere; }
+.archive-table .btn { font-size: 11px; padding: 8px 11px; white-space: nowrap; }
+.archive-pagination { display: flex; justify-content: space-between; align-items: center; margin-top: 20px; gap: 15px; }
+.archive-pagination span { font: 12px var(--mono); color: #aebbd0; }
+.archive-pagination button:disabled { opacity: .35; cursor: default; }
+.archive-empty { padding: 38px 22px; text-align: center; border: 1px dashed #3c4960; border-radius: 12px; margin-top: 22px; }
+.archive-empty p { font-size: 13px; }
+@media(max-width:850px) { .archive-filters { grid-template-columns: repeat(2,minmax(0,1fr)); padding: 18px; } }
+@media(max-width:520px) { .archive-filters { grid-template-columns: 1fr; gap: 15px; } .archive-models { grid-template-columns: 1fr; } .archive-pagination .btn { padding: 10px; font-size: 11px; } .archive-pagination span { font-size: 10px; } .archive-filter-footer .btn { font-size: 11px; } }

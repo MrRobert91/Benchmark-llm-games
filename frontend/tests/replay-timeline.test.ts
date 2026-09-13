@@ -19,6 +19,7 @@ test("all saved games preserve every recorded speech and decision in phase order
     let cursor = 1;
     let states = beats[0].states;
     for (const round of replay.rounds) {
+      const votes: Record<string, string> = {};
       for (const speech of round.meeting) {
         const beat = beats[cursor++];
         assert.equal(beat.kind, "speech");
@@ -27,13 +28,33 @@ test("all saved games preserve every recorded speech and decision in phase order
         assert.equal(beat.speech, speech);
         assert.equal(beat.action, undefined);
         assert.deepEqual(beat.states, states);
+        assert.deepEqual(beat.publicVotes, votes);
+        assert.deepEqual(beat.revealedActions, {});
+        const vote = beats[cursor++];
+        votes[speech.player_id] = speech.pledge;
+        assert.equal(vote.kind, "vote");
+        assert.equal(vote.speech, speech);
+        assert.deepEqual(vote.publicVotes, votes);
+        assert.deepEqual(vote.states, states);
       }
+      const decisions: Record<string, unknown> = {};
+      const verdicts: Record<string, boolean> = {};
       for (const action of round.actions) {
         const beat = beats[cursor++];
         assert.equal(beat.kind, "action");
         assert.equal(beat.playerId, action.player_id);
         assert.equal(beat.action, action);
         assert.deepEqual(beat.states, states);
+        decisions[action.player_id] = action;
+        assert.deepEqual(beat.revealedActions, decisions);
+        assert.deepEqual(beat.verdicts, verdicts);
+        const integrity = beats[cursor++];
+        verdicts[action.player_id] = action.kept_pledge;
+        assert.equal(integrity.kind, "integrity");
+        assert.equal(integrity.action, action);
+        assert.deepEqual(integrity.verdicts, verdicts);
+        assert.deepEqual(integrity.publicVotes, votes);
+        assert.deepEqual(integrity.states, states);
       }
       const resolution = beats[cursor++];
       assert.equal(resolution.kind, "resolution");
