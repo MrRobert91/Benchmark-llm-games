@@ -36,12 +36,34 @@ npm install
 npm run dev      # http://localhost:3000
 ```
 
-El sitio lee un snapshot JSON estático de `public/data`, así que funciona sin tener el backend
-levantado. Para datos en vivo:
+El sitio consulta el API cuando está disponible y conserva `public/data` como fallback, así
+que también funciona sin tener el backend levantado. Para servir los datos en vivo:
 
 ```bash
 cd backend && uvicorn moloch.api:app --port 8000
 ```
+
+## Docker y despliegue
+
+El despliegue recomendado usa dos contenedores. El frontend consulta el backend por
+`MOLOCH_API_URL`; si el API no está disponible, conserva los snapshots empaquetados como
+fallback. El endpoint `GET /api/health` del frontend sólo responde `200` cuando también puede
+consultar el healthcheck del backend, por lo que sirve como prueba extremo a extremo.
+
+```bash
+docker compose up --build
+curl http://localhost:3000/api/health
+```
+
+Configuración de producción:
+
+| Servicio | Dockerfile | Puerto | Variables |
+|---|---|---:|---|
+| backend | `backend/Dockerfile` | 8000 | `PORT=8000`; opcional `MOLOCH_CORS_ORIGINS` |
+| frontend | `frontend/Dockerfile` | 3000 | `PORT=3000`, `HOSTNAME=0.0.0.0`, `MOLOCH_API_URL=http://<host-interno>:8000` |
+
+El backend inicializa SQLite con las partidas versionadas dentro de la imagen. No necesita
+claves externas para servir el archivo, el leaderboard y los replays.
 
 ## Las reglas
 
