@@ -1,7 +1,7 @@
 import type { ReplayBeat } from "./replay-timeline";
 
 export type RobotGesture =
-  "idle" | "speaking" | "safe" | "fast" | "kept" | "broken";
+  "idle" | "thinking" | "speaking" | "safe" | "fast" | "kept" | "broken";
 
 export function robotGesture(beat: ReplayBeat, playerId: string): RobotGesture {
   if (beat.playerId !== playerId) return "idle";
@@ -36,6 +36,12 @@ export function robotPose(
     mouth: 0.15,
   };
   switch (gesture) {
+    case "thinking":
+      pose.headX = 0.12 + nod * 0.025;
+      pose.headZ = 0.08;
+      pose.right = [-1.45, -0.35, 0.5];
+      pose.rightFist = 0.35;
+      break;
     case "speaking":
       pose.bodyX = 0.04 + nod * 0.025;
       pose.headX = nod * 0.065;
@@ -91,6 +97,7 @@ export function robotPose(
 
 export const GESTURE_LABEL: Record<RobotGesture, string> = {
   idle: "Escuchando",
+  thinking: "Pensando…",
   speaking: "Hablando",
   safe: "SAFE · manos abiertas",
   fast: "FAST · puño alzado",

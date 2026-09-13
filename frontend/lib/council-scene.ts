@@ -841,6 +841,7 @@ export function createCouncil(
   composer.addPass(output);
   let beat = initial,
     wide = false,
+    thinking = false,
     raf = 0,
     disposed = false,
     visible = true;
@@ -906,7 +907,7 @@ export function createCouncil(
     camera.fov += (desiredFov - camera.fov) * lerp;
     camera.updateProjectionMatrix();
     delegates.forEach((d) => {
-      const gesture = robotGesture(beat, d.playerId);
+      const gesture = thinking ? "thinking" : robotGesture(beat, d.playerId);
       const pose = robotPose(gesture, beatTime, reduced.matches);
       // Seek directly to the pose; transitions and oscillations never carry future state backward.
       d.body.rotation.set(pose.bodyX, 0, pose.bodyZ);
@@ -920,10 +921,10 @@ export function createCouncil(
         }),
       );
       d.voiceBars.forEach((bar, j) => {
-        bar.visible = gesture === "speaking";
+        bar.visible = gesture === "speaking" || gesture === "thinking";
         bar.scale.y = 1 + pose.mouth * (j % 2 ? 1.4 : 3);
       });
-      d.speakingHalo.visible = gesture === "speaking";
+      d.speakingHalo.visible = gesture === "speaking" || gesture === "thinking";
       d.speakingHalo.scale.setScalar(
         reduced.matches ? 1 : 1 + Math.sin(beatTime * 4) * 0.035,
       );
@@ -947,8 +948,10 @@ export function createCouncil(
   renderer.domElement.addEventListener("webglcontextlost", lost);
   raf = requestAnimationFrame(tick);
   return {
-    update(next: ReplayBeat, overview: boolean) {
-      if (beat !== next) beatTime = 0;
+    update(next: ReplayBeat, overview: boolean, waiting = false, currentReplay = replay) {
+      if (thinking !== waiting || (!waiting && (beat.kind !== next.kind || beat.round !== next.round || beat.playerId !== next.playerId))) beatTime = 0;
+      replay = currentReplay;
+      thinking = waiting;
       beat = next;
       wide = overview;
     },

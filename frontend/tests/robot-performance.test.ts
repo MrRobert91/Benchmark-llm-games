@@ -52,3 +52,10 @@ test("speaking articulates over time; SAFE, FAST, kept and broken have unique po
     assert.deepEqual(robotPose(gesture, 1, true), robotPose(gesture, 20, true));
   }
 });
+
+
+test("thinking stays seated, animates gently and respects reduced motion", () => {
+  assert.equal(robotPose("thinking", 1).bodyX, 0);
+  assert.notEqual(robotPose("thinking", 1).headX, robotPose("thinking", 2).headX);
+  assert.deepEqual(robotPose("thinking", 1, true), robotPose("thinking", 2, true));
+});

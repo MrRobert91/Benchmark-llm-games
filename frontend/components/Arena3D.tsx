@@ -8,15 +8,18 @@ export function Arena3D({
   replay,
   beat,
   overview,
+  thinking = false,
 }: {
   replay: Replay;
   beat: ReplayBeat;
   overview: boolean;
+  thinking?: boolean;
 }) {
   const mount = useRef<HTMLDivElement>(null);
   const scene = useRef<ReturnType<typeof createCouncil> | null>(null);
-  const latest = useRef({ beat, overview });
-  latest.current = { beat, overview };
+  const latest = useRef({ replay, beat, overview, thinking });
+  latest.current = { replay, beat, overview, thinking };
+  const sceneKey = JSON.stringify([replay.game_id, replay.players, replay.rules]);
   const [failed, setFailed] = useState(false);
   const [retry, setRetry] = useState(0);
   useEffect(() => {
@@ -25,11 +28,11 @@ export function Arena3D({
     try {
       scene.current = createCouncil(
         mount.current,
-        replay,
+        latest.current.replay,
         latest.current.beat,
         () => setFailed(true),
       );
-      scene.current.update(latest.current.beat, latest.current.overview);
+      scene.current.update(latest.current.beat, latest.current.overview, latest.current.thinking, latest.current.replay);
     } catch {
       mount.current.replaceChildren();
       setFailed(true);
@@ -38,10 +41,10 @@ export function Arena3D({
       scene.current?.dispose();
       scene.current = null;
     };
-  }, [replay, retry]);
+  }, [sceneKey, retry]);
   useEffect(() => {
-    scene.current?.update(beat, overview);
-  }, [beat, overview]);
+    scene.current?.update(beat, overview, thinking, replay);
+  }, [beat, overview, thinking, replay]);
   return (
     <div
       className="council-render"

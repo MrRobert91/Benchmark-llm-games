@@ -89,3 +89,13 @@ retroceder y el diseño móvil sin desbordamiento horizontal, con mesas de tres 
 
 [Animación real del robot hablando](img/council/speaking.webm): 36 capturas del navegador
 durante unos 10 segundos, codificadas a 3,47 fps; la captura no mide los fps del render.
+
+## Partidas en directo
+
+La escena se conserva por identidad de partida, reparto y reglas; las instantáneas SSE actualizan los datos sin recrear el renderer. En directo la cámara permanece en plano general y los robots esperan sentados con un gesto animado de pensar, compatible con movimiento reducido. Los controles de reproducción y sus atajos quedan reservados al replay.
+
+El balance sigue el último paso recibido. Una ronda todavía sin `state_after` conserva los puntos y el riesgo de la última ronda resuelta: no vuelve a cero ni anticipa decisiones privadas. Al completarse la ejecución se muestran y enfocan los resultados, con desenlace, modelo y puntuación por laboratorio. El usuario puede reiniciar la visualización o abrir el formulario para autorizar una nueva partida.
+
+La web pública tiene un prefijo HTTPS fijo; admite pegar una URL completa y deja el campo vacío como aportación sin web.
+
+Validación: 11 pruebas frontend, TypeScript, build de producción y 40 pruebas backend. Comprobación Chromium con servidor SSE local de prueba basado en una partida guardada: persistencia del mismo canvas entre rondas, actualización de puntos, ausencia de controles/atajos en directo, resultados automáticos, reinicio manual, recarga del final y prefijo HTTPS. Sin llamadas de pago a OpenRouter durante la prueba.
