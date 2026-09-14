@@ -1,6 +1,11 @@
 import { TradeoffChart } from "@/components/TradeoffChart";
 import { getGames, getLeaderboard, getStats } from "@/lib/data";
 import { shortModel } from "@/lib/types";
+import {
+  formatIntegrity,
+  integrityBarWidth,
+  integritySortKey,
+} from "@/lib/integrity";
 
 export const dynamic = "force-dynamic";
 
@@ -9,7 +14,10 @@ export default async function LeaderboardPage() {
   const { models, backends, contributors = [] } = leaderboard;
   const stats = await getStats(games, leaderboard);
 
-  const mostAligned = [...models].sort((a, b) => b.avg_integrity - a.avg_integrity)[0];
+  // Un modelo con integridad desconocida no puede encabezar el ranking de alineamiento.
+  const mostAligned = [...models].sort(
+    (a, b) => integritySortKey(b.avg_integrity) - integritySortKey(a.avg_integrity),
+  )[0];
   const bestPerformer = [...models].sort((a, b) => b.avg_payoff - a.avg_payoff)[0];
 
   return (
@@ -37,7 +45,7 @@ export default async function LeaderboardPage() {
                 {shortModel(mostAligned.model)}
               </span>
               <p className="metric-note">
-                {Math.round(mostAligned.avg_integrity * 100)}% de compromisos cumplidos en{" "}
+                {formatIntegrity(mostAligned.avg_integrity)} de compromisos cumplidos en{" "}
                 {mostAligned.games} partidas.
               </p>
             </div>
@@ -48,7 +56,7 @@ export default async function LeaderboardPage() {
               </span>
               <p className="metric-note">
                 {bestPerformer.avg_payoff.toFixed(1)} de pago medio, con{" "}
-                {Math.round(bestPerformer.avg_integrity * 100)}% de integridad.
+                {formatIntegrity(bestPerformer.avg_integrity)} de integridad.
               </p>
             </div>
             <div className="card metric">
@@ -105,14 +113,16 @@ export default async function LeaderboardPage() {
                       <div className="meter" style={{ width: 84 }}>
                         <span
                           style={{
-                            width: `${m.avg_integrity * 100}%`,
+                            width: integrityBarWidth(m.avg_integrity),
                             background:
-                              m.avg_integrity > 0.85 ? "var(--safe)" : "var(--warn)",
+                              m.avg_integrity !== null && m.avg_integrity > 0.85
+                                ? "var(--safe)"
+                                : "var(--warn)",
                           }}
                         />
                       </div>
                       <span className="num" style={{ minWidth: 40 }}>
-                        {Math.round(m.avg_integrity * 100)}%
+                        {formatIntegrity(m.avg_integrity)}
                       </span>
                     </div>
                   </td>
@@ -214,7 +224,7 @@ export default async function LeaderboardPage() {
                     <td className="num">{contribution.n_players}</td>
                     <td className="num">{contribution.moloch_index.toFixed(3)}</td>
                     <td className="num" style={{ paddingRight: 22 }}>
-                      {Math.round(contribution.mean_integrity * 100)}%
+                      {formatIntegrity(contribution.mean_integrity)}
                     </td>
                   </tr>
                 ))}

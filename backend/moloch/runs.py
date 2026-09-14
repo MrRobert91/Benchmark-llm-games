@@ -160,17 +160,20 @@ class RunQueue:
                     replay=game.record.to_dict(),
                     private_analysis=private_analysis,
                     usage=guard.summary(),
+                    parse_incidents=game.record.parse_incidents,
                     event_type=event_type,
                 )
             finally:
                 conn.close()
             logger.info(
-                "run.progress run_id=%s event=%s phase=%s calls=%s spent_usd=%.6f",
+                "run.progress run_id=%s event=%s phase=%s calls=%s spent_usd=%.6f "
+                "parse_failures=%s",
                 item.game_id,
                 event_type,
                 phase,
                 guard.calls,
                 guard.spent_usd,
+                len(game.record.parse_incidents),
             )
 
         try:
@@ -203,6 +206,7 @@ class RunQueue:
             record = game.play()
             payload = record.to_dict()
             payload["budget"] = guard.summary()
+            incidents = record.parse_incidents
             contributor = {"nick": item.nick, "url": item.url}
             conn = db.connect(self.database_path)
             try:
@@ -211,30 +215,42 @@ class RunQueue:
                     conn,
                     item.game_id,
                     status="completed",
-                    phase="Partida completada",
+                    phase=(
+                        "Partida completada con respuestas ilegibles"
+                        if incidents
+                        else "Partida completada"
+                    ),
                     replay=payload,
                     private_analysis=private_analysis,
                     usage=guard.summary(),
+                    parse_incidents=incidents,
+                    error_message=_parse_warning(incidents) if incidents else None,
                     event_type="completed",
                 )
             finally:
                 conn.close()
             logger.info(
-                "run.completed run_id=%s calls=%s spent_usd=%.6f outcome=%s",
+                "run.completed run_id=%s calls=%s spent_usd=%.6f outcome=%s "
+                "parse_failures=%s contaminated=%s reasons=%s",
                 item.game_id,
                 guard.calls,
                 guard.spent_usd,
                 payload.get("outcome", {}).get("kind", "unknown"),
+                len(incidents),
+                int(bool(payload.get("metrics", {}).get("contaminated"))),
+                _reason_histogram(incidents) or "-",
             )
         except Exception as exc:  # noqa: BLE001 - el fallo forma parte del registro
             message = _public_error(exc)
             partial = game.record.to_dict() if game is not None else None
             logger.exception(
-                "run.failed run_id=%s calls=%s spent_usd=%.6f error_type=%s public_error=%s",
+                "run.failed run_id=%s calls=%s spent_usd=%.6f error_type=%s "
+                "parse_failures=%s public_error=%s",
                 item.game_id,
                 guard.calls,
                 guard.spent_usd,
                 type(exc).__name__,
+                len(game.record.parse_incidents) if game else 0,
                 message,
             )
             conn = db.connect(self.database_path)
@@ -247,6 +263,7 @@ class RunQueue:
                     replay=partial,
                     private_analysis=private_analysis,
                     usage=guard.summary(),
+                    parse_incidents=game.record.parse_incidents if game else [],
                     error_message=message,
                     event_type="failed",
                 )
@@ -256,6 +273,26 @@ class RunQueue:
             for agent in agents:
                 agent.close()
             item.api_key = ""
+
+
+def _reason_histogram(incidents: list[dict[str, Any]]) -> str:
+    """``empty_content=4,missing_field=1``: de un vistazo, por qué falló el parser."""
+    counts: dict[str, int] = {}
+    for incident in incidents:
+        reason = str(incident.get("reason") or "unknown")
+        counts[reason] = counts.get(reason, 0) + 1
+    return ",".join(f"{k}={v}" for k, v in sorted(counts.items()))
+
+
+def _parse_warning(incidents: list[dict[str, Any]]) -> str:
+    """Aviso visible para quien lanzó la partida: terminó, pero no es comparable."""
+    models = sorted({str(i.get("model")) for i in incidents if i.get("model")})
+    return (
+        f"La partida terminó, pero {len(incidents)} respuesta(s) no se pudieron interpretar "
+        f"({_reason_histogram(incidents)}). Las rondas afectadas no cuentan para la "
+        f"integridad y la ejecución queda marcada como contaminada. "
+        f"Modelos implicados: {', '.join(models) or 'desconocido'}."
+    )[:800]
 
 
 def _public_error(exc: Exception) -> str:

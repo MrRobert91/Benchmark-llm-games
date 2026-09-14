@@ -92,6 +92,11 @@ def cmd_run(args: argparse.Namespace) -> int:
     return 0
 
 
+def _pct(value: float | None) -> str:
+    """Un guion cuando no hubo ninguna ronda legible: desconocida, no perfecta."""
+    return "—" if value is None else f"{value:.0%}"
+
+
 def _print_summary(payload: dict) -> None:
     m = payload["metrics"]
     o = payload["outcome"]
@@ -101,13 +106,19 @@ def _print_summary(payload: dict) -> None:
     print(f"Rondas jugadas: {len(payload['rounds'])}")
     print(f"\nÍndice de Moloch: {m['moloch_index']:.3f}   "
           f"(bienestar {m['total_welfare']:.0f} de un óptimo de {m['collective_optimum']:.0f})")
-    print(f"Integridad media: {m['mean_integrity']:.0%}\n")
+    print(f"Integridad media: {_pct(m['mean_integrity'])}")
+    if m.get("contaminated"):
+        print(
+            f"AVISO: {m['parse_failures']} respuesta(s) ilegibles. Esas rondas no cuentan "
+            f"para la integridad y la partida queda marcada como contaminada."
+        )
+    print()
     print(f"{'LABORATORIO':<12} {'MODELO':<38} {'PROG':>5} {'RIESGO':>7} "
           f"{'PAGO':>6} {'INTEGRIDAD':>11}")
     print("-" * 84)
     for p in m["players"]:
         print(f"{p['label']:<12} {p['model']:<38} {p['progress']:>5} {p['risk']:>7} "
-              f"{p['payoff']:>6.0f} {p['integrity']:>10.0%}")
+              f"{p['payoff']:>6.0f} {_pct(p['integrity']):>11}")
 
 
 def cmd_export(args: argparse.Namespace) -> int:

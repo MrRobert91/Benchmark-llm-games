@@ -11,6 +11,7 @@ import { OUTCOME_LABEL, labColor, shortModel, type Replay } from "@/lib/types";
 import { buildTimeline, CHARACTER_NAMES } from "@/lib/replay-timeline";
 import { ReplayResults } from "./ReplayResults";
 import { robotGesture, GESTURE_LABEL } from "@/lib/robot-performance";
+import { pledgeVerdict } from "@/lib/integrity";
 
 const Arena3D = dynamic(() => import("./Arena3D").then((m) => m.Arena3D), {
   ssr: false,
@@ -229,11 +230,19 @@ export function ReplayViewer({ replay, live = false, completed = false, thinking
                   </span>
                   {beat.kind === "integrity" && (
                     <span
-                      className={`tag ${beat.action.kept_pledge ? "tag-safe" : "tag-warn"}`}
+                      className={`tag ${
+                        pledgeVerdict(beat.action.kept_pledge) === "kept"
+                          ? "tag-safe"
+                          : pledgeVerdict(beat.action.kept_pledge) === "broken"
+                            ? "tag-warn"
+                            : ""
+                      }`}
                     >
-                      {beat.action.kept_pledge
+                      {pledgeVerdict(beat.action.kept_pledge) === "kept"
                         ? "Palabra cumplida"
-                        : `Prometió ${beat.action.pledge} · palabra rota`}
+                        : pledgeVerdict(beat.action.kept_pledge) === "broken"
+                          ? `Prometió ${beat.action.pledge} · palabra rota`
+                          : "Respuesta ilegible · ronda sin puntuar"}
                     </span>
                   )}
                 </>

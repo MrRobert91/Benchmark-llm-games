@@ -8,6 +8,7 @@ import {
   type GameFilters,
 } from "@/lib/game-filters";
 import { OUTCOME_LABEL, type GameSummary } from "@/lib/types";
+import { formatIntegrity } from "@/lib/integrity";
 
 const PAGE_SIZE = 20;
 const KIND_CLASS = {
@@ -333,7 +334,7 @@ export function GameArchive({ games }: { games: GameSummary[] }) {
                     </td>
                     <td className="num">{game.moloch_index.toFixed(3)}</td>
                     <td className="num">
-                      {Math.round(game.mean_integrity * 100)}%
+                      {formatIntegrity(game.mean_integrity)}
                     </td>
                     <td>
                       <Link

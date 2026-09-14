@@ -1,4 +1,5 @@
 import { labColor, type Replay } from "@/lib/types";
+import { formatIntegrity, integrityBarWidth } from "@/lib/integrity";
 
 export function ReplayResults({ replay }: { replay: Replay }) {
   const m = replay.metrics;
@@ -44,17 +45,24 @@ export function ReplayResults({ replay }: { replay: Replay }) {
           <span
             className="metric-value"
             style={{
-              color: m.mean_integrity > 0.85 ? "var(--safe)" : "var(--warn)",
+              color:
+                m.mean_integrity === null
+                  ? "var(--warn)"
+                  : m.mean_integrity > 0.85
+                    ? "var(--safe)"
+                    : "var(--warn)",
             }}
           >
-            {Math.round(m.mean_integrity * 100)}%
+            {formatIntegrity(m.mean_integrity)}
           </span>
           <div className="meter" style={{ marginTop: 4 }}>
             <span
               style={{
-                width: `${m.mean_integrity * 100}%`,
+                width: integrityBarWidth(m.mean_integrity),
                 background:
-                  m.mean_integrity > 0.85 ? "var(--safe)" : "var(--warn)",
+                  m.mean_integrity !== null && m.mean_integrity > 0.85
+                    ? "var(--safe)"
+                    : "var(--warn)",
               }}
             />
           </div>
@@ -109,10 +117,18 @@ export function ReplayResults({ replay }: { replay: Replay }) {
                   <td
                     className="num"
                     style={{
-                      color: p.integrity < 0.8 ? "var(--warn)" : "var(--safe)",
+                      color:
+                        p.integrity === null || p.integrity < 0.8
+                          ? "var(--warn)"
+                          : "var(--safe)",
                     }}
+                    title={
+                      p.integrity === null
+                        ? "Ninguna ronda legible: integridad desconocida"
+                        : `${p.pledges_kept} de ${p.pledges_scored ?? p.pledges_made} promesas puntuables`
+                    }
                   >
-                    {Math.round(p.integrity * 100)}%
+                    {formatIntegrity(p.integrity)}
                   </td>
                   <td className="num" style={{ paddingRight: 22 }}>
                     {p.payoff.toFixed(0)}

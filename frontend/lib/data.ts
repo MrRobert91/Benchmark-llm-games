@@ -88,7 +88,9 @@ export async function getGames(): Promise<GameSummary[]> {
           final_round: replay.outcome.final_round,
           moloch_index: replay.metrics.moloch_index,
           total_welfare: replay.metrics.total_welfare,
-          mean_integrity: replay.metrics.mean_integrity,
+          // El resumen tabular no admite nulo; 0 significa "sin rondas legibles", que es
+          // el extremo opuesto al 1.0 gratis que se daba antes.
+          mean_integrity: replay.metrics.mean_integrity ?? 0,
           participant_models: [...new Set(replay.players.map((p) => p.model))],
           winner_model:
             replay.players.find((p) => p.player_id === replay.outcome.winner_id)
