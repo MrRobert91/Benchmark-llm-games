@@ -15,9 +15,15 @@ const H = 420;
 const PAD = { top: 40, right: 30, bottom: 52, left: 62 };
 const CHAR_W = 6.4;
 
-export function TradeoffChart({ rows }: { rows: ModelRow[] }) {
+export function TradeoffChart({ rows: allRows }: { rows: ModelRow[] }) {
   const [hover, setHover] = useState<number | null>(null);
   const clipId = useId();
+
+  // Un modelo sin ninguna ronda legible no tiene integridad que situar en el eje Y. Se
+  // omite en vez de dibujarlo en el 0, que sugeriría que incumplió todo lo que prometió.
+  const rows = allRows.filter(
+    (r): r is ModelRow & { avg_integrity: number } => r.avg_integrity !== null,
+  );
 
   if (rows.length === 0) return null;
 

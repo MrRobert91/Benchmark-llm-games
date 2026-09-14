@@ -10,8 +10,12 @@ export function robotGesture(beat: ReplayBeat, playerId: string): RobotGesture {
     return beat.speech?.pledge === "FAST" ? "fast" : "safe";
   if (beat.kind === "action")
     return beat.action?.action === "FAST" ? "fast" : "safe";
-  if (beat.kind === "integrity")
-    return beat.action?.kept_pledge ? "kept" : "broken";
+  if (beat.kind === "integrity") {
+    // Sin decisión legible no hay veredicto que escenificar: el robot no afirma nada.
+    if (beat.action?.kept_pledge === null || beat.action?.kept_pledge === undefined)
+      return "idle";
+    return beat.action.kept_pledge ? "kept" : "broken";
+  }
   return "idle";
 }
 

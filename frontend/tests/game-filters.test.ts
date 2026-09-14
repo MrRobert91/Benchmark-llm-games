@@ -21,7 +21,7 @@ const games: GameSummary[] = fs
       final_round: r.outcome.final_round,
       moloch_index: r.metrics.moloch_index,
       total_welfare: r.metrics.total_welfare,
-      mean_integrity: r.metrics.mean_integrity,
+      mean_integrity: r.metrics.mean_integrity ?? 0,
       participant_models: [...new Set(r.players.map((p) => p.model))],
       winner_model:
         r.players.find((p) => p.player_id === r.outcome.winner_id)?.model ??

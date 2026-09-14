@@ -92,15 +92,39 @@ def connect(path: Path | str = DEFAULT_DB) -> sqlite3.Connection:
     conn.executescript(SCHEMA)
     _ensure_column(conn, "games", "contributor_nick", "TEXT")
     _ensure_column(conn, "games", "contributor_url", "TEXT")
+    # Trazabilidad del parser. Se añaden en caliente para no romper bases ya existentes.
+    _ensure_column(conn, "games", "parse_failures", "INTEGER NOT NULL DEFAULT 0")
+    _ensure_column(conn, "games", "contaminated", "INTEGER NOT NULL DEFAULT 0")
+    _ensure_column(conn, "games", "integrity_confidence", "REAL NOT NULL DEFAULT 1.0")
+    _ensure_column(conn, "game_players", "parse_failures", "INTEGER NOT NULL DEFAULT 0")
+    if _ensure_column(conn, "game_players", "pledges_scored", "INTEGER NOT NULL DEFAULT 0"):
+        _backfill_scored_pledges(conn)
+    _ensure_column(conn, "web_runs", "parse_incidents_json", "TEXT NOT NULL DEFAULT '[]'")
+    _ensure_column(conn, "web_runs", "parse_failures", "INTEGER NOT NULL DEFAULT 0")
     return conn
 
 
 def _ensure_column(
     conn: sqlite3.Connection, table: str, column: str, declaration: str
-) -> None:
+) -> bool:
+    """Añade la columna si falta. Devuelve ``True`` cuando la acaba de crear."""
     columns = {row["name"] for row in conn.execute(f"PRAGMA table_info({table})")}
-    if column not in columns:
-        conn.execute(f"ALTER TABLE {table} ADD COLUMN {column} {declaration}")
+    if column in columns:
+        return False
+    conn.execute(f"ALTER TABLE {table} ADD COLUMN {column} {declaration}")
+    return True
+
+
+def _backfill_scored_pledges(conn: sqlite3.Connection) -> None:
+    """Las partidas anteriores al control de parseo se puntuaron enteras: así se registran.
+
+    Sin esto, `pledges_scored` se quedaría a 0 en las filas antiguas y el leaderboard daría
+    su integridad por desconocida, que es el error contrario al que se está corrigiendo.
+    """
+    conn.execute(
+        "UPDATE game_players SET pledges_scored = pledges_made "
+        "WHERE pledges_scored = 0 AND pledges_made > 0"
+    )
 
 
 def save_game(
@@ -110,11 +134,13 @@ def save_game(
 ) -> str:
     metrics = record["metrics"]
     outcome = record["outcome"]
+    parse_failures = int(metrics.get("parse_failures") or 0)
     conn.execute(
         """INSERT OR REPLACE INTO games
            (game_id, created_at, seed, backend, n_players, outcome_kind, winner_label,
-            final_round, moloch_index, total_welfare, mean_integrity, replay_json)
-           VALUES (?,?,?,?,?,?,?,?,?,?,?,?)""",
+            final_round, moloch_index, total_welfare, mean_integrity, replay_json,
+            parse_failures, contaminated, integrity_confidence)
+           VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
         (
             record["game_id"],
             record["created_at"],
@@ -126,8 +152,12 @@ def save_game(
             outcome["final_round"],
             metrics["moloch_index"],
             metrics["total_welfare"],
-            metrics["mean_integrity"],
+            # La columna no admite nulo: se guarda 0 y se distingue con integrity_confidence.
+            metrics["mean_integrity"] if metrics.get("mean_integrity") is not None else 0.0,
             json.dumps(record, ensure_ascii=False),
+            parse_failures,
+            1 if metrics.get("contaminated") else 0,
+            float(metrics.get("integrity_confidence", 1.0)),
         ),
     )
     conn.execute("DELETE FROM game_players WHERE game_id = ?", (record["game_id"],))
@@ -135,8 +165,8 @@ def save_game(
         conn.execute(
             """INSERT INTO game_players
                (game_id, player_id, label, model, progress, risk, payoff, integrity,
-                fast_rate, pledges_made, pledges_kept)
-               VALUES (?,?,?,?,?,?,?,?,?,?,?)""",
+                fast_rate, pledges_made, pledges_kept, parse_failures, pledges_scored)
+               VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)""",
             (
                 record["game_id"],
                 p["player_id"],
@@ -145,10 +175,12 @@ def save_game(
                 p["progress"],
                 p["risk"],
                 p["payoff"],
-                p["integrity"],
+                p["integrity"] if p.get("integrity") is not None else 0.0,
                 p["fast_rate"],
                 p["pledges_made"],
                 p["pledges_kept"],
+                int(p.get("parse_failures") or 0),
+                int(p.get("pledges_scored", p.get("pledges_made") or 0)),
             ),
         )
     if contributor:
@@ -214,30 +246,49 @@ def get_game(conn: sqlite3.Connection, game_id: str) -> dict[str, Any] | None:
 def leaderboard(
     conn: sqlite3.Connection, *, openrouter_only: bool = False
 ) -> list[dict[str, Any]]:
-    """Ranking por modelo, con los dos ejes: rendimiento e integridad."""
+    """Ranking por modelo, con los dos ejes: rendimiento e integridad.
+
+    La integridad se calcula sobre las promesas realmente puntuables (``pledges_scored``), no
+    promediando la columna ``integrity`` fila a fila. La diferencia importa: una fila sin
+    ninguna ronda legible guarda 0.0 por restricción de esquema, y promediarla mentiría igual
+    que el 1.0 que se guardaba antes. Las rondas que el parser no pudo leer se cuentan aparte,
+    en ``parse_failures``, en vez de colarse como promesas cumplidas.
+    """
     rows = conn.execute(
         """SELECT gp.model,
                   COUNT(DISTINCT gp.game_id) AS games,
                   AVG(gp.payoff)       AS avg_payoff,
-                  AVG(gp.integrity)    AS avg_integrity,
                   AVG(gp.fast_rate)    AS avg_fast_rate,
                   AVG(gp.risk)         AS avg_risk,
-                  SUM(gp.pledges_made) AS pledges_made,
-                  SUM(gp.pledges_kept) AS pledges_kept
+                  SUM(gp.pledges_made)   AS pledges_made,
+                  SUM(gp.pledges_kept)   AS pledges_kept,
+                  SUM(gp.pledges_scored) AS pledges_scored,
+                  SUM(gp.parse_failures) AS parse_failures,
+                  COUNT(DISTINCT CASE WHEN gp.parse_failures > 0 THEN gp.game_id END)
+                      AS contaminated_games
            FROM game_players gp
            JOIN games g ON g.game_id = gp.game_id
            WHERE (? = 0 OR g.backend LIKE 'openrouter%')
-           GROUP BY gp.model ORDER BY avg_integrity DESC, avg_payoff DESC""",
+           GROUP BY gp.model""",
         (1 if openrouter_only else 0,),
     ).fetchall()
     out = []
     for r in rows:
         d = dict(r)
+        scored = d["pledges_scored"] or 0
+        rounds = scored + (d["parse_failures"] or 0)
         d["avg_payoff"] = round(d["avg_payoff"], 2)
-        d["avg_integrity"] = round(d["avg_integrity"], 4)
+        #: ``None`` cuando no hubo ni una ronda legible: desconocida, no perfecta.
+        d["avg_integrity"] = round(d["pledges_kept"] / scored, 4) if scored else None
+        #: Qué parte de las rondas de este modelo se pudo leer. Debajo de 1.0, desconfía.
+        d["parse_success_rate"] = round(scored / rounds, 4) if rounds else 0.0
         d["avg_fast_rate"] = round(d["avg_fast_rate"], 4)
         d["avg_risk"] = round(d["avg_risk"], 2)
         out.append(d)
+    out.sort(
+        key=lambda d: (d["avg_integrity"] is not None, d["avg_integrity"] or 0, d["avg_payoff"]),
+        reverse=True,
+    )
     return out
 
 
@@ -287,6 +338,7 @@ def update_web_run(
     usage: dict[str, Any] | None = None,
     error_message: str | None = None,
     event_type: str | None = None,
+    parse_incidents: list[dict[str, Any]] | None = None,
 ) -> None:
     fields = ["updated_at = ?"]
     values: list[Any] = [_utc_now()]
@@ -309,6 +361,13 @@ def update_web_run(
         ):
             fields.append(f"{column} = ?")
             values.append(usage.get(key, 0))
+    if parse_incidents is not None:
+        # Los fallos del parser se guardan aunque la partida termine bien: son la prueba de
+        # que esa ejecución quedó contaminada y el material para arreglar el parser.
+        fields.append("parse_incidents_json = ?")
+        values.append(json.dumps(parse_incidents, ensure_ascii=False))
+        fields.append("parse_failures = ?")
+        values.append(len(parse_incidents))
     if error_message is not None:
         fields.append("error_message = ?")
         values.append(error_message[:800])
@@ -324,7 +383,7 @@ def get_web_run(conn: sqlite3.Connection, game_id: str) -> dict[str, Any] | None
         """SELECT game_id, status, phase, created_at, updated_at, seed,
                   contributor_nick, contributor_url, models_json, budget_limit,
                   spent_usd, calls, prompt_tokens, completion_tokens, error_message,
-                  replay_json
+                  replay_json, parse_incidents_json, parse_failures
            FROM web_runs WHERE game_id = ?""",
         (game_id,),
     ).fetchone()
@@ -332,6 +391,9 @@ def get_web_run(conn: sqlite3.Connection, game_id: str) -> dict[str, Any] | None
         return None
     result = dict(row)
     result["models"] = json.loads(result.pop("models_json"))
+    # Público a propósito: a diferencia de private_analysis, una incidencia de parseo no
+    # contiene el prompt ni el razonamiento, solo un extracto de la respuesta y el motivo.
+    result["parse_incidents"] = json.loads(result.pop("parse_incidents_json") or "[]")
     result["replay"] = (
         json.loads(result.pop("replay_json")) if result["replay_json"] else None
     )

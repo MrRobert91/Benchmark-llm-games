@@ -17,14 +17,20 @@ export interface ActionRecord {
   player_id: string;
   action: ActionName;
   pledge: ActionName;
-  kept_pledge: boolean;
+  /** `null` cuando la respuesta del modelo no se pudo leer: no se sabe si cumplió. */
+  kept_pledge: boolean | null;
+  /** `false` si la ronda no cuenta para la integridad por un fallo de parseo. */
+  scored?: boolean;
+  action_readable?: boolean;
+  pledge_readable?: boolean;
 }
 
 export interface StateRecord {
   player_id: string;
   progress: number;
   risk: number;
-  integrity: number;
+  integrity: number | null;
+  parse_failures?: number;
 }
 
 export interface RoundRecord {
@@ -44,7 +50,11 @@ export interface PlayerMetrics {
   payoff: number;
   pledges_made: number;
   pledges_kept: number;
-  integrity: number;
+  /** Rondas puntuables: el denominador real de `integrity`. */
+  pledges_scored?: number;
+  parse_failures?: number;
+  /** `null` cuando ninguna ronda fue legible. Desconocida, no perfecta. */
+  integrity: number | null;
   fast_rate: number;
   rounds_played: number;
 }
@@ -83,12 +93,18 @@ export interface Replay {
   players: PlayerMeta[];
   rounds: RoundRecord[];
   outcome: Outcome;
+  /** Respuestas que el parser no pudo interpretar, con el motivo de cada una. */
+  parse_incidents?: ParseIncident[];
   metrics: {
     moloch_index: number;
     total_welfare: number;
     collective_optimum: number;
     collective_floor: number;
-    mean_integrity: number;
+    mean_integrity: number | null;
+    /** Proporción de rondas legibles. Por debajo de 1, la partida está contaminada. */
+    integrity_confidence?: number;
+    parse_failures?: number;
+    contaminated?: boolean;
     critical_prize: number;
     players: PlayerMetrics[];
   };
@@ -101,6 +117,24 @@ export interface Replay {
     completion_tokens?: number;
   };
   contributor?: Contributor;
+}
+
+export interface ParseIncident {
+  round?: number;
+  player_id: string;
+  model: string;
+  phase: string;
+  field: string;
+  reason: string;
+  strategy: string;
+  repairs: string[];
+  finish_reason: string | null;
+  content_chars: number;
+  reasoning_tokens: number;
+  excerpt: string;
+  fallback_action: string | null;
+  served_model: string | null;
+  provider: string | null;
 }
 
 export interface Contributor {
@@ -130,11 +164,16 @@ export interface ModelRow {
   model: string;
   games: number;
   avg_payoff: number;
-  avg_integrity: number;
+  /** `null` si el modelo no tuvo ninguna ronda legible. */
+  avg_integrity: number | null;
   avg_fast_rate: number;
   avg_risk: number;
   pledges_made: number;
   pledges_kept: number;
+  pledges_scored?: number;
+  parse_failures?: number;
+  contaminated_games?: number;
+  parse_success_rate?: number;
 }
 
 export interface BackendRow {

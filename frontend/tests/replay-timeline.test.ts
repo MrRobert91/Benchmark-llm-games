@@ -38,7 +38,7 @@ test("all saved games preserve every recorded speech and decision in phase order
         assert.deepEqual(vote.states, states);
       }
       const decisions: Record<string, unknown> = {};
-      const verdicts: Record<string, boolean> = {};
+      const verdicts: Record<string, boolean | null> = {};
       for (const action of round.actions) {
         const beat = beats[cursor++];
         assert.equal(beat.kind, "action");

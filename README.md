@@ -224,7 +224,7 @@ públicas.
 ## Pruebas
 
 ```bash
-cd backend && python -m pytest tests/ -q     # 31 pruebas
+cd backend && python -m pytest tests/ -q     # 99 pruebas
 cd frontend && npx tsc --noEmit && npm run build
 ```
 
@@ -232,8 +232,27 @@ Las pruebas del motor cubren el determinismo por semilla, la contabilidad de pro
 riesgo contra las acciones registradas, la coherencia de los pagos con el desenlace, los
 límites del índice de Moloch y que la configuración por defecto sea de verdad un dilema
 social. Las del adaptador de OpenRouter cubren el parseo de respuestas envueltas en prosa o
-en vallas de código, la caída a un valor seguro cuando la respuesta es ilegible, y la guardia
-de presupuesto.
+en vallas de código, la escalera que recupera a los modelos que devuelven el contenido vacío
+por agotar el presupuesto de tokens razonando, que una respuesta ilegible **no** se cuente
+como promesa cumplida, y la guardia de presupuesto. El corpus de `tests/test_parsing.py` son
+respuestas literales capturadas de modelos reales, no ejemplos inventados.
+
+### Fiabilidad del parser e integridad
+
+Un modelo cuya respuesta no se puede leer **no puntúa**, ni bien ni mal: la ronda queda
+marcada (`scored: false`, `kept_pledge: null`), se suma a `parse_failures` y la partida se
+guarda como contaminada, con la lista `parse_incidents` que dice exactamente qué falló. Antes
+la acción ilegible caía en el compromiso público del propio agente, coincidían por
+construcción y la ronda entraba como promesa cumplida: los modelos que peor contestaban eran
+los que mejor puntuaban. Está contado en detalle, con las mediciones contra modelos reales,
+en [`docs/compatibilidad-modelos.md`](docs/compatibilidad-modelos.md).
+
+Para medir qué modelos del catálogo son utilizables antes de gastar una partida entera:
+
+```bash
+export OPENROUTER_API_KEY=...
+cd backend && python -m tools.probe_models --budget 2.00 --limit 20
+```
 
 ## Decisiones de diseño que conviene conocer
 

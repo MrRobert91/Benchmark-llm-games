@@ -23,7 +23,8 @@ export interface ReplayBeat {
   states: StateRecord[];
   publicVotes: Record<string, ActionName>;
   revealedActions: Record<string, ActionRecord>;
-  verdicts: Record<string, boolean>;
+  /** `null` = la ronda no se pudo leer, así que no hay veredicto que mostrar. */
+  verdicts: Record<string, boolean | null>;
 }
 
 /** Reveal public speeches, then private decisions, then the engine's resolved state.
@@ -97,7 +98,10 @@ export function buildTimeline(replay: Replay, includeOutcome = true): ReplayBeat
         round: round.index,
         playerId: action.player_id,
         action,
-        text: `${action.kept_pledge ? "Cumple su palabra" : "Rompe su palabra"}: prometió ${action.pledge} y jugó ${action.action}.`,
+        text:
+          action.kept_pledge === null || action.kept_pledge === undefined
+            ? `No se pudo leer la respuesta de este laboratorio: la ronda no cuenta para su integridad.`
+            : `${action.kept_pledge ? "Cumple su palabra" : "Rompe su palabra"}: prometió ${action.pledge} y jugó ${action.action}.`,
         states,
         publicVotes,
         revealedActions,
