@@ -131,3 +131,27 @@ test("participant all/any, no finisher, real-only and stable sorting", () => {
   );
   assert.equal(JSON.stringify(games), before);
 });
+
+test("benchmark versions stay separate and legacy-only numeric filters reject V1", () => {
+  const paper: GameSummary = {
+    ...games[0],
+    game_id: "paper-v1",
+    benchmark_version: "moloch-arena-v1-paper-2608.01193v1",
+    outcome_kind: "paper_terminal",
+    moloch_index: 0,
+    mean_integrity: 0,
+  };
+  const mixed = [paper, ...games];
+  assert.deepEqual(
+    filterGames(mixed, {
+      ...DEFAULT_FILTERS,
+      benchmarkVersion: "moloch-arena-v1-paper-2608.01193v1",
+    }).map((game) => game.game_id),
+    ["paper-v1"],
+  );
+  assert.ok(
+    !filterGames(mixed, { ...DEFAULT_FILTERS, minMoloch: "0" }).some(
+      (game) => game.game_id === "paper-v1",
+    ),
+  );
+});

@@ -15,6 +15,7 @@ const KIND_CLASS = {
   catastrophe: "tag-fast",
   restraint: "tag-safe",
   aligned_win: "tag-warn",
+  paper_terminal: "tag-warn",
 };
 
 export function GameArchive({ games }: { games: GameSummary[] }) {
@@ -112,6 +113,24 @@ export function GameArchive({ games }: { games: GameSummary[] }) {
           </select>
         </label>
         <label>
+          Versión del benchmark
+          <select
+            value={filters.benchmarkVersion}
+            onChange={(e) =>
+              update(
+                "benchmarkVersion",
+                e.target.value as GameFilters["benchmarkVersion"],
+              )
+            }
+          >
+            <option value="all">Todas, sin mezclar métricas</option>
+            <option value="moloch-arena-v1-paper-2608.01193v1">
+              Moloch Arena V1 · paper
+            </option>
+            <option value="legacy-moloch-v0">Legacy · consejo</option>
+          </select>
+        </label>
+        <label>
           Desenlace
           <select
             value={filters.outcome}
@@ -126,7 +145,7 @@ export function GameArchive({ games }: { games: GameSummary[] }) {
           </select>
         </label>
         <label>
-          Índice de Moloch mínimo
+          Índice de Moloch mínimo (solo legacy)
           <input
             type="number"
             step="0.01"
@@ -137,7 +156,7 @@ export function GameArchive({ games }: { games: GameSummary[] }) {
           />
         </label>
         <label>
-          Índice de Moloch máximo
+          Índice de Moloch máximo (solo legacy)
           <input
             type="number"
             step="0.01"
@@ -148,7 +167,7 @@ export function GameArchive({ games }: { games: GameSummary[] }) {
           />
         </label>
         <label>
-          Integridad mínima (%)
+          Integridad mínima (solo legacy, %)
           <input
             type="number"
             min="0"
@@ -256,9 +275,8 @@ export function GameArchive({ games }: { games: GameSummary[] }) {
         </div>
       </form>
       <p className="archive-explainer">
-        En una catástrofe, «primero en llegar» identifica al laboratorio que
-        cruzó la meta; todos pierden. Elige «Victoria alineada» para buscar solo
-        victorias.
+        V1 muestra UNSAFE y pago, mientras que legacy conserva Índice de Moloch e
+        integridad. Los filtros numéricos legacy excluyen automáticamente V1.
       </p>
       {results.length ? (
         <>
@@ -272,8 +290,8 @@ export function GameArchive({ games }: { games: GameSummary[] }) {
                   <th>Partida</th>
                   <th>Modelo ganador / primero</th>
                   <th>Modelos participantes</th>
-                  <th className="num">Moloch</th>
-                  <th className="num">Integridad</th>
+                  <th className="num">Métrica de conducta</th>
+                  <th className="num">Pago / integridad</th>
                   <th>
                     <span className="sr-only">Repetición</span>
                   </th>
@@ -296,6 +314,12 @@ export function GameArchive({ games }: { games: GameSummary[] }) {
                         {game.backend === "scripted"
                           ? "scriptados"
                           : "modelos reales"}
+                      </small>
+                      <small>
+                        {game.benchmark_version ===
+                        "moloch-arena-v1-paper-2608.01193v1"
+                          ? `V1 · riesgo ${Math.round((game.risk_treatment ?? 0) * 100)}%`
+                          : "Legacy · consejo"}
                       </small>
                       {game.contributor_nick && (
                         <small>
@@ -332,9 +356,21 @@ export function GameArchive({ games }: { games: GameSummary[] }) {
                         ))}
                       </div>
                     </td>
-                    <td className="num">{game.moloch_index.toFixed(3)}</td>
                     <td className="num">
-                      {formatIntegrity(game.mean_integrity)}
+                      {game.benchmark_version ===
+                      "moloch-arena-v1-paper-2608.01193v1"
+                        ? game.unsafe_rate == null
+                          ? "UNSAFE —"
+                          : `UNSAFE ${Math.round(game.unsafe_rate * 100)}%`
+                        : `Moloch ${game.moloch_index.toFixed(3)}`}
+                    </td>
+                    <td className="num">
+                      {game.benchmark_version ===
+                      "moloch-arena-v1-paper-2608.01193v1"
+                        ? game.mean_payoff == null
+                          ? "Pago —"
+                          : `Pago ${game.mean_payoff.toFixed(2)}`
+                        : formatIntegrity(game.mean_integrity)}
                     </td>
                     <td>
                       <Link

@@ -7,11 +7,11 @@ export default function RunPage() {
     <>
       <section className="run-hero">
         <p className="eyebrow">Experimento abierto · Bring your own key</p>
-        <h1>Lleva modelos a la mesa.</h1>
+        <h1>Ejecuta Moloch Arena V1.</h1>
         <p className="lede">
-          Selecciona entre tres y cinco modelos de OpenRouter, fija cuánto pueden gastar y
-          observa en directo cómo prometen, deciden y revelan sus jugadas. El resultado queda
-          guardado como replay público y entra en el benchmark.
+          Selecciona entre dos y cinco modelos de OpenRouter, un tratamiento de riesgo y una
+          semilla. Las elecciones SAFE/UNSAFE son selladas y se revelan simultáneamente. La
+          clave es efímera y cada decisión queda trazada para poder repetir la carrera.
         </p>
       </section>
       <RunExperimentForm />

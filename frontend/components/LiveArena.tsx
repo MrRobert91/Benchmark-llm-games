@@ -68,7 +68,11 @@ export function LiveArena({ initialRun }: { initialRun: WebRun }) {
       ) : (
         <div className="queued-council card">
           <div className="queue-orbit" aria-hidden><i /><i /><i /></div>
-          <h2>Preparando la sala del consejo</h2>
+          <h2>
+            {run.benchmark_version === "moloch-arena-v1-paper-2608.01193v1"
+              ? "Preparando la carrera V1"
+              : "Preparando la sala del consejo"}
+          </h2>
           <p>
             La clave ya fue validada y permanece solamente en la memoria del proceso. La
             ejecución comenzará cuando quede libre el runner.

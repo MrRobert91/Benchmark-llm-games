@@ -297,3 +297,131 @@ def test_public_budget_error_explains_how_to_continue():
     message = runs._public_error(runs.BudgetExceeded("presupuesto agotado: 0.50 / 0.50 USD"))
     assert "presupuesto máximo" in message
     assert "modelos más económicos" in message
+
+
+def test_api_defaults_to_paper_v1_and_accepts_two_players(tmp_path, monkeypatch):
+    database = tmp_path / "paper-api.db"
+    captured = {}
+
+    class DummyQueue:
+        max_waiting = 8
+        database_path = database
+
+        def start(self):
+            pass
+
+        def submit(self, **kwargs):
+            captured.update(kwargs)
+            return "paper-run"
+
+    monkeypatch.setattr(api, "DB_PATH", database)
+    monkeypatch.setattr(api, "RUN_QUEUE", DummyQueue())
+    monkeypatch.setattr(api, "validate_key", lambda _key: {"limit_remaining": 2.0})
+    monkeypatch.setattr(api, "list_text_models", lambda: [{"id": "vendor/cheap"}])
+    with TestClient(api.app) as client:
+        versions = client.get("/api/benchmark-versions")
+        assert versions.status_code == 200
+        response = client.post(
+            "/api/runs",
+            json={
+                "api_key": "test-openrouter-key-shape",
+                "nick": "Ada",
+                "models": ["vendor/cheap", "vendor/cheap"],
+                "budget_usd": 0.5,
+                "risk_treatment": 0.9,
+                "seed": 123,
+            },
+        )
+    assert response.status_code == 202
+    assert captured["benchmark_version"] == "moloch-arena-v1-paper-2608.01193v1"
+    assert captured["risk_treatment"] == 0.9
+    assert captured["seed"] == 123
+
+
+def test_experiment_plan_is_persisted_and_idempotent(tmp_path, monkeypatch):
+    monkeypatch.setattr(api, "DB_PATH", tmp_path / "experiment-api.db")
+    with TestClient(api.app) as client:
+        request = {
+            "models": ["vendor/cheap"],
+            "preset": "smoke-cheap-2p",
+            "master_seed": 7,
+        }
+        first = client.post("/api/experiments/plan", json=request)
+        second = client.post("/api/experiments/plan", json=request)
+        assert first.status_code == 200
+        assert second.status_code == 200
+        assert first.json()["manifest_hash"] == second.json()["manifest_hash"]
+        loaded = client.get(f"/api/experiments/{first.json()['experiment_id']}")
+    assert loaded.status_code == 200
+    assert len(loaded.json()["cells"]) == 3
+
+
+def test_web_batch_submission_is_idempotent_for_active_cells(tmp_path):
+    from moloch.benchmark.manifest import build_manifest
+
+    database = tmp_path / "batch-idempotency.db"
+    run_queue = runs.RunQueue(database)
+    run_queue._started = True  # Keep the unit test from starting the network worker.
+    manifest = build_manifest(
+        models=["vendor/cheap"],
+        preset="smoke-cheap-2p",
+        master_seed=17,
+        created_at="fixed",
+    ).to_dict()
+    first = run_queue.submit_manifest(
+        api_key="ephemeral-secret",
+        nick="Ada",
+        url=None,
+        manifest=manifest,
+        budget=0.5,
+    )
+    second = run_queue.submit_manifest(
+        api_key="ephemeral-secret",
+        nick="Ada",
+        url=None,
+        manifest=manifest,
+        budget=0.5,
+    )
+    assert len(first) == 3
+    assert second == []
+    conn = db.connect(database)
+    assert conn.execute("SELECT COUNT(*) FROM web_runs").fetchone()[0] == 3
+    assert {cell["status"] for cell in db.get_experiment(conn, manifest["experiment_id"])["cells"]} == {"queued"}
+    conn.close()
+
+
+def test_experiment_api_queues_small_batch_with_one_shared_budget(tmp_path, monkeypatch):
+    database = tmp_path / "execute-experiment.db"
+    captured = {}
+
+    class DummyQueue:
+        max_waiting = 8
+        database_path = database
+
+        def start(self):
+            pass
+
+        def submit_manifest(self, **kwargs):
+            captured.update(kwargs)
+            return ["run-a", "run-b", "run-c"]
+
+    monkeypatch.setattr(api, "DB_PATH", database)
+    monkeypatch.setattr(api, "RUN_QUEUE", DummyQueue())
+    monkeypatch.setattr(api, "validate_key", lambda _key: {"limit_remaining": 2.0})
+    monkeypatch.setattr(api, "list_text_models", lambda: [{"id": "vendor/cheap"}])
+    with TestClient(api.app) as client:
+        response = client.post(
+            "/api/experiments",
+            json={
+                "api_key": "test-openrouter-key-shape",
+                "nick": "Ada",
+                "models": ["vendor/cheap"],
+                "preset": "smoke-cheap-2p",
+                "master_seed": 9,
+                "budget_usd": 0.5,
+            },
+        )
+    assert response.status_code == 202
+    assert response.json()["game_ids"] == ["run-a", "run-b", "run-c"]
+    assert len(captured["manifest"]["cells"]) == 3
+    assert captured["budget"] == 0.5

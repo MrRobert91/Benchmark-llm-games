@@ -730,6 +730,7 @@ export function createCouncil(
     const paintBallot = (current: ReplayBeat) => {
       const vote = current.publicVotes[player.player_id];
       const action = current.revealedActions[player.player_id]?.action;
+      const ballot = vote ?? action;
       const verdict = current.verdicts[player.player_id];
       const key = `${vote}|${action}|${verdict}|${current.round}`;
       if (key === screenKey) return;
@@ -738,18 +739,18 @@ export function createCouncil(
       c.fillStyle = "#091322";
       c.fillRect(0, 0, 768, 384);
       c.strokeStyle =
-        vote === "FAST" ? "#ff9c53" : vote === "SAFE" ? "#67e9b2" : "#62738b";
+        ballot === "FAST" || ballot === "UNSAFE" ? "#ff9c53" : ballot === "SAFE" ? "#67e9b2" : "#62738b";
       c.lineWidth = 8;
       c.strokeRect(5, 5, 758, 374);
       c.textAlign = "center";
       c.textBaseline = "middle";
       c.fillStyle = "#bdcadc";
       c.font = "600 32px sans-serif";
-      c.fillText(`${player.label} · VOTO PÚBLICO`, 384, 54, 710);
+      c.fillText(`${player.label} · ${vote ? "VOTO PÚBLICO" : "DECISIÓN SELLADA"}`, 384, 54, 710);
       c.fillStyle =
-        vote === "FAST" ? "#ff9c53" : vote === "SAFE" ? "#67e9b2" : "#b9c4d4";
-      c.font = `800 ${vote ? 128 : 72}px sans-serif`;
-      c.fillText(vote ?? "PENDIENTE", 384, 169, 700);
+        ballot === "FAST" || ballot === "UNSAFE" ? "#ff9c53" : ballot === "SAFE" ? "#67e9b2" : "#b9c4d4";
+      c.font = `800 ${ballot ? 128 : 72}px sans-serif`;
+      c.fillText(ballot ?? "PENDIENTE", 384, 169, 700);
       c.fillStyle = "#e8edf4";
       c.font = "600 35px sans-serif";
       c.fillText(

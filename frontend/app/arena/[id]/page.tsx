@@ -24,12 +24,17 @@ export default async function ArenaPage({
           <div className="game-head">
             <div>
               <h1 style={{ fontSize: 28, marginBottom: 8, marginTop: 12 }}>
-                El consejo de los laboratorios
+                {run.benchmark_version === "moloch-arena-v1-paper-2608.01193v1"
+                  ? "Moloch Arena V1 · carrera del paper"
+                  : "El consejo de los laboratorios"}
               </h1>
               <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                 <span className="tag">{run.models.length} laboratorios</span>
                 <span className="tag">OpenRouter · ejecución web</span>
                 <span className="tag">semilla {run.seed}</span>
+                {run.risk_treatment !== null && run.risk_treatment !== undefined && (
+                  <span className="tag">riesgo {Math.round(run.risk_treatment * 100)}%</span>
+                )}
                 <span className="tag">
                   aportación de{" "}
                   {run.contributor.url ? (
@@ -50,6 +55,7 @@ export default async function ArenaPage({
   if (!replay) notFound();
 
   const scripted = replay.backend === "scripted";
+  const isPaper = replay.benchmark_version === "moloch-arena-v1-paper-2608.01193v1";
 
   return (
     <>
@@ -60,7 +66,7 @@ export default async function ArenaPage({
         <div className="game-head">
           <div>
             <h1 style={{ fontSize: 28, marginBottom: 8, marginTop: 12 }}>
-              El consejo de los laboratorios
+              {isPaper ? "Moloch Arena V1 · carrera del paper" : "El consejo de los laboratorios"}
             </h1>
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
               <span className="tag">{replay.players.length} laboratorios</span>
@@ -69,12 +75,15 @@ export default async function ArenaPage({
               <span className="tag">
                 {scripted ? "agentes guionizados" : `modelos reales · ${replay.backend}`}
               </span>
+              {isPaper && replay.risk_treatment !== undefined && (
+                <span className="tag">riesgo {Math.round(replay.risk_treatment * 100)}%</span>
+              )}
             </div>
           </div>
         </div>
       </section>
 
-      {scripted && (
+      {scripted && !isPaper && (
         <p className="note" style={{ marginBottom: 22 }}>
           Esta partida la jugaron los agentes guionizados de referencia: las cuatro
           estrategias del modelo evolutivo reducido de <em>Falling Behind</em>. No son

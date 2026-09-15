@@ -1,4 +1,7 @@
-export type ActionName = "SAFE" | "FAST";
+export type ActionName = "SAFE" | "FAST" | "UNSAFE";
+export type BenchmarkVersion =
+  | "legacy-moloch-v0"
+  | "moloch-arena-v1-paper-2608.01193v1";
 
 export interface PlayerMeta {
   player_id: string;
@@ -16,7 +19,8 @@ export interface SpeechRecord {
 export interface ActionRecord {
   player_id: string;
   action: ActionName;
-  pledge: ActionName;
+  pledge?: ActionName;
+  stage_payoff?: number;
   /** `null` cuando la respuesta del modelo no se pudo leer: no se sabe si cumplió. */
   kept_pledge: boolean | null;
   /** `false` si la ronda no cuenta para la integridad por un fallo de parseo. */
@@ -31,6 +35,8 @@ export interface StateRecord {
   risk: number;
   integrity: number | null;
   parse_failures?: number;
+  stage_payoff?: number;
+  unsafe_count?: number;
 }
 
 export interface RoundRecord {
@@ -56,32 +62,61 @@ export interface PlayerMetrics {
   /** `null` cuando ninguna ronda fue legible. Desconocida, no perfecta. */
   integrity: number | null;
   fast_rate: number;
+  unsafe_rate?: number;
+  unsafe_count?: number;
+  stage_payoff?: number;
+  prize_share?: number;
+  payoff_before_setback?: number;
+  setback?: boolean;
   rounds_played: number;
 }
 
 export interface GameRules {
-  goal: number;
-  max_rounds: number;
-  uncertain_from_round: number;
+  benchmark_version?: BenchmarkVersion;
+  paper_version?: string;
+  goal?: number;
+  max_rounds?: number;
+  uncertain_from_round?: number;
   stop_probability: number;
   progress_safe: number;
-  progress_fast: number;
-  risk_fast: number;
-  risk_step: number;
-  payoff_win: number;
-  payoff_lose: number;
-  payoff_stalemate: number;
-  payoff_catastrophe: number;
+  progress_fast?: number;
+  progress_unsafe?: number;
+  risk_fast?: number;
+  risk_step?: number;
+  payoff_win?: number;
+  payoff_lose?: number;
+  payoff_stalemate?: number;
+  payoff_catastrophe?: number;
+  minimum_rounds?: number;
+  terminal_prize?: number;
+  risk_treatments?: number[];
+  actions?: ActionName[];
+  horizon_distribution?: string;
 }
 
 export interface Outcome {
-  kind: "aligned_win" | "catastrophe" | "restraint";
+  kind: "aligned_win" | "catastrophe" | "restraint" | "paper_terminal";
   winner_id: string | null;
   winner_label: string | null;
   final_round: number;
   disaster_probability?: number;
   roll?: number;
   headline: string;
+  leader_ids?: string[];
+  leader_labels?: string[];
+  prize?: number;
+  prize_share?: number;
+  terminal_results?: Array<{
+    player_id: string;
+    is_leader: boolean;
+    stage_payoff: number;
+    prize_share: number;
+    risk_probability: number;
+    setback_roll: number | null;
+    setback: boolean;
+    payoff_before_setback: number;
+    payoff: number;
+  }>;
 }
 
 export interface Replay {
@@ -89,6 +124,13 @@ export interface Replay {
   created_at: string;
   seed: number;
   backend: string;
+  benchmark_version?: BenchmarkVersion;
+  protocol_version?: string;
+  spec_hash?: string;
+  protocol_hash?: string;
+  risk_treatment?: number;
+  realized_horizon?: number;
+  admission_status?: string;
   rules: GameRules;
   players: PlayerMeta[];
   rounds: RoundRecord[];
@@ -106,6 +148,10 @@ export interface Replay {
     parse_failures?: number;
     contaminated?: boolean;
     critical_prize: number;
+    unsafe_rate?: number;
+    mean_payoff?: number;
+    admission_status?: string;
+    parse_success_rate?: number;
     players: PlayerMetrics[];
   };
   budget?: {
@@ -158,6 +204,13 @@ export interface GameSummary {
   winner_model?: string | null;
   contributor_nick?: string | null;
   contributor_url?: string | null;
+  benchmark_version?: BenchmarkVersion;
+  protocol_version?: string;
+  admission_status?: string;
+  risk_treatment?: number | null;
+  experiment_id?: string | null;
+  unsafe_rate?: number | null;
+  mean_payoff?: number | null;
 }
 
 export interface ModelRow {
@@ -218,11 +271,50 @@ export interface ModelCatalog {
     default_budget_usd: number;
     max_budget_usd: number;
     queue_size: number;
-    max_rounds: number;
+    max_rounds: number | null;
+    expected_rounds?: number;
+    calls_per_player_expected?: number;
     calls_per_player_max: number;
     estimated_input_tokens_per_call: number;
     estimated_output_tokens_per_call: number;
   };
+  default_benchmark_version?: BenchmarkVersion;
+  benchmark_versions?: BenchmarkDefinition[];
+  presets?: BenchmarkPreset[];
+}
+
+export interface BenchmarkDefinition {
+  benchmark_version: BenchmarkVersion;
+  protocol_version: string;
+  title: string;
+  status: string;
+  parity: Record<string, string>;
+  min_players: number;
+  max_players: number;
+  actions: ActionName[];
+  spec_hash: string;
+  protocol_hash: string;
+}
+
+export interface BenchmarkPreset {
+  id: string;
+  description: string;
+  risks: number[];
+  repetitions: number;
+  players: number | null;
+  evidence: string;
+}
+
+export interface PaperModelRow {
+  model: string;
+  risk_treatment: number;
+  protocol_version: string;
+  games: number;
+  admitted_trajectories: number;
+  avg_payoff: number | null;
+  avg_unsafe_rate: number | null;
+  parse_failures: number;
+  contaminated_games: number;
 }
 
 export interface WebRun {
@@ -241,6 +333,9 @@ export interface WebRun {
   completion_tokens: number;
   error_message: string | null;
   replay: Replay | null;
+  benchmark_version?: BenchmarkVersion;
+  protocol_version?: string;
+  risk_treatment?: number | null;
 }
 
 /** Identidad de cada laboratorio.
@@ -267,6 +362,7 @@ export const OUTCOME_LABEL: Record<Outcome["kind"], string> = {
   aligned_win: "Victoria alineada",
   catastrophe: "Catástrofe",
   restraint: "Contención",
+  paper_terminal: "Final del horizonte",
 };
 
 /** Nombre corto y legible del modelo, para etiquetas y ejes. */

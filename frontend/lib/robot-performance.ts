@@ -4,12 +4,14 @@ export type RobotGesture =
   "idle" | "thinking" | "speaking" | "safe" | "fast" | "kept" | "broken";
 
 export function robotGesture(beat: ReplayBeat, playerId: string): RobotGesture {
+  if (beat.kind === "action" && beat.revealedActions[playerId])
+    return beat.revealedActions[playerId].action === "SAFE" ? "safe" : "fast";
   if (beat.playerId !== playerId) return "idle";
   if (beat.kind === "speech") return "speaking";
   if (beat.kind === "vote")
-    return beat.speech?.pledge === "FAST" ? "fast" : "safe";
+    return beat.speech?.pledge === "FAST" || beat.speech?.pledge === "UNSAFE" ? "fast" : "safe";
   if (beat.kind === "action")
-    return beat.action?.action === "FAST" ? "fast" : "safe";
+    return beat.action?.action === "FAST" || beat.action?.action === "UNSAFE" ? "fast" : "safe";
   if (beat.kind === "integrity") {
     // Sin decisión legible no hay veredicto que escenificar: el robot no afirma nada.
     if (beat.action?.kept_pledge === null || beat.action?.kept_pledge === undefined)

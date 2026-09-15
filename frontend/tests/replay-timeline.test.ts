@@ -116,3 +116,34 @@ test("live updates retain the previous score until the next round resolves", () 
   replay.rounds[1] = next;
   assert.deepEqual(buildTimeline(replay, false).at(-1)!.states, next.state_after);
 });
+
+test("paper V1 reveals all sealed actions simultaneously without speeches or integrity beats", () => {
+  const legacy = structuredClone(games[0]);
+  const replay: Replay = {
+    ...legacy,
+    benchmark_version: "moloch-arena-v1-paper-2608.01193v1",
+    protocol_version: "published-reconstruction-v1",
+    risk_treatment: 0.6,
+    rounds: [
+      {
+        index: 1,
+        meeting: [],
+        actions: [
+          { player_id: "p0", action: "SAFE", stage_payoff: 0.6, kept_pledge: null },
+          { player_id: "p1", action: "UNSAFE", stage_payoff: 2.4, kept_pledge: null },
+        ],
+        state_after: [
+          { player_id: "p0", progress: 1, risk: 0, integrity: null, stage_payoff: 0.6 },
+          { player_id: "p1", progress: 1.5, risk: 0.6, integrity: null, stage_payoff: 2.4 },
+        ],
+        events: ["resolved"],
+      },
+    ],
+    outcome: { ...legacy.outcome, kind: "paper_terminal", final_round: 1 },
+  };
+  const beats = buildTimeline(replay);
+  assert.deepEqual(beats.map((beat) => beat.kind), ["intro", "action", "resolution", "outcome"]);
+  assert.deepEqual(Object.keys(beats[1].revealedActions), ["p0", "p1"]);
+  assert.deepEqual(beats[1].states, beats[0].states);
+  assert.deepEqual(beats[2].states, replay.rounds[0].state_after);
+});

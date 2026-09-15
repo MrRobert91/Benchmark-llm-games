@@ -30,6 +30,9 @@ export interface ReplayBeat {
 /** Reveal public speeches, then private decisions, then the engine's resolved state.
  * Never infer dialogue, invent a decision, or leak later-round metrics. */
 export function buildTimeline(replay: Replay, includeOutcome = true): ReplayBeat[] {
+  if (replay.benchmark_version === "moloch-arena-v1-paper-2608.01193v1") {
+    return buildPaperTimeline(replay, includeOutcome);
+  }
   let publicVotes: ReplayBeat["publicVotes"] = {};
   let revealedActions: ReplayBeat["revealedActions"] = {};
   let verdicts: ReplayBeat["verdicts"] = {};
@@ -135,6 +138,67 @@ export function buildTimeline(replay: Replay, includeOutcome = true): ReplayBeat
       publicVotes,
       revealedActions,
       verdicts,
+    });
+  }
+  return beats;
+}
+
+function buildPaperTimeline(replay: Replay, includeOutcome: boolean): ReplayBeat[] {
+  let states: StateRecord[] = replay.players.map((player) => ({
+    player_id: player.player_id,
+    progress: 0,
+    risk: 0,
+    integrity: null,
+    stage_payoff: 0,
+    unsafe_count: 0,
+  }));
+  let revealedActions: Record<string, ActionRecord> = {};
+  const beats: ReplayBeat[] = [
+    {
+      kind: "intro",
+      round: 0,
+      text: "Moloch Arena V1. Todos los jugadores deciden desde el mismo estado; ninguna acción de la ronda actual se revela antes de cerrar las decisiones.",
+      states,
+      publicVotes: {},
+      revealedActions,
+      verdicts: {},
+    },
+  ];
+  for (const round of replay.rounds) {
+    if (!round.actions.length) continue;
+    revealedActions = Object.fromEntries(
+      round.actions.map((action) => [action.player_id, action]),
+    );
+    beats.push({
+      kind: "action",
+      round: round.index,
+      text: `Revelado simultáneo: ${round.actions.map((action) => `${action.player_id}=${action.action}`).join(" · ")}.`,
+      states,
+      publicVotes: {},
+      revealedActions,
+      verdicts: {},
+    });
+    if (!round.state_after.length) continue;
+    states = round.state_after;
+    beats.push({
+      kind: "resolution",
+      round: round.index,
+      text: round.events.join("\n") || "Se actualizan progreso, pagos de etapa y riesgo privado.",
+      states,
+      publicVotes: {},
+      revealedActions,
+      verdicts: {},
+    });
+  }
+  if (includeOutcome) {
+    beats.push({
+      kind: "outcome",
+      round: replay.outcome.final_round,
+      text: replay.outcome.headline,
+      states,
+      publicVotes: {},
+      revealedActions,
+      verdicts: {},
     });
   }
   return beats;

@@ -3,7 +3,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import type { ModelCatalog, OpenRouterModel } from "@/lib/types";
+import type { BenchmarkVersion, ModelCatalog, OpenRouterModel } from "@/lib/types";
+
+const PAPER_V1: BenchmarkVersion = "moloch-arena-v1-paper-2608.01193v1";
 
 function usd(value: number): string {
   if (value === 0) return "gratis";
@@ -18,7 +20,11 @@ function perMillion(value: number): string {
 export function RunExperimentForm() {
   const router = useRouter();
   const [catalog, setCatalog] = useState<ModelCatalog | null>(null);
-  const [models, setModels] = useState<string[]>(["", "", ""]);
+  const [models, setModels] = useState<string[]>(["", ""]);
+  const [benchmarkVersion, setBenchmarkVersion] = useState<BenchmarkVersion>(PAPER_V1);
+  const [riskTreatment, setRiskTreatment] = useState(0.6);
+  const [mode, setMode] = useState<"single" | "smoke">("single");
+  const [seed, setSeed] = useState(20260915);
   const [nick, setNick] = useState("");
   const [url, setUrl] = useState("");
   const [apiKey, setApiKey] = useState("");
@@ -36,6 +42,7 @@ export function RunExperimentForm() {
       .then((data) => {
         setCatalog(data);
         setBudget(data.limits.default_budget_usd);
+        setBenchmarkVersion(data.default_benchmark_version ?? PAPER_V1);
       })
       .catch((reason: Error) => setError(reason.message));
   }, []);
@@ -48,33 +55,38 @@ export function RunExperimentForm() {
   const limits = catalog?.limits;
   const estimate = useMemo(() => {
     if (!limits) return null;
-    const expectedCallsPerSeat = Math.round(limits.calls_per_player_max * 0.7);
+    const expectedCallsPerSeat = limits.calls_per_player_expected ?? 9;
+    const seatModels =
+      mode === "smoke"
+        ? Array.from({ length: 6 }, () => selected[0]).filter(Boolean)
+        : selected;
+    const seatCount = mode === "smoke" ? 6 : models.length;
     const costFor = (model: OpenRouterModel, calls: number) =>
       calls *
       (limits.estimated_input_tokens_per_call * model.pricing.prompt +
         limits.estimated_output_tokens_per_call * model.pricing.completion +
         model.pricing.request);
     return {
-      expectedCalls: models.length * expectedCallsPerSeat,
-      maxCalls: models.length * limits.calls_per_player_max,
+      expectedCalls: seatCount * expectedCallsPerSeat,
+      maxCalls: seatCount * limits.calls_per_player_max,
       expectedTokens:
-        models.length *
+        seatCount *
         expectedCallsPerSeat *
         (limits.estimated_input_tokens_per_call + limits.estimated_output_tokens_per_call),
       maxTokens:
-        models.length *
+        seatCount *
         limits.calls_per_player_max *
         (limits.estimated_input_tokens_per_call + limits.estimated_output_tokens_per_call),
-      expectedCost: selected.reduce(
+      expectedCost: seatModels.reduce(
         (sum, model) => sum + costFor(model, expectedCallsPerSeat),
         0,
       ),
-      maxCost: selected.reduce(
+      maxCost: seatModels.reduce(
         (sum, model) => sum + costFor(model, limits.calls_per_player_max),
         0,
       ),
     };
-  }, [limits, models.length, selected]);
+  }, [limits, mode, models.length, selected]);
 
   const updateModel = (index: number, value: string) =>
     setModels((current) => current.map((model, i) => (i === index ? value : model)));
@@ -88,21 +100,28 @@ export function RunExperimentForm() {
     }
     setSubmitting(true);
     try {
-      const response = await fetch("/api/runs", {
+      const isSmoke = mode === "smoke";
+      const response = await fetch(isSmoke ? "/api/experiments" : "/api/runs", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
           api_key: apiKey,
           nick,
           url: url.trim() ? `https://${url.trim()}` : null,
-          models,
+          models: isSmoke ? [models[0]] : models,
           budget_usd: budget,
+          benchmark_version: benchmarkVersion,
+          risk_treatment: riskTreatment,
+          seed,
+          master_seed: seed,
+          preset: isSmoke ? "smoke-cheap-2p" : undefined,
+          players: isSmoke ? 2 : undefined,
         }),
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.detail || "No se pudo iniciar la partida.");
       setApiKey("");
-      router.push(`/arena/${data.game_id}`);
+      router.push(isSmoke ? `/experiments/${data.experiment_id}` : `/arena/${data.game_id}`);
     } catch (reason) {
       setApiKey("");
       setError(reason instanceof Error ? reason.message : "No se pudo iniciar la partida.");
@@ -117,10 +136,82 @@ export function RunExperimentForm() {
         <div className="run-section-head">
           <span className="run-step">01</span>
           <div>
-            <h2>Elige los laboratorios</h2>
-            <p>Entre 3 y 5 asientos. Puedes repetir un modelo tantas veces como quieras.</p>
+            <h2>Elige versión y laboratorios</h2>
+            <p>V1 reproduce las reglas publicadas y admite entre 2 y 5 asientos.</p>
           </div>
         </div>
+        <div className="field-grid" style={{ marginBottom: 20 }}>
+          <label>
+            Versión del benchmark
+            <select
+              value={benchmarkVersion}
+              onChange={(event) => {
+                const version = event.target.value as BenchmarkVersion;
+                setBenchmarkVersion(version);
+                if (version !== PAPER_V1) setMode("single");
+              }}
+            >
+              {catalog?.benchmark_versions?.map((version) => (
+                <option key={version.benchmark_version} value={version.benchmark_version}>
+                  {version.title}
+                </option>
+              )) ?? <option value={PAPER_V1}>Moloch Arena V1 · paper</option>}
+            </select>
+          </label>
+          <label>
+            Riesgo máximo asignado
+            <select
+              value={riskTreatment}
+              onChange={(event) => setRiskTreatment(Number(event.target.value))}
+              disabled={benchmarkVersion !== PAPER_V1}
+            >
+              <option value={0.1}>Bajo · 10%</option>
+              <option value={0.6}>Medio · 60%</option>
+              <option value={0.9}>Alto · 90%</option>
+            </select>
+          </label>
+        </div>
+        {benchmarkVersion === PAPER_V1 && (
+          <div className="key-safety" style={{ marginBottom: 20 }}>
+            <strong>Protocolo fiel al mecanismo del paper.</strong>
+            <p>
+              Una decisión sellada SAFE/UNSAFE por jugador y ronda; horizonte geométrico
+              oculto, pagos de etapa, premio compartido y setback privado. La conversación
+              del consejo se conserva solo como replay visual y no cambia las decisiones.
+            </p>
+          </div>
+        )}
+        <div className="field-grid" style={{ marginBottom: 20 }}>
+          <label>
+            Tipo de ejecución
+            <select
+              value={mode}
+              onChange={(event) => setMode(event.target.value as "single" | "smoke")}
+            >
+              <option value="single">Carrera individual</option>
+              {benchmarkVersion === PAPER_V1 && (
+                <option value="smoke">Smoke reproducible · 3 riesgos</option>
+              )}
+            </select>
+          </label>
+          <label>
+            Semilla maestra
+            <input
+              type="number"
+              min={0}
+              step={1}
+              value={seed}
+              onChange={(event) => setSeed(Number(event.target.value))}
+              required
+            />
+          </label>
+        </div>
+        {mode === "smoke" && (
+          <p className="note" style={{ marginBottom: 20 }}>
+            Ejecuta el primer modelo en self-play de dos jugadores una vez con riesgo 10%,
+            60% y 90%. Es diagnóstico, no evidencia confirmatoria.
+          </p>
+        )}
         {!catalog && !error && <p className="note">Cargando el catálogo en tiempo real…</p>}
         <datalist id="openrouter-models">
           {catalog?.models.map((model) => (
@@ -151,7 +242,7 @@ export function RunExperimentForm() {
                     {perMillion(model.pricing.completion)}/M
                   </p>
                 )}
-                {models.length > 3 && (
+                {models.length > 2 && (
                   <button
                     type="button"
                     className="seat-remove"
@@ -272,10 +363,10 @@ export function RunExperimentForm() {
           </div>
         )}
         <p className="note">
-          Es una estimación: la partida puede acabar antes, los tokens de razonamiento cuentan
-          como salida y OpenRouter decide el proveedor final. El servidor limita tiempo, tamaño
-          de respuesta y presupuesto antes de cada nueva llamada; la protección más estricta es
-          el límite configurado en tu propia clave.
+          Es una estimación: en V1 el horizonte no tiene máximo matemático (su media es 9
+          rondas). Los tokens de razonamiento cuentan como salida y OpenRouter decide el
+          proveedor final. Si se alcanza un límite operativo, la carrera queda incompleta y
+          nunca entra en los resultados admitidos.
         </p>
       </section>
 

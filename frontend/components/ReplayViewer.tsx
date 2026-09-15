@@ -16,7 +16,7 @@ import { pledgeVerdict } from "@/lib/integrity";
 const Arena3D = dynamic(() => import("./Arena3D").then((m) => m.Arena3D), {
   ssr: false,
   loading: () => (
-    <div className="council-loading">Preparando la sala del consejo…</div>
+    <div className="council-loading">Preparando la arena 3D…</div>
   ),
 });
 const PHASE = {
@@ -33,6 +33,15 @@ export function ReplayViewer({ replay, live = false, completed = false, thinking
   const playerRef = useRef<HTMLDivElement>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
   const beats = useMemo(() => buildTimeline(replay, !live), [replay, live]);
+  const isPaper = replay.benchmark_version === "moloch-arena-v1-paper-2608.01193v1";
+  const phaseLabel = (kind: keyof typeof PHASE) =>
+    isPaper && kind === "intro"
+      ? "Inicio de la carrera"
+      : isPaper && kind === "action"
+        ? "Revelado simultáneo"
+        : isPaper && kind === "outcome"
+          ? "Resultado terminal"
+          : PHASE[kind];
   const [step, setStep] = useState(completed ? beats.length - 1 : 0);
   const [playing, setPlaying] = useState(false);
   const [overview, setOverview] = useState(false);
@@ -112,7 +121,14 @@ export function ReplayViewer({ replay, live = false, completed = false, thinking
             <p className="eyebrow">Partida finalizada</p>
             <h2>{OUTCOME_LABEL[replay.outcome.kind]}</h2>
             <p>{replay.outcome.headline}</p>
-            <p>Ronda final: {replay.outcome.final_round} · {replay.outcome.kind === "aligned_win" ? `Ganador: ${replay.outcome.winner_label}` : "Sin ganador"}</p>
+            <p>
+              Ronda final: {replay.outcome.final_round} ·{" "}
+              {isPaper
+                ? `Líderes: ${replay.outcome.leader_labels?.join(", ") ?? "sin datos"}`
+                : replay.outcome.kind === "aligned_win"
+                  ? `Ganador: ${replay.outcome.winner_label}`
+                  : "Sin ganador"}
+            </p>
             <button className="btn" onClick={() => seek(0)}>Reiniciar visualización</button>{" "}
             <a className="btn btn-primary" href="/run">Preparar nueva partida</a>
           </section>
@@ -135,7 +151,7 @@ export function ReplayViewer({ replay, live = false, completed = false, thinking
           <div className="council-topline">
             <div>
               <span className="council-live-dot" /> {live ? "EN DIRECTO" : "MOLOCH"}{" "}
-              <span className="council-subtitle">/ THE COUNCIL</span>
+              <span className="council-subtitle">/ {isPaper ? "PAPER V1" : "THE COUNCIL"}</span>
             </div>
             <span>
               {beat.round
@@ -152,11 +168,11 @@ export function ReplayViewer({ replay, live = false, completed = false, thinking
           </button>}
           {!live && beat.kind === "intro" && (
             <div className="council-intro">
-              <span>EL PRECIO DE AVANZAR</span>
+              <span>{isPaper ? "BENCHMARK DEL PAPER" : "EL PRECIO DE AVANZAR"}</span>
               <h2>
-                Una mesa.
+                {isPaper ? "Decisiones selladas." : "Una mesa."}
                 <br />
-                Ninguna salida fácil.
+                {isPaper ? "Un horizonte incierto." : "Ninguna salida fácil."}
               </h2>
               <p>{replay.players.length} laboratorios. Un futuro en juego.</p>
             </div>
@@ -184,13 +200,15 @@ export function ReplayViewer({ replay, live = false, completed = false, thinking
               {player ? String(seat + 1).padStart(2, "0") : "M"}
             </span>
             <div>
-              <span className="dialogue-phase">{PHASE[beat.kind]}</span>
+              <span className="dialogue-phase">{phaseLabel(beat.kind)}</span>
               <h3>
                 {player
                   ? player.label
                   : resolved
                     ? OUTCOME_LABEL[replay.outcome.kind]
-                    : "El consejo"}
+                    : isPaper
+                      ? "La carrera"
+                      : "El consejo"}
               </h3>
               {player && (
                 <span className="dialogue-model">
@@ -206,7 +224,17 @@ export function ReplayViewer({ replay, live = false, completed = false, thinking
             key={currentStep}
           >
             <p className="dialogue-text">
-              {live && beat.kind === "intro" ? "El consejo está reunido. Esperando las primeras respuestas de los modelos." : live && beat.kind === "resolution" ? "Balance actualizado. Esperando la siguiente intervención." : beat.kind === "speech" ? `“${beat.text}”` : beat.text}
+              {live && beat.kind === "intro"
+                ? isPaper
+                  ? "La carrera está preparada. Esperando las primeras decisiones selladas."
+                  : "El consejo está reunido. Esperando las primeras respuestas de los modelos."
+                : live && beat.kind === "resolution"
+                  ? isPaper
+                    ? "Balance actualizado. Esperando la siguiente ronda."
+                    : "Balance actualizado. Esperando la siguiente intervención."
+                  : beat.kind === "speech"
+                    ? `“${beat.text}”`
+                    : beat.text}
             </p>
             <div className="dialogue-tags">
               {player && (
@@ -250,7 +278,9 @@ export function ReplayViewer({ replay, live = false, completed = false, thinking
               {resolved && (
                 <>
                   <span className="tag">
-                    Índice de Moloch {replay.metrics.moloch_index.toFixed(3)}
+                    {isPaper
+                      ? `UNSAFE ${Math.round((replay.metrics.unsafe_rate ?? 0) * 100)}%`
+                      : `Índice de Moloch ${replay.metrics.moloch_index.toFixed(3)}`}
                   </span>
                   <span className="tag">
                     Bienestar {replay.metrics.total_welfare.toFixed(0)}
@@ -269,7 +299,7 @@ export function ReplayViewer({ replay, live = false, completed = false, thinking
           {!live && <button
             className="dialogue-next"
             aria-label={
-              resolved ? "Volver al inicio" : "Siguiente intervención"
+              resolved ? "Volver al inicio" : isPaper ? "Siguiente paso" : "Siguiente intervención"
             }
             onClick={() => seek(resolved ? 0 : step + 1)}
           >
@@ -283,7 +313,7 @@ export function ReplayViewer({ replay, live = false, completed = false, thinking
           </button>
           <button
             className="btn"
-            aria-label="Intervención anterior"
+            aria-label={isPaper ? "Paso anterior" : "Intervención anterior"}
             disabled={step === 0}
             onClick={() => seek(step - 1)}
           >
@@ -291,7 +321,7 @@ export function ReplayViewer({ replay, live = false, completed = false, thinking
           </button>
           <button
             className="btn"
-            aria-label="Intervención siguiente"
+            aria-label={isPaper ? "Paso siguiente" : "Intervención siguiente"}
             disabled={resolved || step >= beats.length - 1}
             onClick={() => seek(step + 1)}
           >
@@ -349,12 +379,12 @@ export function ReplayViewer({ replay, live = false, completed = false, thinking
                 </span>
                 <strong>
                   {state?.progress ?? 0}
-                  <small> / {replay.rules.goal}</small>
+                  <small>{isPaper ? " progreso" : ` / ${replay.rules.goal}`}</small>
                 </strong>
                 <span className="balance-model">{p.model}</span>
                 <span className="balance-public-vote">
-                  Voto público:{" "}
-                  <b>{beat.publicVotes[p.player_id] ?? "Pendiente"}</b>
+                  {isPaper ? "Decisión sellada:" : "Voto público:"}{" "}
+                  {!isPaper && <b>{beat.publicVotes[p.player_id] ?? "Pendiente"}</b>}
                   {beat.revealedActions[p.player_id] && (
                     <>
                       {" "}
@@ -371,7 +401,14 @@ export function ReplayViewer({ replay, live = false, completed = false, thinking
                 <div className="meter">
                   <span
                     style={{
-                      width: `${Math.min(100, ((state?.progress ?? 0) / replay.rules.goal) * 100)}%`,
+                      width: `${Math.min(
+                        100,
+                        ((state?.progress ?? 0) /
+                          (isPaper
+                            ? (replay.realized_horizon ?? replay.outcome.final_round) * 1.5
+                            : replay.rules.goal ?? 1)) *
+                          100,
+                      )}%`,
                       background: labColor(i),
                     }}
                   />
@@ -379,11 +416,19 @@ export function ReplayViewer({ replay, live = false, completed = false, thinking
                 <small>
                   Riesgo{" "}
                   {Math.round(
-                    Math.min(1, (state?.risk ?? 0) * replay.rules.risk_step) *
+                    Math.min(
+                      1,
+                      isPaper
+                        ? state?.risk ?? 0
+                        : (state?.risk ?? 0) * (replay.rules.risk_step ?? 0),
+                    ) *
                       100,
                   )}
                   %
                 </small>
+                {isPaper && (
+                  <small>Pago de etapa {state?.stage_payoff?.toFixed(2) ?? "0.00"}</small>
+                )}
                 {result && <strong>Pago {result.payoff.toFixed(0)}</strong>}
               </div>
             );
@@ -391,12 +436,12 @@ export function ReplayViewer({ replay, live = false, completed = false, thinking
         </div>
       </div>
       <details className="council-history">
-        <summary>Acta de la sesión · {currentStep} pasos {live ? "recibidos" : "reproducidos"}</summary>
+        <summary>{isPaper ? "Traza de la carrera" : "Acta de la sesión"} · {currentStep} pasos {live ? "recibidos" : "reproducidos"}</summary>
         <div>
           {beats.slice(1, currentStep + 1).map((b, i) => (
             <button key={i} disabled={live} onClick={() => seek(i + 1)}>
               <span>
-                R{b.round} · {PHASE[b.kind]}{" "}
+                R{b.round} · {phaseLabel(b.kind)}{" "}
                 {replay.players.find((p) => p.player_id === b.playerId)?.label}
               </span>
               <p>{b.text}</p>
@@ -405,10 +450,9 @@ export function ReplayViewer({ replay, live = false, completed = false, thinking
         </div>
       </details>
       <details className="council-references">
-        <summary>Dirección artística · referencias del consejo</summary>
+        <summary>Dirección artística · referencias de la arena</summary>
         <p>
-          Reparto y sala de referencia. Cada personaje de la reunión está
-          modelado en 3D.
+          Reparto y escenario de referencia. Cada participante está modelado en 3D.
         </p>
         <div>
           <img
