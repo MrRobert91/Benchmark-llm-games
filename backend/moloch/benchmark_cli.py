@@ -280,9 +280,9 @@ th:first-child,td:first-child{{text-align:left}}code{{overflow-wrap:anywhere}}</
 <b>Contrato:</b> <code>{escape(report['protocol_hash'])}</code><br>
 <b>Datos:</b> <code>{escape(report['data_hash'])}</code></p>
 <p>{report['races_total']} carreras; {report['races_excluded']} excluidas por contaminación.</p>
-<p>{report['execution']['final_decisions']} decisiones finales; 
-{report['execution']['provider_attempts']} intentos de proveedor trazados 
-({report['execution']['successful_provider_calls']} con respuesta válida); 
+<p>{report['execution']['final_decisions']} decisiones finales;
+{report['execution']['provider_attempts']} intentos de proveedor trazados
+({report['execution']['successful_provider_calls']} con respuesta válida);
 coste {report['execution']['spent_usd']:.9f} USD.</p>
 <table><thead><tr><th>Modelo</th><th>Riesgo</th><th>Trayectorias</th><th>Decisiones</th>
 <th>UNSAFE</th><th>Pago medio</th></tr></thead><tbody>{rows}</tbody></table>
