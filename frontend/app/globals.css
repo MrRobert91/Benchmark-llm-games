@@ -600,6 +600,19 @@ code {
 .council-history button { display: block; width: 100%; text-align: left; background: transparent; border: 0; border-bottom: 1px solid var(--line); padding: 15px 0; cursor: pointer; }
 .council-history button > span { color: #d8bd8c; font: 10px var(--mono); }
 .council-history p { font-size: 13px; margin: 8px 0 0; }
+.live-turn-log { margin-top: 20px; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: #090e16; }
+.live-turn-log header { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 17px 20px; border-bottom: 1px solid var(--line); }
+.live-turn-log header h3,.live-turn-log header p { margin: 0; }
+.live-turn-log header > span { color: #a9b3c5; font: 11px var(--mono); white-space: nowrap; }
+.live-turn-log ol { list-style: none; margin: 0; padding: 0; max-height: 520px; overflow: auto; }
+.live-turn-log li { display: grid; grid-template-columns: 38px 1fr; gap: 12px; padding: 14px 20px; border-bottom: 1px solid var(--line); }
+.live-turn-log li:last-child { border-bottom: 0; }
+.live-turn-log li > span { color: #778399; font: 10px/1.8 var(--mono); }
+.live-turn-log li strong { color: #d8bd8c; font: 10px var(--mono); text-transform: uppercase; letter-spacing: .07em; }
+.live-turn-log li p { margin: 6px 0 0; color: #cbd3df; font-size: 13px; line-height: 1.65; overflow-wrap: anywhere; }
+.live-turn-log li[data-event="thinking"] { border-left: 2px solid #3987e5; }
+.live-turn-log li[data-event="round_resolved"] { border-left: 2px solid var(--safe); background: #12201955; }
+.live-turn-log li[data-event="failed"] { border-left: 2px solid var(--fast); }
 .council-references p { font-size: 12px; margin: 16px 0; }
 .council-references img { width: 100%; border-radius: 8px; display: block; margin-top: 10px; }
 @media(max-width:700px) {

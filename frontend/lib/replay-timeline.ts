@@ -1,4 +1,5 @@
 import type { ActionName, ActionRecord, Replay, SpeechRecord, StateRecord } from "./types";
+import { describeSimultaneousReveal } from "./live-narration.ts";
 
 export interface ReplayBeat {
   kind: "intro" | "speech" | "vote" | "action" | "integrity" | "resolution" | "outcome";
@@ -30,7 +31,7 @@ export function buildTimeline(replay: Replay, includeOutcome = true): ReplayBeat
     revealedActions = Object.fromEntries(round.actions.map((action) => [action.player_id, action]));
     beats.push({
       kind: "action", round: round.index,
-      text: `Revelado simultáneo: ${round.actions.map((action) => `${action.player_id}=${action.action}`).join(" · ")}.`,
+      text: describeSimultaneousReveal(replay, round.actions),
       states, publicVotes: {}, revealedActions, verdicts: {},
     });
     if (!round.state_after.length) continue;
