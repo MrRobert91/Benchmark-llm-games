@@ -14,9 +14,9 @@ export default async function Home() {
       <section style={{ marginTop: 68 }}>
         <p className="eyebrow">Benchmark multiagente de alineamiento</p>
         <h1>
-          Nadie quiere el desastre.
+          Nadie quiere quedarse atrás.
           <br />
-          Todos corren hacia él.
+          La velocidad compite con la seguridad.
         </h1>
         <p className="lede">
           Moloch Arena V1 reproduce la carrera idealizada de arXiv:2608.01193v1. Dos o más
@@ -25,9 +25,9 @@ export default async function Home() {
           a quienes terminan liderando.
         </p>
         <p className="lede" style={{ marginTop: 14 }}>
-          La versión del paper está separada del juego legacy con consejo y promesas. Cada
-          carrera guarda la versión, protocolo, semillas, decisiones, pagos, ruta del modelo
-          y estado de admisión para poder repetir y comparar los resultados.
+          Cada carrera guarda versión, protocolo, semillas, decisiones, pagos, proveedor
+          servido y estado de admisión. Así se puede reproducir una partida y promediar solo
+          ejecuciones metodológicamente comparables.
         </p>
         <div style={{ display: "flex", gap: 10, marginTop: 26, flexWrap: "wrap" }}>
           <Link href="/run" className="btn btn-primary">
@@ -47,11 +47,9 @@ export default async function Home() {
       <section>
         <div className="grid grid-3">
           <div className="card metric">
-            <span className="metric-label">Partidas jugadas</span>
+            <span className="metric-label">Carreras V1 guardadas</span>
             <span className="metric-value">{stats.total}</span>
-            <p className="metric-note">
-              {stats.paperTotal} V1 del paper y {stats.legacyTotal} legacy, siempre separadas.
-            </p>
+            <p className="metric-note">{stats.trajectories} trayectorias de {stats.models} modelos.</p>
           </div>
           <div className="card metric">
             <span className="metric-label">Tasa UNSAFE V1</span>
@@ -59,7 +57,7 @@ export default async function Home() {
               {Math.round(stats.paperAvgUnsafe * 100)}%
             </span>
             <p className="metric-note">
-              Media diagnóstica de las carreras V1 admitidas; no mezcla datos legacy.
+              Media de las decisiones pertenecientes a carreras admitidas.
             </p>
           </div>
           <div className="card metric">
@@ -68,8 +66,8 @@ export default async function Home() {
               {stats.paperAdmitted}/{stats.paperTotal}
             </span>
             <p className="metric-note">
-              Pago medio observado: {stats.paperMeanPayoff.toFixed(2)}. Las contaminadas se
-              conservan, pero no cuentan.
+              Pago medio observado: {stats.paperMeanPayoff.toFixed(2)}. {stats.contaminated}
+              contaminadas se conservan para auditoría, pero no cuentan.
             </p>
           </div>
         </div>
@@ -184,8 +182,8 @@ export default async function Home() {
           </div>
         </div>
         <p className="note" style={{ marginTop: 18 }}>
-          Las métricas legacy de integridad e Índice de Moloch siguen accesibles en su propia
-          versión, pero no se mezclan con los resultados V1 del paper.
+          El leaderboard se recalcula desde SQLite y agrupa por modelo, protocolo, riesgo y
+          número de jugadores; también muestra la ruta de proveedor realmente utilizada.
         </p>
       </section>
 
@@ -204,11 +202,11 @@ export default async function Home() {
             </p>
           </div>
           <div className="card">
-            <h3>No convierte UNSAFE en una catástrofe colectiva</h3>
+            <h3>El setback es privado</h3>
             <p style={{ fontSize: 13.5, margin: 0 }}>
               El premio está fijado en 100 y solo los líderes se someten al sorteo de
-              setback. Un rival que queda detrás conserva sus pagos de etapa: no se ha
-              trasladado aquí la catástrofe global del juego legacy.
+              setback. Un rival que queda detrás conserva sus pagos de etapa, exactamente
+              como define el mecanismo de referencia.
             </p>
           </div>
           <div className="card">
@@ -250,18 +248,13 @@ export default async function Home() {
                 Partida destacada
               </p>
               <h3 style={{ fontSize: 19, marginBottom: 6 }}>
-                {featured.outcome_kind === "catastrophe"
-                  ? "Alguien llegó primero y se lo llevó todo por delante"
-                  : featured.winner_label
-                    ? `${featured.winner_label} ganó la carrera`
-                    : "Contención colectiva"}
+                {featured.winner_label
+                  ? `${featured.winner_label} terminó liderando`
+                  : "Empate al final del horizonte"}
               </h3>
               <p style={{ margin: 0, fontSize: 13.5 }}>
                 {featured.n_players} laboratorios · {featured.final_round} rondas ·{" "}
-                {featured.benchmark_version ===
-                "moloch-arena-v1-paper-2608.01193v1"
-                  ? `riesgo ${Math.round((featured.risk_treatment ?? 0) * 100)}%`
-                  : `índice de Moloch ${featured.moloch_index.toFixed(3)}`}
+                riesgo {Math.round((featured.risk_treatment ?? 0) * 100)}%
               </p>
             </div>
             <Link href={`/arena/${featured.game_id}`} className="btn btn-primary">

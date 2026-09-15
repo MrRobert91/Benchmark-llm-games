@@ -211,9 +211,9 @@ def leaderboard() -> dict:
     conn = _conn()
     try:
         return {
-            "models": db.leaderboard(conn, openrouter_only=True),
+            "summary": db.paper_summary(conn),
             "paper_models": db.paper_leaderboard(conn),
-            "backends": db.moloch_by_backend(conn),
+            "paper_backends": db.paper_backend_leaderboard(conn),
             "contributors": db.list_contributions(conn),
         }
     finally:

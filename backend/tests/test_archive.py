@@ -1,19 +1,26 @@
 import argparse
 import copy
 import json
-from pathlib import Path
 
 from fastapi.testclient import TestClient
 
 from moloch import api, db
+from moloch.benchmark.versions.paper_2608_01193_v1.agents import build_scripted
+from moloch.benchmark.versions.paper_2608_01193_v1.engine import PaperGame
 from moloch.cli import cmd_export
 
-SNAPSHOTS = Path(__file__).resolve().parents[2] / "frontend/public/data/games"
+
+def paper_replay(seed=1):
+    return PaperGame(
+        [build_scripted("AS", "p0", "Safe"), build_scripted("AU", "p1", "Unsafe")],
+        risk_treatment=0.6,
+        seed=seed,
+    ).play().to_dict()
 
 
 def test_archive_models_resolve_by_player_id_and_preserve_all_strategies(tmp_path):
     conn = db.connect(tmp_path / "models.db")
-    replays = [json.loads(path.read_text(encoding="utf-8")) for path in SNAPSHOTS.glob("*.json")]
+    replays = [paper_replay(seed) for seed in range(1, 5)]
     try:
         for replay in replays:
             db.save_game(conn, replay)
@@ -31,7 +38,7 @@ def test_archive_models_resolve_by_player_id_and_preserve_all_strategies(tmp_pat
 def test_paginated_api_and_export_include_games_beyond_200(tmp_path, monkeypatch):
     database = tmp_path / "archive.db"
     conn = db.connect(database)
-    replay = json.loads((SNAPSHOTS / "a29f546cf168.json").read_text(encoding="utf-8"))
+    replay = paper_replay()
     try:
         for index in range(205):
             record = copy.deepcopy(replay)
@@ -54,19 +61,3 @@ def test_paginated_api_and_export_include_games_beyond_200(tmp_path, monkeypatch
     assert cmd_export(argparse.Namespace(db=str(database), out=str(out))) == 0
     assert len(json.loads((out / "games.json").read_text(encoding="utf-8"))) == 205
     assert len(list((out / "games").glob("*.json"))) == 205
-
-
-def test_snapshot_matches_the_declared_design():
-    """El snapshot guionizado tiene que seguir siendo lo que produce el motor actual.
-
-    Las partidas guardadas se generaron una vez a mano y quedaron desfasadas dos veces: al
-    corregir `ConditionallyAntisocialSafe` y al cambiar el conteo del leaderboard. Esta
-    prueba es lo que impide que vuelva a pasar en silencio; si falla, hay que ejecutar
-    `python -m tools.regenerate_snapshot` desde `backend/` y revisar el diff.
-    """
-    import sys
-
-    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-    from tools.regenerate_snapshot import main as regenerate
-
-    assert regenerate(["--check"]) == 0

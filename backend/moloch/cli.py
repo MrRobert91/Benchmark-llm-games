@@ -134,9 +134,9 @@ def cmd_export(args: argparse.Namespace) -> int:
     (out / "leaderboard.json").write_text(
         json.dumps(
             {
-                "models": db.leaderboard(conn),
+                "summary": db.paper_summary(conn),
                 "paper_models": db.paper_leaderboard(conn),
-                "backends": db.moloch_by_backend(conn),
+                "paper_backends": db.paper_backend_leaderboard(conn),
                 "contributors": db.list_contributions(conn),
             },
             ensure_ascii=False,

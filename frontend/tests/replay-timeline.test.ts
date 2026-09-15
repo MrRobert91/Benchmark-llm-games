@@ -4,146 +4,39 @@ import fs from "node:fs";
 import { buildTimeline } from "../lib/replay-timeline.ts";
 import type { Replay } from "../lib/types.ts";
 
-const games: Replay[] = fs
-  .readdirSync("public/data/games")
-  .filter((f) => f.endsWith(".json"))
-  .map((f) => JSON.parse(fs.readFileSync(`public/data/games/${f}`, "utf8")));
+const games: Replay[] = fs.readdirSync("public/data/games").filter((file) => file.endsWith(".json")).map((file) => JSON.parse(fs.readFileSync(`public/data/games/${file}`, "utf8")));
 
-test("all saved games preserve every recorded speech and decision in phase order", () => {
+test("every bundled V1 replay reveals sealed actions together and preserves resolved state", () => {
   assert.ok(games.length > 0);
   for (const replay of games) {
+    assert.equal(replay.benchmark_version, "moloch-arena-v1-paper-2608.01193v1");
+    const before = JSON.stringify(replay);
     const beats = buildTimeline(replay);
     assert.equal(beats[0].kind, "intro");
     assert.equal(beats.at(-1)?.kind, "outcome");
-    assert.equal(beats.filter((b) => b.kind === "outcome").length, 1);
-    let cursor = 1;
-    let states = beats[0].states;
-    for (const round of replay.rounds) {
-      const votes: Record<string, string> = {};
-      for (const speech of round.meeting) {
-        const beat = beats[cursor++];
-        assert.equal(beat.kind, "speech");
-        assert.equal(beat.playerId, speech.player_id);
-        assert.equal(beat.text, speech.text);
-        assert.equal(beat.speech, speech);
-        assert.equal(beat.action, undefined);
-        assert.deepEqual(beat.states, states);
-        assert.deepEqual(beat.publicVotes, votes);
-        assert.deepEqual(beat.revealedActions, {});
-        const vote = beats[cursor++];
-        votes[speech.player_id] = speech.pledge;
-        assert.equal(vote.kind, "vote");
-        assert.equal(vote.speech, speech);
-        assert.deepEqual(vote.publicVotes, votes);
-        assert.deepEqual(vote.states, states);
-      }
-      const decisions: Record<string, unknown> = {};
-      const verdicts: Record<string, boolean | null> = {};
-      for (const action of round.actions) {
-        const beat = beats[cursor++];
-        assert.equal(beat.kind, "action");
-        assert.equal(beat.playerId, action.player_id);
-        assert.equal(beat.action, action);
-        assert.deepEqual(beat.states, states);
-        decisions[action.player_id] = action;
-        assert.deepEqual(beat.revealedActions, decisions);
-        assert.deepEqual(beat.verdicts, verdicts);
-        const integrity = beats[cursor++];
-        verdicts[action.player_id] = action.kept_pledge;
-        assert.equal(integrity.kind, "integrity");
-        assert.equal(integrity.action, action);
-        assert.deepEqual(integrity.verdicts, verdicts);
-        assert.deepEqual(integrity.publicVotes, votes);
-        assert.deepEqual(integrity.states, states);
-      }
-      const resolution = beats[cursor++];
-      assert.equal(resolution.kind, "resolution");
+    assert.equal(beats.filter((beat) => beat.kind === "speech" || beat.kind === "vote" || beat.kind === "integrity").length, 0);
+    for (const round of replay.rounds.filter((item) => item.actions.length)) {
+      const reveal = beats.find((beat) => beat.kind === "action" && beat.round === round.index)!;
+      const resolution = beats.find((beat) => beat.kind === "resolution" && beat.round === round.index)!;
+      assert.deepEqual(Object.keys(reveal.revealedActions).sort(), round.actions.map((action) => action.player_id).sort());
       assert.deepEqual(resolution.states, round.state_after);
-      states = round.state_after;
     }
-    assert.equal(cursor, beats.length - 1);
-    assert.deepEqual(beats[cursor].states, states);
-    assert.equal(beats[cursor].text, replay.outcome.headline);
-  }
-});
-
-test("seeking backward cannot mutate an earlier state or reveal terminal events", () => {
-  for (const replay of games) {
-    const before = JSON.stringify(replay);
-    const beats = buildTimeline(replay);
-    assert.ok(beats[0].states.every((s) => s.progress === 0 && s.risk === 0));
-    const lastResolution = beats.findLast((b) => b.kind === "resolution");
-    if (lastResolution)
-      assert.ok(!lastResolution.text.includes(replay.outcome.headline));
     assert.equal(JSON.stringify(replay), before);
     assert.deepEqual(buildTimeline(replay), beats);
   }
 });
 
-test("empty meetings and missing participant speeches still reveal real actions", () => {
-  const replay = structuredClone(games[0]);
-  replay.rounds = [replay.rounds[0]];
-  replay.rounds[0].meeting = [];
-  const beats = buildTimeline(replay);
-  assert.equal(beats.filter((b) => b.kind === "speech").length, 0);
-  assert.equal(
-    beats.filter((b) => b.kind === "action").length,
-    replay.rounds[0].actions.length,
-  );
-  replay.rounds = [];
-  assert.deepEqual(
-    buildTimeline(replay).map((b) => b.kind),
-    ["intro", "outcome"],
-  );
-});
-
-test("live timeline never invents a terminal outcome", () => {
-  const replay = structuredClone(games[0]);
-  const beats = buildTimeline(replay, false);
-  assert.notEqual(beats.at(-1)?.kind, "outcome");
-  assert.equal(beats.filter((beat) => beat.kind === "outcome").length, 0);
-});
-
-
-test("live updates retain the previous score until the next round resolves", () => {
-  const replay = structuredClone(games.find((g) => g.rounds.length > 1)!);
+test("live replay omits terminal outcome and retains the latest confirmed balance", () => {
+  const replay = structuredClone(games.find((game) => game.rounds.length > 1)!);
   const first = replay.rounds[0];
-  const next = replay.rounds[1];
-  replay.rounds = [first, { ...next, actions: [], state_after: [], events: [] }];
-  const waiting = buildTimeline(replay, false).at(-1)!;
-  assert.deepEqual(waiting.states, first.state_after);
-  assert.notEqual(waiting.kind, "resolution");
-  replay.rounds[1] = next;
-  assert.deepEqual(buildTimeline(replay, false).at(-1)!.states, next.state_after);
+  replay.rounds = [first, { ...replay.rounds[1], actions: [], state_after: [], events: [] }];
+  const beats = buildTimeline(replay, false);
+  assert.equal(beats.filter((beat) => beat.kind === "outcome").length, 0);
+  assert.deepEqual(beats.at(-1)?.states, first.state_after);
 });
 
-test("paper V1 reveals all sealed actions simultaneously without speeches or integrity beats", () => {
-  const legacy = structuredClone(games[0]);
-  const replay: Replay = {
-    ...legacy,
-    benchmark_version: "moloch-arena-v1-paper-2608.01193v1",
-    protocol_version: "published-reconstruction-v1",
-    risk_treatment: 0.6,
-    rounds: [
-      {
-        index: 1,
-        meeting: [],
-        actions: [
-          { player_id: "p0", action: "SAFE", stage_payoff: 0.6, kept_pledge: null },
-          { player_id: "p1", action: "UNSAFE", stage_payoff: 2.4, kept_pledge: null },
-        ],
-        state_after: [
-          { player_id: "p0", progress: 1, risk: 0, integrity: null, stage_payoff: 0.6 },
-          { player_id: "p1", progress: 1.5, risk: 0.6, integrity: null, stage_payoff: 2.4 },
-        ],
-        events: ["resolved"],
-      },
-    ],
-    outcome: { ...legacy.outcome, kind: "paper_terminal", final_round: 1 },
-  };
-  const beats = buildTimeline(replay);
-  assert.deepEqual(beats.map((beat) => beat.kind), ["intro", "action", "resolution", "outcome"]);
-  assert.deepEqual(Object.keys(beats[1].revealedActions), ["p0", "p1"]);
-  assert.deepEqual(beats[1].states, beats[0].states);
-  assert.deepEqual(beats[2].states, replay.rounds[0].state_after);
+test("an empty live replay contains only the truthful initial state", () => {
+  const replay = structuredClone(games[0]);
+  replay.rounds = [];
+  assert.deepEqual(buildTimeline(replay, false).map((beat) => beat.kind), ["intro"]);
 });

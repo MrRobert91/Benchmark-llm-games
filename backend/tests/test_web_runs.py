@@ -1,5 +1,4 @@
 import json
-from pathlib import Path
 
 from fastapi.testclient import TestClient
 
@@ -7,15 +6,8 @@ from moloch import api, db, runs
 from moloch.agents.openrouter import OpenRouterError
 from moloch.agents.base import Speech
 from moloch.rules import Action
-
-SNAPSHOT = (
-    Path(__file__).resolve().parents[2]
-    / "frontend"
-    / "public"
-    / "data"
-    / "games"
-    / "a29f546cf168.json"
-)
+from moloch.benchmark.versions.paper_2608_01193_v1.agents import build_scripted
+from moloch.benchmark.versions.paper_2608_01193_v1.engine import PaperGame
 
 
 def test_web_run_keeps_private_analysis_out_of_public_payload(tmp_path):
@@ -45,18 +37,18 @@ def test_web_run_keeps_private_analysis_out_of_public_payload(tmp_path):
     conn.close()
 
 
-def test_openrouter_leaderboard_excludes_scripted_and_keeps_each_contribution(tmp_path):
+def test_v1_contributions_expose_benchmark_metrics(tmp_path):
     conn = db.connect(tmp_path / "leaderboard.db")
-    scripted = json.loads(SNAPSHOT.read_text(encoding="utf-8"))
-    scripted["game_id"] = "scripted-one"
-    scripted["backend"] = "scripted"
-    web = json.loads(SNAPSHOT.read_text(encoding="utf-8"))
+    web = PaperGame(
+        [build_scripted("AS", "p0", "Safe"), build_scripted("AU", "p1", "Unsafe")],
+        risk_treatment=0.6,
+        seed=44,
+    ).play().to_dict()
     web["game_id"] = "web-one"
-    web["backend"] = "openrouter-web"
-    db.save_game(conn, scripted)
+    web["backend"] = "openrouter-web-paper-v1"
     db.save_game(conn, web, contributor={"nick": "Ada", "url": "https://example.com"})
-    board = db.leaderboard(conn, openrouter_only=True)
-    assert sum(row["games"] for row in board) == len(web["players"])
+    board = db.paper_leaderboard(conn)
+    assert sum(row["admitted_trajectories"] for row in board) == len(web["players"])
     contributions = db.list_contributions(conn)
     assert contributions == [
         {
@@ -66,8 +58,10 @@ def test_openrouter_leaderboard_excludes_scripted_and_keeps_each_contribution(tm
             "url": "https://example.com",
             "n_players": len(web["players"]),
             "outcome_kind": web["outcome"]["kind"],
-            "moloch_index": web["metrics"]["moloch_index"],
-            "mean_integrity": web["metrics"]["mean_integrity"],
+            "risk_treatment": 0.6,
+            "admission_status": "admitted",
+            "unsafe_rate": web["metrics"]["unsafe_rate"],
+            "mean_payoff": web["metrics"]["mean_payoff"],
         }
     ]
     conn.close()

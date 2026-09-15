@@ -11,9 +11,8 @@ export default async function ArenaListPage() {
         <p className="eyebrow">Archivo completo</p>
         <h1 style={{ fontSize: 34 }}>Partidas</h1>
         <p className="lede">
-          Explora y vuelve a ver todas las partidas guardadas. Busca por
-          modelos, compara sus decisiones y descubre cuándo cayó el grupo en la
-          trampa de Moloch.
+          Explora las carreras V1 guardadas, filtra por modelo, riesgo o admisión y reproduce
+          en 3D cada decisión SAFE/UNSAFE, pago de etapa, liderazgo y setback.
         </p>
       </section>
       <GameArchive games={games} />

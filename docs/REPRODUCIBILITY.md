@@ -120,7 +120,7 @@ actions. It does not contain:
 - the realised hidden horizon;
 - another player's private risk draw or accumulated UNSAFE count;
 - any same-round choice;
-- legacy meeting text or promises.
+- any generated dialogue or out-of-band message.
 
 Calls are made sequentially for transport, but all prompts are built from the same immutable
 pre-action snapshot. Actions are revealed only after every response is recorded.
@@ -129,7 +129,6 @@ pre-action snapshot. Actions are revealed only after every response is recorded.
 
 Raw replays remain append-only. Normalized `race_decisions`, `terminal_results`,
 `provider_calls`, `experiments` and `experiment_cells` allow independent reconstruction.
-Legacy rows are tagged `legacy-moloch-v0` without rewriting their replay JSON.
 
 A race is admitted only when every action is readable under the frozen parser. A fallback,
 missing field, incomplete run, budget stop or provider error excludes the whole race. Excluded
@@ -146,8 +145,8 @@ npm run build
 
 For a V1 replay verify that each round shows one simultaneous reveal, decimal progress,
 stage payoff and private risk. The final screen must show all leaders, equal prize shares,
-each leader's independent setback and each final payoff. The leaderboard must keep V1 rows
-separate from legacy integrity and Moloch-index rows.
+each leader's independent setback and each final payoff. The leaderboard must aggregate only
+identical protocol/risk/player-count cells and report the provider route separately.
 
 ## Known unavailable reproductions
 
