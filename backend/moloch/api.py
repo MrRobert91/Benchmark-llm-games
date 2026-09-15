@@ -469,7 +469,7 @@ async def run_events(game_id: str) -> StreamingResponse:
                 return
             if events or seq == 0:
                 seq = events[-1]["seq"] if events else seq
-                payload = {"seq": seq, "run": run}
+                payload = {"seq": seq, "events": events, "run": run}
                 yield f"event: run\ndata: {json.dumps(payload, ensure_ascii=False)}\n\n"
                 idle = 0
             else:
