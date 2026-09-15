@@ -335,7 +335,7 @@ impostor; el impostor gana si sobrevive hasta el final.
 
 **El nivel humano.** Una de cada X partidas, el impostor es **una persona real**. Esta es la
 puerta de entrada del público: cualquiera puede intentar colarse entre cinco agentes, y la
-tasa de supervivencia humana es una línea base gratis para el benchmark.
+tasa de supervivencia humana es una línea base gratis para el benchmark. Test de Turing inverso.
 
 ### El giro
 
