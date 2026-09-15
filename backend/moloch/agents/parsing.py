@@ -81,7 +81,18 @@ SPEECH_KEYS = (
 )
 
 _SAFE_WORDS = ("safe", "seguro", "segura", "prudente", "cauto", "lento")
-_FAST_WORDS = ("fast", "rapido", "rápida", "rápido", "rapida", "agresivo", "acelerar")
+_FAST_WORDS = (
+    "unsafe",
+    "inseguro",
+    "insegura",
+    "fast",
+    "rapido",
+    "rápida",
+    "rápido",
+    "rapida",
+    "agresivo",
+    "acelerar",
+)
 
 _THINK_BLOCK = re.compile(
     r"<\s*(think|thinking|reasoning|scratchpad|analysis)\s*>.*?<\s*/\s*\1\s*>",
@@ -463,7 +474,7 @@ def _classify(value: Any) -> FieldOutcome:
 
     if text in ("safe", "seguro"):
         return FieldOutcome(ok=True, value=Action.SAFE, raw_value=_short(value))
-    if text in ("fast", "rapido"):
+    if text in ("unsafe", "inseguro", "insegura", "fast", "rapido"):
         return FieldOutcome(ok=True, value=Action.FAST, raw_value=_short(value))
 
     has_safe = any(re.search(rf"\b{word}\b", text) for word in _safe_tokens())

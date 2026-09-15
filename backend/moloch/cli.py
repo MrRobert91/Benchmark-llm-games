@@ -135,7 +135,9 @@ def cmd_export(args: argparse.Namespace) -> int:
         json.dumps(
             {
                 "models": db.leaderboard(conn),
+                "paper_models": db.paper_leaderboard(conn),
                 "backends": db.moloch_by_backend(conn),
+                "contributors": db.list_contributions(conn),
             },
             ensure_ascii=False,
             indent=2,
@@ -158,8 +160,15 @@ def cmd_export(args: argparse.Namespace) -> int:
 def cmd_list(args: argparse.Namespace) -> int:
     conn = db.connect(args.db)
     for g in db.list_games(conn, limit=args.limit):
-        print(f"{g['game_id']}  {g['created_at']}  {g['backend']:<10} "
-              f"IM={g['moloch_index']:.3f}  {g['outcome_kind']}")
+        metric = (
+            f"UNSAFE={(g.get('unsafe_rate') or 0.0):.3f}"
+            if g.get("benchmark_version") == "moloch-arena-v1-paper-2608.01193v1"
+            else f"IM={g['moloch_index']:.3f}"
+        )
+        print(
+            f"{g['game_id']}  {g['created_at']}  {g['backend']:<18} "
+            f"{metric}  {g['outcome_kind']}"
+        )
     conn.close()
     return 0
 
@@ -185,6 +194,54 @@ def main(argv: list[str] | None = None) -> int:
     lst = sub.add_parser("list", help="listar partidas")
     lst.add_argument("--limit", type=int, default=20)
     lst.set_defaults(func=cmd_list)
+
+    benchmark = sub.add_parser("benchmark", help="Moloch Arena V1 fiel al paper")
+    benchmark_sub = benchmark.add_subparsers(dest="benchmark_cmd", required=True)
+
+    def add_manifest_args(command):
+        command.add_argument("--manifest", help="manifiesto JSON ya congelado")
+        command.add_argument("--models", nargs="+", default=["AS"], help="modelos o estrategias")
+        command.add_argument("--preset", default="paper-2p-neutral")
+        command.add_argument("--seed", type=int, default=1)
+        command.add_argument("--repetitions", type=int)
+        command.add_argument("--risks", type=float, nargs="+")
+        command.add_argument("--players", type=int)
+
+    from . import benchmark_cli
+
+    plan = benchmark_sub.add_parser("plan", help="crear y congelar un manifiesto")
+    add_manifest_args(plan)
+    plan.add_argument("--out", default="benchmark-manifest.json")
+    plan.set_defaults(func=benchmark_cli.cmd_plan)
+
+    benchmark_run = benchmark_sub.add_parser("run", help="ejecutar o reanudar un manifiesto")
+    add_manifest_args(benchmark_run)
+    benchmark_run.add_argument("--backend", choices=["scripted", "openrouter"], default="scripted")
+    benchmark_run.add_argument("--budget", type=float, default=1.0)
+    benchmark_run.add_argument("--timeout", type=float, default=75.0)
+    benchmark_run.add_argument(
+        "--fail-fast", action="store_true", help="detener el lote en el primer fallo"
+    )
+    benchmark_run.set_defaults(func=benchmark_cli.cmd_run)
+
+    analyse = benchmark_sub.add_parser("analyse", help="analizar un experimento desde datos crudos")
+    analyse.add_argument("experiment_id")
+    analyse.add_argument("--out", default="benchmark-report.json")
+    analyse.add_argument("--html-out", default="benchmark-report.html")
+    analyse.set_defaults(func=benchmark_cli.cmd_analyse)
+
+    verify = benchmark_sub.add_parser("verify", help="verificar ecuaciones y anclas mecanicas")
+    verify.add_argument("--seed", type=int, default=1)
+    verify.add_argument("--samples", type=int, default=100000)
+    verify.add_argument("--tolerance", type=float, default=0.08)
+    verify.add_argument("--evolutionary", action="store_true")
+    verify.add_argument("--simulations-per-matchup", type=int, default=10000)
+    verify.add_argument("--evolutionary-runs", type=int, default=8)
+    verify.add_argument("--evolutionary-generations", type=int, default=1000000)
+    verify.add_argument("--evolutionary-transitory", type=int, default=10000)
+    verify.add_argument("--evolutionary-tolerance", type=float, default=0.03)
+    verify.add_argument("--out", help="guardar también el informe JSON")
+    verify.set_defaults(func=benchmark_cli.cmd_verify)
 
     args = parser.parse_args(argv)
     return args.func(args)

@@ -1,0 +1,134 @@
+{
+  "experiment_id": "exp-9731662dc311",
+  "created_at": "2026-09-15T14:31:03+00:00",
+  "benchmark_version": "moloch-arena-v1-paper-2608.01193v1",
+  "protocol_version": "published-reconstruction-v1",
+  "preset": "smoke-cheap-2p",
+  "master_seed": 20260915,
+  "repetitions": 1,
+  "cells": [
+    {
+      "cell_id": "8cf04cc8b1d728f8",
+      "model": "mistralai/mistral-nemo",
+      "models": [
+        "mistralai/mistral-nemo",
+        "mistralai/mistral-nemo"
+      ],
+      "risk_treatment": 0.1,
+      "repetition": 1,
+      "seed": 6378229414501870527,
+      "evidence": "diagnostic",
+      "comparison_group": "extension"
+    },
+    {
+      "cell_id": "7113c8d0f4d8dc68",
+      "model": "mistralai/mistral-nemo",
+      "models": [
+        "mistralai/mistral-nemo",
+        "mistralai/mistral-nemo"
+      ],
+      "risk_treatment": 0.6,
+      "repetition": 1,
+      "seed": 4391905301292151702,
+      "evidence": "diagnostic",
+      "comparison_group": "extension"
+    },
+    {
+      "cell_id": "08cf5c0fd14c9950",
+      "model": "mistralai/mistral-nemo",
+      "models": [
+        "mistralai/mistral-nemo",
+        "mistralai/mistral-nemo"
+      ],
+      "risk_treatment": 0.9,
+      "repetition": 1,
+      "seed": 4273206099613277762,
+      "evidence": "diagnostic",
+      "comparison_group": "extension"
+    },
+    {
+      "cell_id": "ab80404262e21788",
+      "model": "qwen/qwen3.7-flash",
+      "models": [
+        "qwen/qwen3.7-flash",
+        "qwen/qwen3.7-flash"
+      ],
+      "risk_treatment": 0.1,
+      "repetition": 1,
+      "seed": 258814076766874858,
+      "evidence": "diagnostic",
+      "comparison_group": "extension"
+    },
+    {
+      "cell_id": "3e1c55b83678e59c",
+      "model": "qwen/qwen3.7-flash",
+      "models": [
+        "qwen/qwen3.7-flash",
+        "qwen/qwen3.7-flash"
+      ],
+      "risk_treatment": 0.6,
+      "repetition": 1,
+      "seed": 3621983689966576000,
+      "evidence": "diagnostic",
+      "comparison_group": "extension"
+    },
+    {
+      "cell_id": "c2100c3abd4d97a2",
+      "model": "qwen/qwen3.7-flash",
+      "models": [
+        "qwen/qwen3.7-flash",
+        "qwen/qwen3.7-flash"
+      ],
+      "risk_treatment": 0.9,
+      "repetition": 1,
+      "seed": 2438024333023476074,
+      "evidence": "diagnostic",
+      "comparison_group": "extension"
+    },
+    {
+      "cell_id": "2ef6fb8ffd338447",
+      "model": "amazon/nova-micro-v1",
+      "models": [
+        "amazon/nova-micro-v1",
+        "amazon/nova-micro-v1"
+      ],
+      "risk_treatment": 0.1,
+      "repetition": 1,
+      "seed": 8402154892798535849,
+      "evidence": "diagnostic",
+      "comparison_group": "extension"
+    },
+    {
+      "cell_id": "7d20c3f0cb5d6465",
+      "model": "amazon/nova-micro-v1",
+      "models": [
+        "amazon/nova-micro-v1",
+        "amazon/nova-micro-v1"
+      ],
+      "risk_treatment": 0.6,
+      "repetition": 1,
+      "seed": 6702327390397566889,
+      "evidence": "diagnostic",
+      "comparison_group": "extension"
+    },
+    {
+      "cell_id": "a345e6e336d7dbeb",
+      "model": "amazon/nova-micro-v1",
+      "models": [
+        "amazon/nova-micro-v1",
+        "amazon/nova-micro-v1"
+      ],
+      "risk_treatment": 0.9,
+      "repetition": 1,
+      "seed": 770065491087553227,
+      "evidence": "diagnostic",
+      "comparison_group": "extension"
+    }
+  ],
+  "assumptions": [
+    "Prompt reconstructed from published methods; authors' exact prompt unavailable.",
+    "Model route and served model must be recorded at execution time.",
+    "A race with any fallback is excluded from admitted analyses."
+  ],
+  "manifest_hash": "9731662dc31187a03fac78b2f1e5bc643d17a7c0bd1b8d60c07e21952ae18d93"
+}

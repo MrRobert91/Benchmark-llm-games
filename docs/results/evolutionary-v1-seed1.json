@@ -1,0 +1,268 @@
+{
+  "stage_matrix": "match",
+  "horizon_samples": 100000,
+  "horizon_mean": 8.98446,
+  "horizon_support_min": 5,
+  "horizon_support_max": 55,
+  "status": "match",
+  "benchmark_version": "moloch-arena-v1-paper-2608.01193v1",
+  "spec_hash": "90e0f31b93a8c5fc314b40bf068f7b65c14d409c63c8a704d5de2c90f4c517af",
+  "protocol_hash": "3f9549fab4565ae92fdbc90b99a86a0ad3b303477e7b415ced4ad23c7cd60a1f",
+  "evolutionary": {
+    "0.1": {
+      "strategies": [
+        "AS",
+        "AU",
+        "CS",
+        "CAS"
+      ],
+      "distribution": {
+        "AS": 0.006656539141414141,
+        "AU": 0.014032159090909092,
+        "CS": 0.006725208333333333,
+        "CAS": 0.9707735934343434
+      },
+      "unsafe_prevalence": 0.9848057525252525,
+      "population": 100,
+      "beta": 2.0,
+      "mutation": 0.02,
+      "runs": 8,
+      "generations": 1000000,
+      "transitory": 10000,
+      "seed": 1,
+      "method": "egttools-full-finite-population-numerical",
+      "paper_comparison": {
+        "key": "evolutionary_unsafe_low",
+        "published": 0.992,
+        "reproduced": 0.9848057525252525,
+        "absolute_difference": 0.007194247474747506,
+        "relative_difference": 0.007252265599543857,
+        "tolerance": 0.03,
+        "status": "within_tolerance"
+      },
+      "payoff_matrix": [
+        [
+          59.0,
+          5.4,
+          59.0507,
+          8.623300000000631
+        ],
+        [
+          109.44,
+          61.2,
+          105.79628000001381,
+          61.1314
+        ],
+        [
+          59.068,
+          16.554200000003124,
+          59.0266,
+          34.243259999998564
+        ],
+        [
+          108.84840000001225,
+          61.2608,
+          86.35760000000774,
+          61.858
+        ]
+      ],
+      "action_rate_matrix": [
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.8886054516491962,
+          0.0,
+          0.4697545456553918
+        ],
+        [
+          0.11213402258379215,
+          1.0,
+          0.5306095391720344,
+          1.0
+        ]
+      ],
+      "simulations_per_conditional_matchup": 10000
+    },
+    "0.6": {
+      "strategies": [
+        "AS",
+        "AU",
+        "CS",
+        "CAS"
+      ],
+      "distribution": {
+        "AS": 0.006617989898989899,
+        "AU": 0.011498448232323231,
+        "CS": 0.007489573232323232,
+        "CAS": 0.9726813623737374
+      },
+      "unsafe_prevalence": 0.9841798106060606,
+      "population": 100,
+      "beta": 2.0,
+      "mutation": 0.02,
+      "runs": 8,
+      "generations": 1000000,
+      "transitory": 10000,
+      "seed": 1,
+      "method": "egttools-full-finite-population-numerical",
+      "paper_comparison": {
+        "key": "evolutionary_unsafe_medium",
+        "published": 0.98,
+        "reproduced": 0.9841798106060606,
+        "absolute_difference": 0.004179810606060652,
+        "relative_difference": 0.004265112863327196,
+        "tolerance": 0.03,
+        "status": "within_tolerance"
+      },
+      "payoff_matrix": [
+        [
+          59.0,
+          5.4,
+          58.9958,
+          8.603900000000635
+        ],
+        [
+          48.64,
+          27.200000000000003,
+          47.66528000000332,
+          27.143
+        ],
+        [
+          59.0128,
+          16.4916000000031,
+          58.941,
+          26.764060000001983
+        ],
+        [
+          102.23216000001504,
+          27.135,
+          61.77822000000428,
+          27.5294
+        ]
+      ],
+      "action_rate_matrix": [
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.8882156989872342,
+          0.0,
+          0.46999528348451775
+        ],
+        [
+          0.11105558331945138,
+          1.0,
+          0.5305320899616017,
+          1.0
+        ]
+      ],
+      "simulations_per_conditional_matchup": 10000
+    },
+    "0.9": {
+      "strategies": [
+        "AS",
+        "AU",
+        "CS",
+        "CAS"
+      ],
+      "distribution": {
+        "AS": 0.03320004924242424,
+        "AU": 0.006654935606060606,
+        "CS": 0.9525819116161616,
+        "CAS": 0.006782169191919192
+      },
+      "unsafe_prevalence": 0.013437104797979799,
+      "population": 100,
+      "beta": 2.0,
+      "mutation": 0.02,
+      "runs": 8,
+      "generations": 1000000,
+      "transitory": 10000,
+      "seed": 1,
+      "method": "egttools-full-finite-population-numerical",
+      "paper_comparison": {
+        "key": "evolutionary_unsafe_high",
+        "published": 0.019,
+        "reproduced": 0.013437104797979799,
+        "absolute_difference": 0.005562895202020201,
+        "relative_difference": 0.2927839580010632,
+        "tolerance": 0.03,
+        "status": "within_tolerance"
+      },
+      "payoff_matrix": [
+        [
+          59.0,
+          5.4,
+          58.9432,
+          8.539800000000541
+        ],
+        [
+          12.159999999999997,
+          6.799999999999999,
+          11.197039999999829,
+          6.4952
+        ],
+        [
+          59.0009,
+          16.63020000000312,
+          59.0062,
+          22.554240000002096
+        ],
+        [
+          97.88162000001411,
+          6.998,
+          46.57280000000214,
+          6.9116
+        ]
+      ],
+      "action_rate_matrix": [
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.8890749963949374,
+          0.0,
+          0.4693827463492453
+        ],
+        [
+          0.11150633913537984,
+          1.0,
+          0.5308784896923282,
+          1.0
+        ]
+      ],
+      "simulations_per_conditional_matchup": 10000
+    }
+  }
+}

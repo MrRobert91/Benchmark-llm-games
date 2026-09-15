@@ -417,6 +417,19 @@ class OpenRouterAgent(Agent):
                     messages, budget_tokens, phase, reasoning, attempt=attempt
                 )
             except OpenRouterError as exc:
+                if exc.status_code == 429 and attempt < 3:
+                    delay = 20 * attempt
+                    logger.info(
+                        "openrouter.rate_limit.retry player_id=%s model=%s phase=%s "
+                        "delay_seconds=%s attempt=%s",
+                        self.player_id,
+                        self.model,
+                        phase,
+                        delay,
+                        attempt,
+                    )
+                    time.sleep(delay)
+                    continue
                 if (
                     exc.status_code == 400
                     and exc.provider_message
@@ -529,6 +542,31 @@ class OpenRouterAgent(Agent):
         if not resp.is_success:
             provider_message = _error_message(resp)
             latency_ms = round((time.monotonic() - started) * 1000)
+            if self.audit_sink:
+                self.audit_sink(
+                    {
+                        "player_id": self.player_id,
+                        "model": self.model,
+                        "phase": phase,
+                        "request_messages": messages,
+                        "response_content": "",
+                        "reasoning": None,
+                        "reasoning_details": [],
+                        "usage": {},
+                        "response_id": request_id,
+                        "provider": None,
+                        "served_model": None,
+                        "finish_reason": None,
+                        "native_finish_reason": None,
+                        "refusal": None,
+                        "reasoning_mode": _reasoning_label(reasoning),
+                        "attempt": attempt,
+                        "max_tokens": max_tokens,
+                        "latency_ms": latency_ms,
+                        "status_code": resp.status_code,
+                        "error": provider_message,
+                    }
+                )
             logger.warning(
                 "openrouter.request.failed player_id=%s model=%s phase=%s status=%s latency_ms=%s request_id=%s provider_message=%s",
                 self.player_id,

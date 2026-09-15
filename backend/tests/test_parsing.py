@@ -184,6 +184,13 @@ def test_bare_word_answer_counts_as_a_decision():
     assert parsing.read_action_field(outcome).value == Action.FAST
 
 
+def test_paper_unsafe_label_maps_to_the_unsafe_legacy_transport_value():
+    for raw in ('{"action": "UNSAFE"}', "UNSAFE", '{"action": "inseguro"}'):
+        outcome = parsing.parse_json_object(raw)
+        assert outcome.ok
+        assert parsing.read_action_field(outcome).value == Action.FAST
+
+
 def test_keys_translated_to_spanish():
     outcome = parsing.parse_json_object('{"acción": "SEGURO", "mensaje": "con calma"}')
     read = parsing.read_action_field(outcome)

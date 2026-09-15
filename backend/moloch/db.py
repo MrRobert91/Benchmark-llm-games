@@ -78,6 +78,84 @@ CREATE TABLE IF NOT EXISTS run_events (
 
 CREATE INDEX IF NOT EXISTS idx_web_runs_created ON web_runs(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_run_events_game ON run_events(game_id, seq);
+
+CREATE TABLE IF NOT EXISTS benchmark_versions (
+    benchmark_version TEXT PRIMARY KEY,
+    protocol_version  TEXT NOT NULL,
+    spec_hash         TEXT NOT NULL,
+    protocol_hash     TEXT NOT NULL,
+    definition_json  TEXT NOT NULL,
+    created_at       TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS experiments (
+    experiment_id    TEXT PRIMARY KEY,
+    benchmark_version TEXT NOT NULL,
+    protocol_version TEXT NOT NULL,
+    preset           TEXT NOT NULL,
+    manifest_hash    TEXT NOT NULL UNIQUE,
+    status           TEXT NOT NULL,
+    created_at       TEXT NOT NULL,
+    manifest_json    TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS experiment_cells (
+    experiment_id    TEXT NOT NULL REFERENCES experiments(experiment_id) ON DELETE CASCADE,
+    cell_id          TEXT NOT NULL,
+    model            TEXT NOT NULL,
+    models_json      TEXT NOT NULL,
+    risk_treatment   REAL NOT NULL,
+    repetition       INTEGER NOT NULL,
+    seed             INTEGER NOT NULL,
+    evidence         TEXT NOT NULL,
+    comparison_group TEXT NOT NULL,
+    game_id          TEXT,
+    status           TEXT NOT NULL DEFAULT 'planned',
+    PRIMARY KEY (experiment_id, cell_id)
+);
+
+CREATE TABLE IF NOT EXISTS race_decisions (
+    game_id          TEXT NOT NULL REFERENCES games(game_id) ON DELETE CASCADE,
+    round_index      INTEGER NOT NULL,
+    player_id        TEXT NOT NULL,
+    state_before_hash TEXT NOT NULL,
+    action           TEXT NOT NULL,
+    stage_payoff     REAL NOT NULL,
+    action_readable  INTEGER NOT NULL,
+    strict_format    INTEGER NOT NULL DEFAULT 1,
+    PRIMARY KEY (game_id, round_index, player_id)
+);
+
+CREATE TABLE IF NOT EXISTS terminal_results (
+    game_id          TEXT NOT NULL REFERENCES games(game_id) ON DELETE CASCADE,
+    player_id        TEXT NOT NULL,
+    is_leader        INTEGER NOT NULL,
+    stage_payoff     REAL NOT NULL,
+    prize_share      REAL NOT NULL,
+    risk_probability REAL NOT NULL,
+    setback_roll     REAL,
+    setback          INTEGER NOT NULL,
+    payoff_before_setback REAL NOT NULL,
+    payoff           REAL NOT NULL,
+    PRIMARY KEY (game_id, player_id)
+);
+
+CREATE TABLE IF NOT EXISTS provider_calls (
+    game_id          TEXT NOT NULL,
+    call_index       INTEGER NOT NULL,
+    player_id        TEXT,
+    phase            TEXT,
+    requested_model  TEXT,
+    served_model     TEXT,
+    provider         TEXT,
+    response_id      TEXT,
+    prompt_tokens    INTEGER NOT NULL DEFAULT 0,
+    completion_tokens INTEGER NOT NULL DEFAULT 0,
+    cost_usd         REAL NOT NULL DEFAULT 0,
+    latency_ms       INTEGER,
+    trace_json       TEXT NOT NULL,
+    PRIMARY KEY (game_id, call_index)
+);
 """
 
 
@@ -101,7 +179,74 @@ def connect(path: Path | str = DEFAULT_DB) -> sqlite3.Connection:
         _backfill_scored_pledges(conn)
     _ensure_column(conn, "web_runs", "parse_incidents_json", "TEXT NOT NULL DEFAULT '[]'")
     _ensure_column(conn, "web_runs", "parse_failures", "INTEGER NOT NULL DEFAULT 0")
+    _ensure_column(
+        conn, "games", "benchmark_version", "TEXT NOT NULL DEFAULT 'legacy-moloch-v0'"
+    )
+    _ensure_column(
+        conn, "games", "protocol_version", "TEXT NOT NULL DEFAULT 'legacy-council-v0'"
+    )
+    _ensure_column(conn, "games", "spec_hash", "TEXT NOT NULL DEFAULT ''")
+    _ensure_column(conn, "games", "protocol_hash", "TEXT NOT NULL DEFAULT ''")
+    _ensure_column(conn, "games", "admission_status", "TEXT NOT NULL DEFAULT 'legacy'")
+    _ensure_column(conn, "games", "risk_treatment", "REAL")
+    _ensure_column(conn, "games", "experiment_id", "TEXT")
+    _ensure_column(conn, "games", "cell_id", "TEXT")
+    _ensure_column(conn, "game_players", "unsafe_rate", "REAL")
+    _ensure_column(conn, "game_players", "stage_payoff", "REAL")
+    _ensure_column(conn, "game_players", "prize_share", "REAL")
+    _ensure_column(conn, "game_players", "risk_probability", "REAL")
+    _ensure_column(conn, "game_players", "setback", "INTEGER")
+    _ensure_column(
+        conn, "web_runs", "benchmark_version", "TEXT NOT NULL DEFAULT 'legacy-moloch-v0'"
+    )
+    _ensure_column(
+        conn, "web_runs", "protocol_version", "TEXT NOT NULL DEFAULT 'legacy-council-v0'"
+    )
+    _ensure_column(conn, "web_runs", "risk_treatment", "REAL")
+    _ensure_column(conn, "race_decisions", "strict_format", "INTEGER NOT NULL DEFAULT 1")
+    _ensure_column(conn, "experiment_cells", "error_message", "TEXT")
+    _ensure_column(conn, "experiment_cells", "usage_json", "TEXT")
+    _ensure_column(conn, "experiment_cells", "partial_replay_json", "TEXT")
+    _ensure_column(conn, "provider_calls", "experiment_id", "TEXT")
+    _ensure_column(conn, "provider_calls", "cell_id", "TEXT")
+    _ensure_column(conn, "provider_calls", "status_code", "INTEGER")
+    conn.execute(
+        """UPDATE provider_calls
+           SET experiment_id = (SELECT g.experiment_id FROM games g
+                                WHERE g.game_id = provider_calls.game_id),
+               cell_id = (SELECT g.cell_id FROM games g
+                          WHERE g.game_id = provider_calls.game_id)
+           WHERE experiment_id IS NULL OR cell_id IS NULL"""
+    )
+    _register_benchmarks(conn)
     return conn
+
+
+def _register_benchmarks(conn: sqlite3.Connection) -> None:
+    from .benchmark.registry import list_benchmarks
+
+    now = _utc_now()
+    for definition in list_benchmarks():
+        conn.execute(
+            """INSERT INTO benchmark_versions
+               (benchmark_version, protocol_version, spec_hash, protocol_hash,
+                definition_json, created_at)
+               VALUES (?, ?, ?, ?, ?, ?)
+               ON CONFLICT(benchmark_version) DO UPDATE SET
+                 protocol_version=excluded.protocol_version,
+                 spec_hash=excluded.spec_hash,
+                 protocol_hash=excluded.protocol_hash,
+                 definition_json=excluded.definition_json""",
+            (
+                definition["benchmark_version"],
+                definition["protocol_version"],
+                definition["spec_hash"],
+                definition["protocol_hash"],
+                json.dumps(definition, ensure_ascii=False, sort_keys=True),
+                now,
+            ),
+        )
+    conn.commit()
 
 
 def _ensure_column(
@@ -150,14 +295,30 @@ def save_game(
             outcome["kind"],
             outcome.get("winner_label"),
             outcome["final_round"],
-            metrics["moloch_index"],
-            metrics["total_welfare"],
+            float(metrics.get("moloch_index") or 0.0),
+            float(metrics.get("total_welfare") or 0.0),
             # La columna no admite nulo: se guarda 0 y se distingue con integrity_confidence.
             metrics["mean_integrity"] if metrics.get("mean_integrity") is not None else 0.0,
             json.dumps(record, ensure_ascii=False),
             parse_failures,
             1 if metrics.get("contaminated") else 0,
             float(metrics.get("integrity_confidence", 1.0)),
+        ),
+    )
+    conn.execute(
+        """UPDATE games SET benchmark_version = ?, protocol_version = ?, spec_hash = ?,
+                  protocol_hash = ?, admission_status = ?, risk_treatment = ?,
+                  experiment_id = ?, cell_id = ? WHERE game_id = ?""",
+        (
+            record.get("benchmark_version", "legacy-moloch-v0"),
+            record.get("protocol_version", "legacy-council-v0"),
+            record.get("spec_hash", ""),
+            record.get("protocol_hash", ""),
+            record.get("admission_status", "legacy"),
+            record.get("risk_treatment"),
+            record.get("experiment_id"),
+            record.get("cell_id"),
+            record["game_id"],
         ),
     )
     conn.execute("DELETE FROM game_players WHERE game_id = ?", (record["game_id"],))
@@ -183,6 +344,21 @@ def save_game(
                 int(p.get("pledges_scored", p.get("pledges_made") or 0)),
             ),
         )
+        conn.execute(
+            """UPDATE game_players SET unsafe_rate = ?, stage_payoff = ?, prize_share = ?,
+                      risk_probability = ?, setback = ?
+               WHERE game_id = ? AND player_id = ?""",
+            (
+                p.get("unsafe_rate"),
+                p.get("stage_payoff"),
+                p.get("prize_share"),
+                p.get("risk"),
+                None if p.get("setback") is None else int(bool(p.get("setback"))),
+                record["game_id"],
+                p["player_id"],
+            ),
+        )
+    _save_normalized_paper_trace(conn, record)
     if contributor:
         conn.execute(
             "UPDATE games SET contributor_nick = ?, contributor_url = ? WHERE game_id = ?",
@@ -192,13 +368,61 @@ def save_game(
     return record["game_id"]
 
 
+def _save_normalized_paper_trace(conn: sqlite3.Connection, record: dict[str, Any]) -> None:
+    if not str(record.get("benchmark_version", "")).startswith("moloch-arena-v1-paper"):
+        return
+    game_id = record["game_id"]
+    conn.execute("DELETE FROM race_decisions WHERE game_id = ?", (game_id,))
+    for round_record in record.get("rounds", []):
+        for action in round_record.get("actions", []):
+            conn.execute(
+                """INSERT INTO race_decisions
+                   (game_id, round_index, player_id, state_before_hash, action,
+                    stage_payoff, action_readable, strict_format)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+                (
+                    game_id,
+                    round_record["index"],
+                    action["player_id"],
+                    round_record.get("state_before_hash", ""),
+                    action["action"],
+                    float(action.get("stage_payoff") or 0),
+                    int(bool(action.get("action_readable", True))),
+                    int(bool(action.get("strict_format", True))),
+                ),
+            )
+    conn.execute("DELETE FROM terminal_results WHERE game_id = ?", (game_id,))
+    for result in record.get("outcome", {}).get("terminal_results", []):
+        conn.execute(
+            """INSERT INTO terminal_results
+               (game_id, player_id, is_leader, stage_payoff, prize_share,
+                risk_probability, setback_roll, setback, payoff_before_setback, payoff)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            (
+                game_id,
+                result["player_id"],
+                int(bool(result["is_leader"])),
+                result["stage_payoff"],
+                result["prize_share"],
+                result["risk_probability"],
+                result.get("setback_roll"),
+                int(bool(result["setback"])),
+                result["payoff_before_setback"],
+                result["payoff"],
+            ),
+        )
+
+
 def list_games(
     conn: sqlite3.Connection, limit: int | None = 50, offset: int = 0
 ) -> list[dict[str, Any]]:
     rows = conn.execute(
         """SELECT game_id, created_at, backend, n_players, outcome_kind, winner_label,
                   final_round, moloch_index, total_welfare, mean_integrity,
-                  contributor_nick, contributor_url,
+                  contributor_nick, contributor_url, benchmark_version, protocol_version,
+                  admission_status, risk_treatment, experiment_id,
+                  json_extract(replay_json, '$.metrics.unsafe_rate') AS unsafe_rate,
+                  json_extract(replay_json, '$.metrics.mean_payoff') AS mean_payoff,
                   json_extract(replay_json, '$.outcome.winner_id') AS winner_id
            FROM games ORDER BY created_at DESC, rowid DESC LIMIT ? OFFSET ?""",
         (-1 if limit is None else limit, offset),
@@ -268,7 +492,8 @@ def leaderboard(
                       AS contaminated_games
            FROM game_players gp
            JOIN games g ON g.game_id = gp.game_id
-           WHERE (? = 0 OR g.backend LIKE 'openrouter%')
+           WHERE g.benchmark_version = 'legacy-moloch-v0'
+             AND (? = 0 OR g.backend LIKE 'openrouter%')
            GROUP BY gp.model""",
         (1 if openrouter_only else 0,),
     ).fetchall()
@@ -292,13 +517,46 @@ def leaderboard(
     return out
 
 
+def paper_leaderboard(conn: sqlite3.Connection) -> list[dict[str, Any]]:
+    rows = conn.execute(
+        """SELECT gp.model, g.risk_treatment, g.protocol_version,
+                  COUNT(DISTINCT gp.game_id) AS games,
+                  SUM(CASE WHEN g.admission_status = 'admitted' THEN 1 ELSE 0 END)
+                      AS admitted_trajectories,
+                  AVG(CASE WHEN g.admission_status = 'admitted' THEN gp.payoff END)
+                      AS avg_payoff,
+                  AVG(CASE WHEN g.admission_status = 'admitted' THEN gp.unsafe_rate END)
+                      AS avg_unsafe_rate,
+                  SUM(gp.parse_failures) AS parse_failures,
+                  COUNT(DISTINCT CASE WHEN g.contaminated = 1 THEN g.game_id END)
+                      AS contaminated_games
+           FROM game_players gp
+           JOIN games g ON g.game_id = gp.game_id
+           WHERE g.benchmark_version = 'moloch-arena-v1-paper-2608.01193v1'
+           GROUP BY gp.model, g.risk_treatment, g.protocol_version
+           ORDER BY gp.model, g.risk_treatment"""
+    ).fetchall()
+    return [
+        {
+            **dict(row),
+            "avg_payoff": None
+            if row["avg_payoff"] is None
+            else round(float(row["avg_payoff"]), 6),
+            "avg_unsafe_rate": None
+            if row["avg_unsafe_rate"] is None
+            else round(float(row["avg_unsafe_rate"]), 6),
+        }
+        for row in rows
+    ]
+
+
 def moloch_by_backend(conn: sqlite3.Connection) -> list[dict[str, Any]]:
     rows = conn.execute(
         """SELECT backend, COUNT(*) AS games, AVG(moloch_index) AS avg_moloch,
                   SUM(outcome_kind = 'catastrophe') AS catastrophes,
                   SUM(outcome_kind = 'restraint')   AS restraints,
                   SUM(outcome_kind = 'aligned_win') AS aligned_wins
-           FROM games GROUP BY backend"""
+           FROM games WHERE benchmark_version = 'legacy-moloch-v0' GROUP BY backend"""
     ).fetchall()
     return [
         {**dict(r), "avg_moloch": round(r["avg_moloch"], 4)} for r in rows
@@ -314,6 +572,9 @@ def create_web_run(
     url: str | None,
     models: list[str],
     budget_limit: float,
+    benchmark_version: str = "legacy-moloch-v0",
+    protocol_version: str = "legacy-council-v0",
+    risk_treatment: float | None = None,
 ) -> None:
     now = _utc_now()
     conn.execute(
@@ -322,6 +583,11 @@ def create_web_run(
             contributor_url, models_json, budget_limit)
            VALUES (?, 'queued', 'queued', ?, ?, ?, ?, ?, ?, ?)""",
         (game_id, now, now, seed, nick, url, json.dumps(models), budget_limit),
+    )
+    conn.execute(
+        """UPDATE web_runs SET benchmark_version = ?, protocol_version = ?,
+                  risk_treatment = ? WHERE game_id = ?""",
+        (benchmark_version, protocol_version, risk_treatment, game_id),
     )
     _append_event(conn, game_id, "queued")
     conn.commit()
@@ -383,7 +649,8 @@ def get_web_run(conn: sqlite3.Connection, game_id: str) -> dict[str, Any] | None
         """SELECT game_id, status, phase, created_at, updated_at, seed,
                   contributor_nick, contributor_url, models_json, budget_limit,
                   spent_usd, calls, prompt_tokens, completion_tokens, error_message,
-                  replay_json, parse_incidents_json, parse_failures
+                  replay_json, parse_incidents_json, parse_failures,
+                  benchmark_version, protocol_version, risk_treatment
            FROM web_runs WHERE game_id = ?""",
         (game_id,),
     ).fetchone()
@@ -432,11 +699,187 @@ def list_contributions(conn: sqlite3.Connection, limit: int = 100) -> list[dict[
                       g.contributor_url AS url, g.n_players, g.outcome_kind,
                       g.moloch_index, g.mean_integrity
                FROM games g
-               WHERE g.backend = 'openrouter-web' AND g.contributor_nick IS NOT NULL
+               WHERE g.backend = 'openrouter-web'
+                 AND g.benchmark_version = 'legacy-moloch-v0'
+                 AND g.contributor_nick IS NOT NULL
                ORDER BY g.created_at DESC, g.rowid DESC LIMIT ?""",
             (limit,),
         )
     ]
+
+
+def save_provider_calls(
+    conn: sqlite3.Connection,
+    game_id: str,
+    calls: list[dict[str, Any]],
+    *,
+    experiment_id: str | None = None,
+    cell_id: str | None = None,
+) -> None:
+    conn.execute("DELETE FROM provider_calls WHERE game_id = ?", (game_id,))
+    for index, call in enumerate(calls, start=1):
+        usage = call.get("usage") or {}
+        conn.execute(
+            """INSERT INTO provider_calls
+               (game_id, call_index, player_id, phase, requested_model, served_model,
+                provider, response_id, prompt_tokens, completion_tokens, cost_usd,
+                latency_ms, trace_json)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            (
+                game_id,
+                index,
+                call.get("player_id"),
+                call.get("phase"),
+                call.get("model"),
+                call.get("served_model"),
+                call.get("provider"),
+                call.get("response_id"),
+                int(usage.get("prompt_tokens") or 0),
+                int(usage.get("completion_tokens") or 0),
+                float(usage.get("cost") or 0),
+                call.get("latency_ms"),
+                json.dumps(call, ensure_ascii=False),
+            ),
+        )
+        conn.execute(
+            """UPDATE provider_calls SET experiment_id = ?, cell_id = ?
+               WHERE game_id = ? AND call_index = ?""",
+            (experiment_id, cell_id, game_id, index),
+        )
+        conn.execute(
+            """UPDATE provider_calls SET status_code = ?
+               WHERE game_id = ? AND call_index = ?""",
+            (call.get("status_code"), game_id, index),
+        )
+    conn.commit()
+
+
+def save_experiment(conn: sqlite3.Connection, manifest: dict[str, Any]) -> str:
+    conn.execute(
+        """INSERT INTO experiments
+           (experiment_id, benchmark_version, protocol_version, preset, manifest_hash,
+            status, created_at, manifest_json)
+           VALUES (?, ?, ?, ?, ?, 'planned', ?, ?)
+           ON CONFLICT(experiment_id) DO UPDATE SET manifest_json=excluded.manifest_json""",
+        (
+            manifest["experiment_id"],
+            manifest["benchmark_version"],
+            manifest["protocol_version"],
+            manifest["preset"],
+            manifest["manifest_hash"],
+            manifest["created_at"],
+            json.dumps(manifest, ensure_ascii=False, sort_keys=True),
+        ),
+    )
+    for cell in manifest["cells"]:
+        conn.execute(
+            """INSERT INTO experiment_cells
+               (experiment_id, cell_id, model, models_json, risk_treatment, repetition,
+                seed, evidence, comparison_group)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+               ON CONFLICT(experiment_id, cell_id) DO NOTHING""",
+            (
+                manifest["experiment_id"],
+                cell["cell_id"],
+                cell["model"],
+                json.dumps(cell["models"]),
+                cell["risk_treatment"],
+                cell["repetition"],
+                cell["seed"],
+                cell["evidence"],
+                cell["comparison_group"],
+            ),
+        )
+    conn.commit()
+    return manifest["experiment_id"]
+
+
+def get_experiment(conn: sqlite3.Connection, experiment_id: str) -> dict[str, Any] | None:
+    row = conn.execute(
+        "SELECT manifest_json, status FROM experiments WHERE experiment_id = ?",
+        (experiment_id,),
+    ).fetchone()
+    if row is None:
+        return None
+    manifest = json.loads(row["manifest_json"])
+    manifest["status"] = row["status"]
+    manifest["cells"] = [
+        {
+            **dict(cell),
+            "models": json.loads(cell["models_json"]),
+        }
+        for cell in conn.execute(
+            """SELECT cell_id, model, models_json, risk_treatment, repetition, seed,
+                      evidence, comparison_group, game_id, status, error_message,
+                      usage_json, partial_replay_json
+               FROM experiment_cells WHERE experiment_id = ? ORDER BY rowid""",
+            (experiment_id,),
+        )
+    ]
+    for cell in manifest["cells"]:
+        cell.pop("models_json", None)
+        cell["usage"] = json.loads(cell.pop("usage_json") or "null")
+        cell["partial_replay"] = json.loads(cell.pop("partial_replay_json") or "null")
+    return manifest
+
+
+def update_experiment_cell(
+    conn: sqlite3.Connection,
+    experiment_id: str,
+    cell_id: str,
+    *,
+    status: str,
+    game_id: str | None = None,
+    error_message: str | None = None,
+    usage: dict[str, Any] | None = None,
+    partial_replay: dict[str, Any] | None = None,
+) -> None:
+    conn.execute(
+        """UPDATE experiment_cells SET status = ?, game_id = COALESCE(?, game_id),
+                  error_message = ?, usage_json = ?, partial_replay_json = ?
+           WHERE experiment_id = ? AND cell_id = ?""",
+        (
+            status,
+            game_id,
+            error_message,
+            json.dumps(usage, ensure_ascii=False) if usage is not None else None,
+            json.dumps(partial_replay, ensure_ascii=False)
+            if partial_replay is not None
+            else None,
+            experiment_id,
+            cell_id,
+        ),
+    )
+    counts = conn.execute(
+        """SELECT COUNT(*) AS total,
+                  SUM(status = 'completed') AS completed,
+                  SUM(status = 'failed') AS failed
+           FROM experiment_cells WHERE experiment_id = ?""",
+        (experiment_id,),
+    ).fetchone()
+    experiment_status = "running"
+    if counts and counts["completed"] == counts["total"]:
+        experiment_status = "completed"
+    elif counts and counts["failed"]:
+        experiment_status = "incomplete"
+    conn.execute(
+        "UPDATE experiments SET status = ? WHERE experiment_id = ?",
+        (experiment_status, experiment_id),
+    )
+    conn.commit()
+
+
+def experiment_records(
+    conn: sqlite3.Connection, experiment_id: str
+) -> list[dict[str, Any]]:
+    rows = conn.execute(
+        """SELECT g.replay_json FROM games g
+           JOIN experiment_cells c ON c.game_id = g.game_id
+           WHERE c.experiment_id = ? AND c.status = 'completed'
+           ORDER BY c.rowid""",
+        (experiment_id,),
+    ).fetchall()
+    return [json.loads(row["replay_json"]) for row in rows]
 
 
 def fail_interrupted_runs(conn: sqlite3.Connection) -> int:
@@ -452,6 +895,19 @@ def fail_interrupted_runs(conn: sqlite3.Connection) -> int:
             error_message="La ejecución se interrumpió al reiniciarse el servidor.",
             event_type="failed",
         )
+        experiment_cell = conn.execute(
+            """SELECT experiment_id, cell_id FROM experiment_cells
+               WHERE game_id = ? AND status IN ('queued', 'running')""",
+            (row["game_id"],),
+        ).fetchone()
+        if experiment_cell:
+            update_experiment_cell(
+                conn,
+                experiment_cell["experiment_id"],
+                experiment_cell["cell_id"],
+                status="failed",
+                game_id=row["game_id"],
+            )
     return len(rows)
 
 

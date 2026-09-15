@@ -160,3 +160,43 @@ def test_403_preserves_provider_context_and_returns_actionable_message(caplog):
     assert "test-secret" not in logs
     assert "must not leak" not in logs
     assert "hidden" not in logs
+
+
+def test_429_retries_with_bounded_backoff(monkeypatch):
+    attempts = 0
+
+    def handler(_request):
+        nonlocal attempts
+        attempts += 1
+        if attempts < 3:
+            return httpx.Response(429, json={"error": {"message": "rate limited"}})
+        return httpx.Response(
+            200,
+            json={
+                "id": "gen-ok",
+                "model": "vendor/model",
+                "provider": "provider",
+                "choices": [{"message": {"content": '{"action":"SAFE"}'}, "finish_reason": "stop"}],
+                "usage": {"cost": 0.001, "prompt_tokens": 2, "completion_tokens": 1},
+            },
+        )
+
+    delays = []
+    monkeypatch.setattr("moloch.agents.openrouter.time.sleep", delays.append)
+    trace = []
+    agent = OpenRouterAgent(
+        "p0",
+        "Helios",
+        "vendor/model",
+        BudgetGuard(),
+        api_key="test-secret",
+        audit_sink=trace.append,
+    )
+    agent._client.close()
+    agent._client = httpx.Client(transport=httpx.MockTransport(handler))
+    result = agent._call([], phase="paper_round_1_action")
+    agent.close()
+    assert result.content == '{"action":"SAFE"}'
+    assert attempts == 3
+    assert delays == [20, 40]
+    assert [entry.get("status_code") for entry in trace] == [429, 429, None]

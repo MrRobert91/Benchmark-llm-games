@@ -14,6 +14,14 @@ from typing import Any
 
 from . import db
 from .agents.openrouter import BudgetExceeded, BudgetGuard, OpenRouterAgent, OpenRouterError
+from .benchmark.registry import (
+    DEFAULT_BENCHMARK_VERSION,
+    LEGACY_BENCHMARK_VERSION,
+    PAPER_BENCHMARK_VERSION,
+    get_benchmark,
+)
+from .benchmark.versions.paper_2608_01193_v1.agents import PaperOpenRouterAgent
+from .benchmark.versions.paper_2608_01193_v1.engine import PaperGame
 from .cli import LAB_NAMES
 from .engine import Game
 
@@ -29,6 +37,12 @@ class WorkItem:
     models: list[str]
     seed: int
     budget: float
+    benchmark_version: str = LEGACY_BENCHMARK_VERSION
+    risk_treatment: float = 0.60
+    shared_guard: BudgetGuard | None = None
+    experiment_id: str | None = None
+    cell_id: str | None = None
+    repetition: int | None = None
 
 
 class RunQueue:
@@ -66,6 +80,9 @@ class RunQueue:
         url: str | None,
         models: list[str],
         budget: float,
+        benchmark_version: str = DEFAULT_BENCHMARK_VERSION,
+        risk_treatment: float = 0.60,
+        seed: int | None = None,
     ) -> str:
         self.start()
         item = WorkItem(
@@ -74,8 +91,10 @@ class RunQueue:
             nick=nick,
             url=url,
             models=list(models),
-            seed=secrets.randbelow(2_147_483_647),
+            seed=seed if seed is not None else secrets.randbelow(2_147_483_647),
             budget=budget,
+            benchmark_version=benchmark_version,
+            risk_treatment=risk_treatment,
         )
         with self._submit_lock:
             if self.queue.full():
@@ -90,6 +109,11 @@ class RunQueue:
                     url=item.url,
                     models=item.models,
                     budget_limit=item.budget,
+                    benchmark_version=item.benchmark_version,
+                    protocol_version=get_benchmark(item.benchmark_version).protocol_version,
+                    risk_treatment=item.risk_treatment
+                    if item.benchmark_version == PAPER_BENCHMARK_VERSION
+                    else None,
                 )
             finally:
                 conn.close()
@@ -103,6 +127,82 @@ class RunQueue:
         )
         return item.game_id
 
+    def submit_manifest(
+        self,
+        *,
+        api_key: str,
+        nick: str,
+        url: str | None,
+        manifest: dict[str, Any],
+        budget: float,
+    ) -> list[str]:
+        """Queue a small web batch with one shared budget guard."""
+        self.start()
+        with self._submit_lock:
+            conn = db.connect(self.database_path)
+            try:
+                db.save_experiment(conn, manifest)
+                existing = db.get_experiment(conn, manifest["experiment_id"])
+            finally:
+                conn.close()
+            terminal_or_active = {
+                cell["cell_id"]
+                for cell in (existing or {}).get("cells", [])
+                if cell["status"] in {"completed", "queued", "running"}
+            }
+            cells = [
+                cell for cell in manifest["cells"] if cell["cell_id"] not in terminal_or_active
+            ]
+            available = self.max_waiting - self.queue.qsize()
+            if len(cells) > available:
+                raise queue.Full
+            guard = BudgetGuard(limit_usd=budget)
+            items = [
+                WorkItem(
+                    game_id=uuid.uuid4().hex[:12],
+                    api_key=api_key,
+                    nick=nick,
+                    url=url,
+                    models=list(cell["models"]),
+                    seed=int(cell["seed"]),
+                    budget=budget,
+                    benchmark_version=manifest["benchmark_version"],
+                    risk_treatment=float(cell["risk_treatment"]),
+                    shared_guard=guard,
+                    experiment_id=manifest["experiment_id"],
+                    cell_id=cell["cell_id"],
+                    repetition=int(cell["repetition"]),
+                )
+                for cell in cells
+            ]
+            conn = db.connect(self.database_path)
+            try:
+                for item in items:
+                    db.create_web_run(
+                        conn,
+                        game_id=item.game_id,
+                        seed=item.seed,
+                        nick=item.nick,
+                        url=item.url,
+                        models=item.models,
+                        budget_limit=item.budget,
+                        benchmark_version=item.benchmark_version,
+                        protocol_version=manifest["protocol_version"],
+                        risk_treatment=item.risk_treatment,
+                    )
+                    db.update_experiment_cell(
+                        conn,
+                        item.experiment_id or "",
+                        item.cell_id or "",
+                        status="queued",
+                        game_id=item.game_id,
+                    )
+            finally:
+                conn.close()
+            for item in items:
+                self.queue.put_nowait(item)
+        return [item.game_id for item in items]
+
     def _worker(self) -> None:
         while True:
             item = self.queue.get()
@@ -115,10 +215,10 @@ class RunQueue:
                 self.queue.task_done()
 
     def _play(self, item: WorkItem) -> None:
-        guard = BudgetGuard(limit_usd=item.budget)
+        guard = item.shared_guard or BudgetGuard(limit_usd=item.budget)
         private_analysis: list[dict[str, Any]] = []
-        agents: list[OpenRouterAgent] = []
-        game: Game | None = None
+        agents: list[Any] = []
+        game: Game | PaperGame | None = None
 
         def audit_sink(entry: dict[str, Any]) -> None:
             private_analysis.append(entry)
@@ -184,9 +284,15 @@ class RunQueue:
                 ",".join(item.models),
                 item.budget,
             )
+            definition = get_benchmark(item.benchmark_version)
+            agent_class = (
+                PaperOpenRouterAgent
+                if item.benchmark_version == PAPER_BENCHMARK_VERSION
+                else OpenRouterAgent
+            )
             for index, model in enumerate(item.models):
                 agents.append(
-                    OpenRouterAgent(
+                    agent_class(
                         player_id=f"p{index}",
                         label=LAB_NAMES[index],
                         model=model,
@@ -196,13 +302,28 @@ class RunQueue:
                         audit_sink=audit_sink,
                     )
                 )
-            game = Game(
-                agents,
-                seed=item.seed,
-                backend="openrouter-web",
-                game_id=item.game_id,
-                event_sink=event_sink,
-            )
+            if item.benchmark_version == PAPER_BENCHMARK_VERSION:
+                game = PaperGame(
+                    agents,
+                    risk_treatment=item.risk_treatment,
+                    seed=item.seed,
+                    backend="openrouter-web-paper-v1",
+                    game_id=item.game_id,
+                    event_sink=event_sink,
+                    spec_hash=definition.spec_hash,
+                    protocol_hash=definition.protocol_hash,
+                    experiment_id=item.experiment_id,
+                    cell_id=item.cell_id,
+                    repetition=item.repetition,
+                )
+            else:
+                game = Game(
+                    agents,
+                    seed=item.seed,
+                    backend="openrouter-web",
+                    game_id=item.game_id,
+                    event_sink=event_sink,
+                )
             record = game.play()
             payload = record.to_dict()
             payload["budget"] = guard.summary()
@@ -211,6 +332,13 @@ class RunQueue:
             conn = db.connect(self.database_path)
             try:
                 db.save_game(conn, payload, contributor=contributor)
+                db.save_provider_calls(
+                    conn,
+                    item.game_id,
+                    private_analysis,
+                    experiment_id=item.experiment_id,
+                    cell_id=item.cell_id,
+                )
                 db.update_web_run(
                     conn,
                     item.game_id,
@@ -227,6 +355,14 @@ class RunQueue:
                     error_message=_parse_warning(incidents) if incidents else None,
                     event_type="completed",
                 )
+                if item.experiment_id and item.cell_id:
+                    db.update_experiment_cell(
+                        conn,
+                        item.experiment_id,
+                        item.cell_id,
+                        status="completed",
+                        game_id=item.game_id,
+                    )
             finally:
                 conn.close()
             logger.info(
@@ -255,6 +391,13 @@ class RunQueue:
             )
             conn = db.connect(self.database_path)
             try:
+                db.save_provider_calls(
+                    conn,
+                    item.game_id,
+                    private_analysis,
+                    experiment_id=item.experiment_id,
+                    cell_id=item.cell_id,
+                )
                 db.update_web_run(
                     conn,
                     item.game_id,
@@ -267,6 +410,17 @@ class RunQueue:
                     error_message=message,
                     event_type="failed",
                 )
+                if item.experiment_id and item.cell_id:
+                    db.update_experiment_cell(
+                        conn,
+                        item.experiment_id,
+                        item.cell_id,
+                        status="failed",
+                        game_id=item.game_id,
+                        error_message=message,
+                        usage=guard.summary(),
+                        partial_replay=partial,
+                    )
             finally:
                 conn.close()
         finally:

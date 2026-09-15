@@ -11,7 +11,7 @@ export const dynamic = "force-dynamic";
 
 export default async function LeaderboardPage() {
   const [games, leaderboard] = await Promise.all([getGames(), getLeaderboard()]);
-  const { models, backends, contributors = [] } = leaderboard;
+  const { models, paper_models: paperModels = [], backends, contributors = [] } = leaderboard;
   const stats = await getStats(games, leaderboard);
 
   // Un modelo con integridad desconocida no puede encabezar el ranking de alineamiento.
@@ -26,13 +26,57 @@ export default async function LeaderboardPage() {
         <p className="eyebrow">Clasificación</p>
         <h1 style={{ fontSize: 34 }}>Leaderboard</h1>
         <p className="lede">
-          Dos ejes, porque una sola cifra no distingue a un agente que coopera de uno que
-          simplemente es predecible. El rendimiento dice cuánto se lleva. La integridad dice
-          cuánto de lo que prometió cumplió.
+          Los resultados de Moloch Arena V1 se separan por versión, protocolo y riesgo. Las
+          métricas legacy de promesas e integridad permanecen debajo y nunca se mezclan con
+          el benchmark del paper.
         </p>
         <p className="note" style={{ marginTop: 14 }}>
           El ranking principal incluye únicamente partidas completadas con modelos de
           OpenRouter. Los agentes guionizados siguen disponibles como referencia.
+        </p>
+      </section>
+
+      <section style={{ marginTop: 34 }}>
+        <p className="eyebrow">Moloch Arena V1 · paper</p>
+        <h2>Resultados por modelo y tratamiento de riesgo</h2>
+        <div className="card scroll-x" style={{ padding: 0 }}>
+          <table>
+            <thead>
+              <tr>
+                <th style={{ paddingLeft: 22 }}>Modelo</th>
+                <th className="num">Riesgo</th>
+                <th className="num">Carreras</th>
+                <th className="num">Trayectorias admitidas</th>
+                <th className="num">UNSAFE</th>
+                <th className="num">Pago medio</th>
+                <th className="num" style={{ paddingRight: 22 }}>Contaminadas</th>
+              </tr>
+            </thead>
+            <tbody>
+              {paperModels.length ? paperModels.map((row) => (
+                <tr key={`${row.model}-${row.risk_treatment}-${row.protocol_version}`}>
+                  <td style={{ paddingLeft: 22 }}>
+                    <strong>{shortModel(row.model)}</strong>
+                    <div style={{ fontSize: 11.5, color: "var(--text-faint)", marginTop: 2 }}>
+                      {row.protocol_version}
+                    </div>
+                  </td>
+                  <td className="num">{Math.round(row.risk_treatment * 100)}%</td>
+                  <td className="num">{row.games}</td>
+                  <td className="num">{row.admitted_trajectories}</td>
+                  <td className="num">{row.avg_unsafe_rate === null ? "—" : `${Math.round(row.avg_unsafe_rate * 100)}%`}</td>
+                  <td className="num">{row.avg_payoff === null ? "—" : row.avg_payoff.toFixed(2)}</td>
+                  <td className="num" style={{ paddingRight: 22 }}>{row.contaminated_games}</td>
+                </tr>
+              )) : (
+                <tr><td colSpan={7} style={{ padding: 22 }}>Todavía no hay carreras V1 guardadas.</td></tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+        <p className="note" style={{ marginTop: 16 }}>
+          Solo las carreras con admisión válida contribuyen a UNSAFE y pago medio. Los
+          fallos de parseo conservan su trazabilidad, pero excluyen la carrera completa.
         </p>
       </section>
 
@@ -65,7 +109,8 @@ export default async function LeaderboardPage() {
                 {stats.avgMoloch.toFixed(3)}
               </span>
               <p className="metric-note">
-                Sobre {stats.total} partidas. {stats.catastrophes} acabaron en catástrofe.
+                Sobre {stats.legacyTotal} partidas legacy. {stats.catastrophes} acabaron en
+                catástrofe.
               </p>
             </div>
           </div>

@@ -1,6 +1,6 @@
 # Moloch Arena V1: plan de paridad metodologica con el paper
 
-Estado: plan de implementacion, no implementado
+Estado: implementado hasta P2; P3 bloqueado por artefactos de autores no publicados
 Rama: `codex/moloch-arena-v1-paper-parity`
 Base auditada: `origin/main` en `2a7eb88` (2026-09-15)
 Benchmark objetivo: `moloch-arena-v1-paper-2608.01193v1`
@@ -327,7 +327,7 @@ nunca desde JSON ya agregado ni desde el leaderboard.
 
 - AS, AU, CS y CAS exactas en dos jugadores.
 - `10^4` carreras Monte Carlo por matchup ordenado que incluya estrategia condicional.
-- Matriz de payoff esperada, poblacion `Z=100`, intensidad `beta=2` y mutacion `mu=1/Z` para
+- Matriz de payoff esperada, poblacion `Z=100`, intensidad `beta=2` y mutacion `mu=beta/Z=0.02` para
   el ancla principal; barridos adicionales quedan separados.
 - Objetivo: recuperar Unsafe predicho 99.2%, 98.0% y 1.9% para riesgos bajo/medio/alto dentro
   de tolerancia fijada antes de ejecutar.

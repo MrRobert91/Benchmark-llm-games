@@ -12,6 +12,7 @@ import type {
   ContributionRow,
   GameSummary,
   ModelRow,
+  PaperModelRow,
   Replay,
   WebRun,
 } from "./types";
@@ -124,11 +125,12 @@ function enrichSnapshotSummary(game: GameSummary): GameSummary {
 
 export async function getLeaderboard(): Promise<{
   models: ModelRow[];
+  paper_models: PaperModelRow[];
   backends: BackendRow[];
   contributors: ContributionRow[];
 }> {
   return liveOrSnapshot("/api/leaderboard", () =>
-    readJson("leaderboard.json", { models: [], backends: [], contributors: [] }),
+    readJson("leaderboard.json", { models: [], paper_models: [], backends: [], contributors: [] }),
   );
 }
 
@@ -171,6 +173,7 @@ export async function getStats(
   games?: GameSummary[],
   leaderboard?: {
     models: ModelRow[];
+    paper_models: PaperModelRow[];
     backends: BackendRow[];
     contributors: ContributionRow[];
   },
@@ -178,18 +181,41 @@ export async function getStats(
   const sourceGames = games ?? (await getGames());
   const sourceLeaderboard = leaderboard ?? (await getLeaderboard());
   const total = sourceGames.length;
-  const catastrophes = sourceGames.filter(
+  const paperGames = sourceGames.filter(
+    (game) => game.benchmark_version === "moloch-arena-v1-paper-2608.01193v1",
+  );
+  const legacyGames = sourceGames.filter(
+    (game) => game.benchmark_version !== "moloch-arena-v1-paper-2608.01193v1",
+  );
+  const catastrophes = legacyGames.filter(
     (g) => g.outcome_kind === "catastrophe",
   ).length;
-  const restraints = sourceGames.filter(
+  const restraints = legacyGames.filter(
     (g) => g.outcome_kind === "restraint",
   ).length;
   const avgMoloch =
-    total > 0
-      ? sourceGames.reduce((sum, game) => sum + game.moloch_index, 0) / total
+    legacyGames.length > 0
+      ? legacyGames.reduce((sum, game) => sum + game.moloch_index, 0) /
+        legacyGames.length
       : 0;
+  const admittedPaperGames = paperGames.filter(
+    (game) => game.admission_status === "admitted",
+  );
+  const paperAvgUnsafe = admittedPaperGames.length
+    ? admittedPaperGames.reduce((sum, game) => sum + (game.unsafe_rate ?? 0), 0) /
+      admittedPaperGames.length
+    : 0;
+  const paperMeanPayoff = admittedPaperGames.length
+    ? admittedPaperGames.reduce((sum, game) => sum + (game.mean_payoff ?? 0), 0) /
+      admittedPaperGames.length
+    : 0;
   return {
     total,
+    paperTotal: paperGames.length,
+    legacyTotal: legacyGames.length,
+    paperAdmitted: admittedPaperGames.length,
+    paperAvgUnsafe,
+    paperMeanPayoff,
     catastrophes,
     restraints,
     avgMoloch,
