@@ -245,8 +245,10 @@ export interface ContributionRow {
   url: string | null;
   n_players: number;
   outcome_kind: Outcome["kind"];
-  moloch_index: number;
-  mean_integrity: number;
+  risk_treatment: number;
+  admission_status: string;
+  unsafe_rate: number;
+  mean_payoff: number;
 }
 
 export interface OpenRouterModel {
@@ -309,12 +311,47 @@ export interface PaperModelRow {
   model: string;
   risk_treatment: number;
   protocol_version: string;
+  n_players: number;
   games: number;
+  trajectories: number;
+  admitted_trajectories: number;
+  avg_payoff: number | null;
+  avg_unsafe_rate: number | null;
+  avg_stage_payoff: number | null;
+  setback_rate: number | null;
+  leader_rate: number | null;
+  parse_failures: number;
+  contaminated_games: number;
+}
+
+export interface PaperBackendRow {
+  provider: string;
+  backend: string;
+  protocol_version: string;
+  risk_treatment: number;
+  n_players: number;
+  games: number;
+  trajectories: number;
+  served_models: number;
+  calls: number;
+  cost_usd: number;
   admitted_trajectories: number;
   avg_payoff: number | null;
   avg_unsafe_rate: number | null;
   parse_failures: number;
   contaminated_games: number;
+}
+
+export interface PaperSummary {
+  games: number;
+  admitted_games: number;
+  contaminated_games: number;
+  trajectories: number;
+  requested_models: number;
+  avg_unsafe_rate: number | null;
+  avg_payoff: number | null;
+  cost_usd: number;
+  updated_at: string | null;
 }
 
 export interface WebRun {

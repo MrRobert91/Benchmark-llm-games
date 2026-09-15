@@ -200,4 +200,44 @@ def test_paper_database_roundtrip_is_versioned_and_normalized(tmp_path):
     terminals = conn.execute("SELECT * FROM terminal_results").fetchall()
     assert len(terminals) == 2
     assert db.paper_leaderboard(conn)[0]["risk_treatment"] == 0.6
+    assert db.paper_leaderboard(conn)[0]["n_players"] == 2
+    assert db.paper_summary(conn)["admitted_games"] == 1
+    conn.close()
+
+
+def test_v1_leaderboards_average_comparable_admitted_runs(tmp_path):
+    conn = db.connect(tmp_path / "leaderboard.db")
+    records = [
+        game(("AS", "AS"), risk=0.6, seed=31).play().to_dict(),
+        game(("AS", "AS"), risk=0.6, seed=32).play().to_dict(),
+    ]
+    for record in records:
+        db.save_game(conn, record)
+        db.save_provider_calls(
+            conn,
+            record["game_id"],
+            [
+                {
+                    "player_id": player["player_id"],
+                    "phase": "decision",
+                    "model": player["model"],
+                    "served_model": player["model"],
+                    "provider": "Test Provider",
+                    "usage": {"cost": 0.001},
+                }
+                for player in record["players"]
+            ],
+        )
+
+    rows = db.paper_leaderboard(conn)
+    assert len(rows) == 1
+    assert rows[0]["games"] == 2
+    assert rows[0]["trajectories"] == 4
+    assert rows[0]["admitted_trajectories"] == 4
+    assert rows[0]["avg_unsafe_rate"] == 0
+    backends = db.paper_backend_leaderboard(conn)
+    assert backends[0]["provider"] == "Test Provider"
+    assert backends[0]["games"] == 2
+    assert backends[0]["trajectories"] == 4
+    assert backends[0]["cost_usd"] == pytest.approx(0.004)
     conn.close()

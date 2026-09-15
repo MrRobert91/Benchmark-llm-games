@@ -15,6 +15,7 @@ export default async function ArenaPage({
   const { id } = await params;
   const run = await getWebRun(id);
   if (run) {
+    if (run.benchmark_version !== "moloch-arena-v1-paper-2608.01193v1") notFound();
     return (
       <>
         <section style={{ marginTop: 34, marginBottom: 22 }}>
@@ -24,9 +25,7 @@ export default async function ArenaPage({
           <div className="game-head">
             <div>
               <h1 style={{ fontSize: 28, marginBottom: 8, marginTop: 12 }}>
-                {run.benchmark_version === "moloch-arena-v1-paper-2608.01193v1"
-                  ? "Moloch Arena V1 · carrera del paper"
-                  : "El consejo de los laboratorios"}
+                Moloch Arena V1 · carrera del paper
               </h1>
               <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                 <span className="tag">{run.models.length} laboratorios</span>
@@ -52,10 +51,9 @@ export default async function ArenaPage({
     );
   }
   const replay = await getReplay(id);
-  if (!replay) notFound();
+  if (!replay || replay.benchmark_version !== "moloch-arena-v1-paper-2608.01193v1") notFound();
 
-  const scripted = replay.backend === "scripted";
-  const isPaper = replay.benchmark_version === "moloch-arena-v1-paper-2608.01193v1";
+  const scripted = replay.backend.includes("scripted");
 
   return (
     <>
@@ -66,7 +64,7 @@ export default async function ArenaPage({
         <div className="game-head">
           <div>
             <h1 style={{ fontSize: 28, marginBottom: 8, marginTop: 12 }}>
-              {isPaper ? "Moloch Arena V1 · carrera del paper" : "El consejo de los laboratorios"}
+              Moloch Arena V1 · carrera del paper
             </h1>
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
               <span className="tag">{replay.players.length} laboratorios</span>
@@ -75,7 +73,7 @@ export default async function ArenaPage({
               <span className="tag">
                 {scripted ? "agentes guionizados" : `modelos reales · ${replay.backend}`}
               </span>
-              {isPaper && replay.risk_treatment !== undefined && (
+              {replay.risk_treatment !== undefined && (
                 <span className="tag">riesgo {Math.round(replay.risk_treatment * 100)}%</span>
               )}
             </div>
@@ -83,12 +81,11 @@ export default async function ArenaPage({
         </div>
       </section>
 
-      {scripted && !isPaper && (
+      {scripted && (
         <p className="note" style={{ marginBottom: 22 }}>
           Esta partida la jugaron los agentes guionizados de referencia: las cuatro
-          estrategias del modelo evolutivo reducido de <em>Falling Behind</em>. No son
-          modelos de lenguaje, y su diálogo se genera a partir del estado de la partida. Para
-          jugar con modelos reales por OpenRouter, ver el README.
+          estrategias del modelo evolutivo reducido de <em>Falling Behind</em>. Son un ancla
+          determinista del benchmark, no modelos de lenguaje.
         </p>
       )}
 

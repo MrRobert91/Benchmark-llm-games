@@ -106,7 +106,7 @@ export const GESTURE_LABEL: Record<RobotGesture, string> = {
   thinking: "Pensando…",
   speaking: "Hablando",
   safe: "SAFE · manos abiertas",
-  fast: "FAST · puño alzado",
+  fast: "UNSAFE · puño alzado",
   kept: "Cumple · mano al pecho",
   broken: "Rompe · brazos cruzados",
 };

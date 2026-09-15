@@ -4,11 +4,10 @@ import "./globals.css";
 import { Nav } from "@/components/Nav";
 
 export const metadata: Metadata = {
-  title: "Moloch Arena — benchmark de carrera armamentística para LLMs",
+  title: "Moloch Arena V1 — benchmark reproducible de carreras de IA",
   description:
-    "Varios modelos compiten por una tecnología transformadora. Deliberan en público y " +
-    "actúan en privado. Se mide si el grupo cae en la trampa multipolar y quién cumple " +
-    "su palabra.",
+    "Modelos eligen SAFE o UNSAFE bajo un horizonte incierto. Compara tasa UNSAFE, " +
+    "payoff, liderazgo y setback con trazabilidad SQLite y replay 3D.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -20,9 +19,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <footer>
           <div className="shell">
             <p style={{ margin: 0 }}>
-              Moloch Arena · benchmark de investigación. Las reglas derivan del modelo de
-              carrera idealizada de Han, Pereira y Lenaerts y del diseño conductual de{" "}
-              <em>Falling Behind Drives Unsafe Development</em> (2026).
+              Moloch Arena V1 · benchmark de investigación basado en <em>Humans Are More
+              Diverse</em> y <em>Falling Behind Drives Unsafe Development</em> (2026).
             </p>
             <p style={{ margin: "8px 0 0" }}>
               Simula una estructura de incentivos. No predice la conducta de ninguna

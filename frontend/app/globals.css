@@ -697,6 +697,18 @@ code {
 .council-balance > div > .balance-public-vote { grid-column: 1 / -1; display: block; color: #adb9cb; font-size: 10px; line-height: 1.6; }
 .balance-public-vote b { color: #ece2d3; }
 .gesture-tag { color: #93ddef; border-color: #4c798b; }
+.benchmark-live { display: flex; align-items: center; gap: 9px; color: var(--text-dim); font-size: 12px; margin: -8px 0 20px; }
+.benchmark-chart { display: grid; gap: 13px; margin-top: 20px; }
+.benchmark-chart-row { display: grid; grid-template-columns: minmax(155px, 1fr) minmax(180px, 3fr) 54px; gap: 14px; align-items: center; }
+.benchmark-chart-row small { display: block; color: var(--text-faint); margin-top: 3px; }
+.benchmark-chart-row > b { text-align: right; font: 600 12px/1 var(--mono); }
+.benchmark-bar { height: 12px; border-radius: 999px; background: rgba(255,255,255,.07); overflow: hidden; }
+.benchmark-bar > span { display: block; height: 100%; min-width: 2px; border-radius: inherit; transition: width .35s ease; }
+.benchmark-legend { display: flex; gap: 16px; justify-content: flex-end; margin-top: 10px; color: var(--text-dim); font-size: 11px; }
+.benchmark-legend span { display: inline-flex; gap: 6px; align-items: center; }
+.benchmark-legend i { width: 9px; height: 9px; border-radius: 50%; }
+@media (max-width: 680px) { .benchmark-chart-row { grid-template-columns: 1fr 48px; } .benchmark-chart-row .benchmark-bar { grid-column: 1 / -1; grid-row: 2; } }
+
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .archive-stats { display: flex; gap: 24px; flex-wrap: wrap; font-size: 12px; color: #a6b1c4; margin-bottom: 22px; }
 .archive-stats b { font: 23px var(--mono); color: #eddbb8; margin-right: 5px; }

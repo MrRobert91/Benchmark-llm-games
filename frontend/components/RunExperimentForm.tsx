@@ -176,8 +176,8 @@ export function RunExperimentForm() {
             <strong>Protocolo fiel al mecanismo del paper.</strong>
             <p>
               Una decisión sellada SAFE/UNSAFE por jugador y ronda; horizonte geométrico
-              oculto, pagos de etapa, premio compartido y setback privado. La conversación
-              del consejo se conserva solo como replay visual y no cambia las decisiones.
+              oculto, pagos de etapa, premio compartido y setback privado. La repetición 3D
+              revela el estado y las acciones sin introducir información en la partida.
             </p>
           </div>
         )}

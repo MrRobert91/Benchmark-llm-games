@@ -35,6 +35,6 @@ races for every ordered conditional-strategy matchup, population 100, beta 2, mu
 eight numerical runs and one million generations. The frozen absolute tolerance is 0.03.
 
 All three published UNSAFE anchors are reproduced within tolerance. See
-`docs/REPRODUCIBILITY.md` for the claim boundary: this validates P0/P1 and the published P2
+[`../REPRODUCIBILITY.md`](../REPRODUCIBILITY.md) for the claim boundary: this validates P0/P1 and the published P2
 reconstruction, but it does not remove the P3 blocker created by unavailable author prompts,
 probes, raw data and code.

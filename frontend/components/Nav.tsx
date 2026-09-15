@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const LINKS = [
-  { href: "/", label: "El proyecto" },
+  { href: "/", label: "Moloch Arena V1" },
   { href: "/arena", label: "Partidas" },
   { href: "/run", label: "Ejecutar" },
   { href: "/leaderboard", label: "Leaderboard" },

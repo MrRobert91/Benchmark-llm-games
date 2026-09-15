@@ -518,27 +518,110 @@ def leaderboard(
 
 
 def paper_leaderboard(conn: sqlite3.Connection) -> list[dict[str, Any]]:
+    """Aggregate comparable V1 trajectories by requested model.
+
+    A comparison cell is deliberately strict: protocol, risk treatment and player count
+    must match. Repeated web runs in the same cell therefore increase the sample behind the
+    same row instead of creating a misleading new ranking entry.
+    """
     rows = conn.execute(
-        """SELECT gp.model, g.risk_treatment, g.protocol_version,
+        """SELECT gp.model, g.risk_treatment, g.protocol_version, g.n_players,
                   COUNT(DISTINCT gp.game_id) AS games,
+                  COUNT(*) AS trajectories,
                   SUM(CASE WHEN g.admission_status = 'admitted' THEN 1 ELSE 0 END)
                       AS admitted_trajectories,
                   AVG(CASE WHEN g.admission_status = 'admitted' THEN gp.payoff END)
                       AS avg_payoff,
                   AVG(CASE WHEN g.admission_status = 'admitted' THEN gp.unsafe_rate END)
                       AS avg_unsafe_rate,
+                  AVG(CASE WHEN g.admission_status = 'admitted' THEN gp.stage_payoff END)
+                      AS avg_stage_payoff,
+                  AVG(CASE WHEN g.admission_status = 'admitted' THEN gp.setback END)
+                      AS setback_rate,
+                  AVG(CASE WHEN g.admission_status = 'admitted' THEN tr.is_leader END)
+                      AS leader_rate,
                   SUM(gp.parse_failures) AS parse_failures,
                   COUNT(DISTINCT CASE WHEN g.contaminated = 1 THEN g.game_id END)
                       AS contaminated_games
            FROM game_players gp
            JOIN games g ON g.game_id = gp.game_id
+           LEFT JOIN terminal_results tr
+             ON tr.game_id = gp.game_id AND tr.player_id = gp.player_id
            WHERE g.benchmark_version = 'moloch-arena-v1-paper-2608.01193v1'
-           GROUP BY gp.model, g.risk_treatment, g.protocol_version
-           ORDER BY gp.model, g.risk_treatment"""
+           GROUP BY gp.model, g.risk_treatment, g.protocol_version, g.n_players
+           ORDER BY gp.model, g.n_players, g.risk_treatment"""
     ).fetchall()
     return [
         {
             **dict(row),
+            **{
+                key: None if row[key] is None else round(float(row[key]), 6)
+                for key in (
+                    "avg_payoff",
+                    "avg_unsafe_rate",
+                    "avg_stage_payoff",
+                    "setback_rate",
+                    "leader_rate",
+                )
+            },
+        }
+        for row in rows
+    ]
+
+
+def paper_backend_leaderboard(conn: sqlite3.Connection) -> list[dict[str, Any]]:
+    """Aggregate comparable V1 outcomes by every provider that served a trajectory.
+
+    A trajectory routed through more than one provider appears in each relevant provider
+    row. Call counts and cost therefore remain exact for the named provider.
+    """
+    rows = conn.execute(
+        """WITH route_counts AS (
+               SELECT pc.game_id, pc.player_id,
+                      COALESCE(NULLIF(pc.provider, ''), 'Proveedor no informado') AS provider,
+                      COALESCE(NULLIF(pc.served_model, ''), NULLIF(pc.requested_model, ''),
+                               'Modelo no informado') AS served_model,
+                      COUNT(*) AS route_calls,
+                      SUM(pc.cost_usd) AS route_cost
+               FROM provider_calls pc
+               GROUP BY pc.game_id, pc.player_id, provider, served_model
+           ), trajectories AS (
+               SELECT gp.game_id, gp.player_id, gp.payoff, gp.unsafe_rate,
+                      gp.parse_failures, g.backend, g.protocol_version, g.risk_treatment,
+                      g.n_players, g.admission_status, g.contaminated,
+                      COALESCE(rc.provider, g.backend) AS provider,
+                      COALESCE(rc.served_model, gp.model) AS served_model,
+                      COALESCE(rc.route_calls, 0) AS calls,
+                      COALESCE(rc.route_cost, 0) AS cost_usd
+               FROM game_players gp
+               JOIN games g ON g.game_id = gp.game_id
+               LEFT JOIN route_counts rc
+                 ON rc.game_id = gp.game_id AND rc.player_id = gp.player_id
+               WHERE g.benchmark_version = 'moloch-arena-v1-paper-2608.01193v1'
+           )
+           SELECT provider, backend, protocol_version, risk_treatment, n_players,
+                  COUNT(DISTINCT game_id) AS games,
+                  COUNT(*) AS trajectories,
+                  COUNT(DISTINCT served_model) AS served_models,
+                  SUM(calls) AS calls,
+                  SUM(cost_usd) AS cost_usd,
+                  SUM(CASE WHEN admission_status = 'admitted' THEN 1 ELSE 0 END)
+                    AS admitted_trajectories,
+                  AVG(CASE WHEN admission_status = 'admitted' THEN payoff END)
+                    AS avg_payoff,
+                  AVG(CASE WHEN admission_status = 'admitted' THEN unsafe_rate END)
+                    AS avg_unsafe_rate,
+                  SUM(parse_failures) AS parse_failures,
+                  COUNT(DISTINCT CASE WHEN contaminated = 1 THEN game_id END)
+                    AS contaminated_games
+           FROM trajectories
+           GROUP BY provider, backend, protocol_version, risk_treatment, n_players
+           ORDER BY provider, n_players, risk_treatment"""
+    ).fetchall()
+    return [
+        {
+            **dict(row),
+            "cost_usd": round(float(row["cost_usd"] or 0), 8),
             "avg_payoff": None
             if row["avg_payoff"] is None
             else round(float(row["avg_payoff"]), 6),
@@ -548,6 +631,36 @@ def paper_leaderboard(conn: sqlite3.Connection) -> list[dict[str, Any]]:
         }
         for row in rows
     ]
+
+
+def paper_summary(conn: sqlite3.Connection) -> dict[str, Any]:
+    row = conn.execute(
+        """SELECT COUNT(DISTINCT g.game_id) AS games,
+                  COUNT(DISTINCT CASE WHEN g.admission_status = 'admitted'
+                                      THEN g.game_id END) AS admitted_games,
+                  COUNT(DISTINCT CASE WHEN g.contaminated = 1
+                                      THEN g.game_id END) AS contaminated_games,
+                  COUNT(gp.player_id) AS trajectories,
+                  COUNT(DISTINCT gp.model) AS requested_models,
+                  AVG(CASE WHEN g.admission_status = 'admitted'
+                           THEN gp.unsafe_rate END) AS avg_unsafe_rate,
+                  AVG(CASE WHEN g.admission_status = 'admitted'
+                           THEN gp.payoff END) AS avg_payoff,
+                  MAX(g.created_at) AS updated_at
+           FROM games g
+           LEFT JOIN game_players gp ON gp.game_id = g.game_id
+           WHERE g.benchmark_version = 'moloch-arena-v1-paper-2608.01193v1'"""
+    ).fetchone()
+    result = dict(row)
+    for key in ("avg_unsafe_rate", "avg_payoff"):
+        result[key] = None if result[key] is None else round(float(result[key]), 6)
+    cost = conn.execute(
+        """SELECT COALESCE(SUM(pc.cost_usd), 0)
+           FROM provider_calls pc JOIN games g ON g.game_id = pc.game_id
+           WHERE g.benchmark_version = 'moloch-arena-v1-paper-2608.01193v1'"""
+    ).fetchone()[0]
+    result["cost_usd"] = round(float(cost), 8)
+    return result
 
 
 def moloch_by_backend(conn: sqlite3.Connection) -> list[dict[str, Any]]:
@@ -697,11 +810,15 @@ def list_contributions(conn: sqlite3.Connection, limit: int = 100) -> list[dict[
         for row in conn.execute(
             """SELECT g.game_id, g.created_at, g.contributor_nick AS nick,
                       g.contributor_url AS url, g.n_players, g.outcome_kind,
-                      g.moloch_index, g.mean_integrity
+                      g.risk_treatment, g.admission_status,
+                      AVG(gp.unsafe_rate) AS unsafe_rate,
+                      AVG(gp.payoff) AS mean_payoff
                FROM games g
-               WHERE g.backend = 'openrouter-web'
-                 AND g.benchmark_version = 'legacy-moloch-v0'
+               JOIN game_players gp ON gp.game_id = g.game_id
+               WHERE g.backend LIKE '%openrouter%'
+                 AND g.benchmark_version = 'moloch-arena-v1-paper-2608.01193v1'
                  AND g.contributor_nick IS NOT NULL
+               GROUP BY g.game_id
                ORDER BY g.created_at DESC, g.rowid DESC LIMIT ?""",
             (limit,),
         )

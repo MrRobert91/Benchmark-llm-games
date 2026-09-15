@@ -8,14 +8,40 @@ import fs from "node:fs";
 import path from "node:path";
 
 import type {
-  BackendRow,
   ContributionRow,
   GameSummary,
-  ModelRow,
+  PaperBackendRow,
   PaperModelRow,
+  PaperSummary,
   Replay,
   WebRun,
 } from "./types";
+
+export const PAPER_V1 = "moloch-arena-v1-paper-2608.01193v1" as const;
+
+export interface LeaderboardData {
+  summary: PaperSummary;
+  paper_models: PaperModelRow[];
+  paper_backends: PaperBackendRow[];
+  contributors: ContributionRow[];
+}
+
+const EMPTY_LEADERBOARD: LeaderboardData = {
+  summary: {
+    games: 0,
+    admitted_games: 0,
+    contaminated_games: 0,
+    trajectories: 0,
+    requested_models: 0,
+    avg_unsafe_rate: null,
+    avg_payoff: null,
+    cost_usd: 0,
+    updated_at: null,
+  },
+  paper_models: [],
+  paper_backends: [],
+  contributors: [],
+};
 
 const DATA_DIR = path.join(process.cwd(), "public", "data");
 const API_BASE_URL = (
@@ -66,7 +92,8 @@ export async function getGames(): Promise<GameSummary[]> {
         ids.add(game.game_id);
         games.push(enrichSnapshotSummary(game));
       }
-      if (page.length < 200) return games;
+      if (page.length < 200)
+        return games.filter((game) => game.benchmark_version === PAPER_V1);
     }
   } catch (error) {
     console.warn("Falling back to bundled game archive", error);
@@ -96,10 +123,17 @@ export async function getGames(): Promise<GameSummary[]> {
           winner_model:
             replay.players.find((p) => p.player_id === replay.outcome.winner_id)
               ?.model ?? null,
+          benchmark_version: replay.benchmark_version,
+          protocol_version: replay.protocol_version,
+          admission_status: replay.admission_status,
+          risk_treatment: replay.risk_treatment,
+          unsafe_rate: replay.metrics.unsafe_rate,
+          mean_payoff: replay.metrics.mean_payoff,
         });
       }
     }
     return [...summaries.values()]
+      .filter((game) => game.benchmark_version === PAPER_V1)
       .map(enrichSnapshotSummary)
       .sort(
         (a, b) =>
@@ -123,14 +157,9 @@ function enrichSnapshotSummary(game: GameSummary): GameSummary {
   };
 }
 
-export async function getLeaderboard(): Promise<{
-  models: ModelRow[];
-  paper_models: PaperModelRow[];
-  backends: BackendRow[];
-  contributors: ContributionRow[];
-}> {
+export async function getLeaderboard(): Promise<LeaderboardData> {
   return liveOrSnapshot("/api/leaderboard", () =>
-    readJson("leaderboard.json", { models: [], paper_models: [], backends: [], contributors: [] }),
+    readJson("leaderboard.json", EMPTY_LEADERBOARD),
   );
 }
 
@@ -148,7 +177,7 @@ export async function getWebRun(gameId: string): Promise<WebRun | null> {
   }
 }
 
-/** Partida destacada de la portada: prioriza modelos reales, catástrofes y partidas largas. */
+/** Partida V1 destacada: prioriza modelos reales, admisión y actualidad. */
 export async function getFeaturedGame(
   games?: GameSummary[],
 ): Promise<GameSummary | null> {
@@ -160,65 +189,30 @@ export async function getFeaturedGame(
     const realModelsB = b.backend === "scripted" ? 1 : 0;
     if (realModelsA !== realModelsB) return realModelsA - realModelsB;
 
-    const kindRank = (kind: GameSummary["outcome_kind"]) =>
-      kind === "catastrophe" ? 0 : kind === "aligned_win" ? 1 : 2;
-    const outcomeDifference =
-      kindRank(a.outcome_kind) - kindRank(b.outcome_kind);
-    if (outcomeDifference !== 0) return outcomeDifference;
-    return b.final_round - a.final_round;
+    const admittedDifference =
+      Number(b.admission_status === "admitted") - Number(a.admission_status === "admitted");
+    if (admittedDifference !== 0) return admittedDifference;
+    return b.created_at.localeCompare(a.created_at);
   })[0];
 }
 
 export async function getStats(
   games?: GameSummary[],
-  leaderboard?: {
-    models: ModelRow[];
-    paper_models: PaperModelRow[];
-    backends: BackendRow[];
-    contributors: ContributionRow[];
-  },
+  leaderboard?: LeaderboardData,
 ) {
   const sourceGames = games ?? (await getGames());
   const sourceLeaderboard = leaderboard ?? (await getLeaderboard());
-  const total = sourceGames.length;
-  const paperGames = sourceGames.filter(
-    (game) => game.benchmark_version === "moloch-arena-v1-paper-2608.01193v1",
-  );
-  const legacyGames = sourceGames.filter(
-    (game) => game.benchmark_version !== "moloch-arena-v1-paper-2608.01193v1",
-  );
-  const catastrophes = legacyGames.filter(
-    (g) => g.outcome_kind === "catastrophe",
-  ).length;
-  const restraints = legacyGames.filter(
-    (g) => g.outcome_kind === "restraint",
-  ).length;
-  const avgMoloch =
-    legacyGames.length > 0
-      ? legacyGames.reduce((sum, game) => sum + game.moloch_index, 0) /
-        legacyGames.length
-      : 0;
-  const admittedPaperGames = paperGames.filter(
-    (game) => game.admission_status === "admitted",
-  );
-  const paperAvgUnsafe = admittedPaperGames.length
-    ? admittedPaperGames.reduce((sum, game) => sum + (game.unsafe_rate ?? 0), 0) /
-      admittedPaperGames.length
-    : 0;
-  const paperMeanPayoff = admittedPaperGames.length
-    ? admittedPaperGames.reduce((sum, game) => sum + (game.mean_payoff ?? 0), 0) /
-      admittedPaperGames.length
-    : 0;
+  const summary = sourceLeaderboard.summary;
   return {
-    total,
-    paperTotal: paperGames.length,
-    legacyTotal: legacyGames.length,
-    paperAdmitted: admittedPaperGames.length,
-    paperAvgUnsafe,
-    paperMeanPayoff,
-    catastrophes,
-    restraints,
-    avgMoloch,
-    backends: sourceLeaderboard.backends,
+    total: summary.games || sourceGames.length,
+    paperTotal: summary.games || sourceGames.length,
+    paperAdmitted: summary.admitted_games,
+    paperAvgUnsafe: summary.avg_unsafe_rate ?? 0,
+    paperMeanPayoff: summary.avg_payoff ?? 0,
+    trajectories: summary.trajectories,
+    models: summary.requested_models,
+    contaminated: summary.contaminated_games,
+    costUsd: summary.cost_usd,
+    backends: sourceLeaderboard.paper_backends,
   };
 }
