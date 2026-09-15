@@ -238,6 +238,38 @@ class RunQueue:
             round_index = detail.get("round")
             player_id = detail.get("player_id")
             label = _player_label(player_id, item.models)
+            replay = game.record.to_dict()
+            public_detail = dict(detail)
+            identity = _player_identity(player_id, item.models)
+            if identity:
+                public_detail.update(identity)
+            round_record = next(
+                (
+                    record
+                    for record in replay.get("rounds", [])
+                    if record.get("index") == round_index
+                ),
+                None,
+            )
+            if event_type == "speech" and round_record:
+                speech = next(
+                    (
+                        entry
+                        for entry in round_record.get("meeting", [])
+                        if entry.get("player_id") == player_id
+                    ),
+                    None,
+                )
+                if speech:
+                    public_detail["speech"] = speech
+            elif event_type == "round_resolved" and round_record:
+                public_detail.update(
+                    {
+                        "actions": round_record.get("actions", []),
+                        "state_after": round_record.get("state_after", []),
+                        "messages": round_record.get("events", []),
+                    }
+                )
             if event_type == "speaking":
                 phase = f"Ronda {round_index}: {label} prepara su intervención"
             elif event_type == "speech":
@@ -257,11 +289,12 @@ class RunQueue:
                     item.game_id,
                     status="running",
                     phase=phase,
-                    replay=game.record.to_dict(),
+                    replay=replay,
                     private_analysis=private_analysis,
                     usage=guard.summary(),
                     parse_incidents=game.record.parse_incidents,
                     event_type=event_type,
+                    event_detail=public_detail,
                 )
             finally:
                 conn.close()
@@ -354,6 +387,10 @@ class RunQueue:
                     parse_incidents=incidents,
                     error_message=_parse_warning(incidents) if incidents else None,
                     event_type="completed",
+                    event_detail={
+                        "round": payload.get("outcome", {}).get("final_round"),
+                        "headline": payload.get("outcome", {}).get("headline"),
+                    },
                 )
                 if item.experiment_id and item.cell_id:
                     db.update_experiment_cell(
@@ -409,6 +446,7 @@ class RunQueue:
                     parse_incidents=game.record.parse_incidents if game else [],
                     error_message=message,
                     event_type="failed",
+                    event_detail={"message": message},
                 )
                 if item.experiment_id and item.cell_id:
                     db.update_experiment_cell(
@@ -466,10 +504,21 @@ def _public_error(exc: Exception) -> str:
 
 
 def _player_label(player_id: object, models: list[str]) -> str:
+    identity = _player_identity(player_id, models)
+    if identity:
+        return f"{identity['label']} ({identity['model']})"
+    return str(player_id or "un laboratorio")
+
+
+def _player_identity(player_id: object, models: list[str]) -> dict[str, str] | None:
     if isinstance(player_id, str) and player_id.startswith("p"):
         try:
             index = int(player_id[1:])
-            return f"{LAB_NAMES[index]} ({models[index]})"
+            return {
+                "player_id": player_id,
+                "label": LAB_NAMES[index],
+                "model": models[index],
+            }
         except (ValueError, IndexError):
             pass
-    return str(player_id or "un laboratorio")
+    return None

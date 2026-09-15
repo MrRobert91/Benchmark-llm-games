@@ -375,6 +375,35 @@ export interface WebRun {
   risk_treatment?: number | null;
 }
 
+export interface LiveRunEventDetail {
+  round?: number;
+  player_id?: string;
+  label?: string;
+  model?: string;
+  speech?: SpeechRecord;
+  actions?: ActionRecord[];
+  state_after?: StateRecord[];
+  messages?: string[];
+  headline?: string;
+  message?: string;
+}
+
+export interface LiveRunEvent {
+  seq: number;
+  created_at: string;
+  event_type:
+    | "queued"
+    | "started"
+    | "speaking"
+    | "speech"
+    | "thinking"
+    | "round_resolved"
+    | "finished"
+    | "completed"
+    | "failed";
+  detail: LiveRunEventDetail;
+}
+
 /** Identidad de cada laboratorio.
  *
  * Slots 1-5 de la paleta categórica de referencia, pasos de modo oscuro. Validados como

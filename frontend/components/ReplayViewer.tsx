@@ -7,8 +7,15 @@ import {
   type KeyboardEvent,
 } from "react";
 import dynamic from "next/dynamic";
-import { OUTCOME_LABEL, labColor, shortModel, type Replay } from "@/lib/types";
+import {
+  OUTCOME_LABEL,
+  labColor,
+  shortModel,
+  type LiveRunEvent,
+  type Replay,
+} from "@/lib/types";
 import { buildTimeline, CHARACTER_NAMES } from "@/lib/replay-timeline";
+import { describeLiveEvent, liveEventTitle } from "@/lib/live-narration";
 import { ReplayResults } from "./ReplayResults";
 import { robotGesture, GESTURE_LABEL } from "@/lib/robot-performance";
 
@@ -28,7 +35,19 @@ const PHASE = {
   outcome: "Resultado terminal",
 };
 
-export function ReplayViewer({ replay, live = false, completed = false, thinking = false }: { replay: Replay; live?: boolean; completed?: boolean; thinking?: boolean }) {
+export function ReplayViewer({
+  replay,
+  live = false,
+  completed = false,
+  thinking = false,
+  liveEvents = [],
+}: {
+  replay: Replay;
+  live?: boolean;
+  completed?: boolean;
+  thinking?: boolean;
+  liveEvents?: LiveRunEvent[];
+}) {
   const playerRef = useRef<HTMLDivElement>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
   const beats = useMemo(() => buildTimeline(replay, !live), [replay, live]);
@@ -39,11 +58,15 @@ export function ReplayViewer({ replay, live = false, completed = false, thinking
   const [speed, setSpeed] = useState(1);
   const currentStep = live ? beats.length - 1 : Math.min(step, beats.length - 1);
   const beat = beats[currentStep];
+  const latestLiveEvent = liveEvents.at(-1);
+  const activePlayerId = live
+    ? latestLiveEvent?.detail.player_id
+    : beat.playerId;
   const resolved = !live && beat.kind === "outcome";
   useEffect(() => {
     if (resolved) resultsRef.current?.focus();
   }, [resolved]);
-  const seat = replay.players.findIndex((p) => p.player_id === beat.playerId);
+  const seat = replay.players.findIndex((p) => p.player_id === activePlayerId);
   const player = replay.players[seat];
   const color = player ? labColor(seat) : "#d8b87f";
   useEffect(() => {
@@ -129,8 +152,8 @@ export function ReplayViewer({ replay, live = false, completed = false, thinking
         tabIndex={0}
         onKeyDown={keyboard}
         aria-label={live ? "Partida en directo. Actualización automática." : "Reproductor de jugadas. Flechas para avanzar o retroceder y espacio para reproducir."}
-        data-phase={beat.kind}
-        data-speaker={beat.playerId ?? "council"}
+        data-phase={live ? latestLiveEvent?.event_type ?? beat.kind : beat.kind}
+        data-speaker={activePlayerId ?? "council"}
       >
         <div className="council-stage">
           <Arena3D replay={replay} beat={beat} overview={live || overview} thinking={thinking} />
@@ -168,10 +191,10 @@ export function ReplayViewer({ replay, live = false, completed = false, thinking
             {replay.players.map((p, i) => (
               <span
                 key={p.player_id}
-                data-active={p.player_id === beat.playerId}
+                data-active={p.player_id === activePlayerId}
                 style={{
                   borderColor:
-                    p.player_id === beat.playerId ? labColor(i) : undefined,
+                    p.player_id === activePlayerId ? labColor(i) : undefined,
                 }}
               >
                 <i style={{ background: labColor(i) }} />
@@ -187,7 +210,11 @@ export function ReplayViewer({ replay, live = false, completed = false, thinking
               {player ? String(seat + 1).padStart(2, "0") : "M"}
             </span>
             <div>
-              <span className="dialogue-phase">{phaseLabel(beat.kind)}</span>
+              <span className="dialogue-phase">
+                {live && latestLiveEvent
+                  ? liveEventTitle(latestLiveEvent)
+                  : phaseLabel(beat.kind)}
+              </span>
               <h3>
                 {player
                   ? player.label
@@ -206,13 +233,13 @@ export function ReplayViewer({ replay, live = false, completed = false, thinking
             className="dialogue-content"
             aria-live="polite"
             aria-atomic="true"
-            key={currentStep}
+            key={live ? latestLiveEvent?.seq ?? currentStep : currentStep}
           >
             <p className="dialogue-text">
-              {live && beat.kind === "intro"
-                ? "La carrera está preparada. Esperando las primeras decisiones selladas."
-                : live && beat.kind === "resolution"
-                  ? "Balance actualizado. Esperando la siguiente ronda."
+              {live && latestLiveEvent
+                ? describeLiveEvent(latestLiveEvent, replay)
+                : live && beat.kind === "intro"
+                  ? "La carrera está preparada. Esperando las primeras decisiones selladas."
                   : beat.kind === "speech"
                     ? `“${beat.text}”`
                     : beat.text}
@@ -232,6 +259,21 @@ export function ReplayViewer({ replay, live = false, completed = false, thinking
                   </span>
                 </>
               )}
+              {live && latestLiveEvent?.event_type === "round_resolved" &&
+                latestLiveEvent.detail.actions?.map((action) => {
+                  const actionPlayer = replay.players.find(
+                    (entry) => entry.player_id === action.player_id,
+                  );
+                  return (
+                    <span
+                      key={action.player_id}
+                      className={`tag tag-${action.action === "SAFE" ? "safe" : "fast"}`}
+                    >
+                      {action.player_id} · {actionPlayer?.label} ·{" "}
+                      {shortModel(actionPlayer?.model ?? "")} = {action.action}
+                    </span>
+                  );
+                })}
               {resolved && (
                 <>
                   <span className="tag">
@@ -261,7 +303,17 @@ export function ReplayViewer({ replay, live = false, completed = false, thinking
             {resolved ? "↻" : "→"}
           </button>}
         </div>
-        {live && <div className="council-controls" role="status"><span className="live-pulse" /> {thinking ? "Los modelos están pensando…" : "Esperando actualizaciones"} · Actualización automática</div>}
+        {live && (
+          <div className="council-controls" role="status">
+            <span className="live-pulse" />{" "}
+            {thinking
+              ? `${player?.label ?? "Un modelo"} está decidiendo…`
+              : latestLiveEvent?.event_type === "round_resolved"
+                ? `Ronda ${latestLiveEvent.detail.round} confirmada`
+                : "Esperando actualizaciones"}{" "}
+            · Actualización automática
+          </div>
+        )}
         {!live && <div className="council-controls">
           <button className="btn btn-primary" onClick={toggle}>
             {playing ? "Ⅱ Pausa" : resolved ? "↻ Repetir" : "▶ Reproducir"}
@@ -383,20 +435,43 @@ export function ReplayViewer({ replay, live = false, completed = false, thinking
           })}
         </div>
       </div>
-      <details className="council-history">
-        <summary>Traza de la carrera · {currentStep} pasos {live ? "recibidos" : "reproducidos"}</summary>
-        <div>
-          {beats.slice(1, currentStep + 1).map((b, i) => (
-            <button key={i} disabled={live} onClick={() => seek(i + 1)}>
-              <span>
-                R{b.round} · {phaseLabel(b.kind)}{" "}
-                {replay.players.find((p) => p.player_id === b.playerId)?.label}
-              </span>
-              <p>{b.text}</p>
-            </button>
-          ))}
-        </div>
-      </details>
+      {live ? (
+        <section className="live-turn-log" aria-label="Traza en directo de turnos">
+          <header>
+            <div>
+              <p className="eyebrow">Traza en directo</p>
+              <h3>Estado de cada ronda y decisión</h3>
+            </div>
+            <span>{liveEvents.length} eventos · último arriba</span>
+          </header>
+          <ol>
+            {[...liveEvents].reverse().map((event) => (
+              <li key={event.seq} data-event={event.event_type}>
+                <span>{String(event.seq).padStart(2, "0")}</span>
+                <div>
+                  <strong>{liveEventTitle(event)}</strong>
+                  <p>{describeLiveEvent(event, replay)}</p>
+                </div>
+              </li>
+            ))}
+          </ol>
+        </section>
+      ) : (
+        <details className="council-history">
+          <summary>Traza de la carrera · {currentStep} pasos reproducidos</summary>
+          <div>
+            {beats.slice(1, currentStep + 1).map((b, i) => (
+              <button key={i} onClick={() => seek(i + 1)}>
+                <span>
+                  R{b.round} · {phaseLabel(b.kind)}{" "}
+                  {replay.players.find((p) => p.player_id === b.playerId)?.label}
+                </span>
+                <p>{b.text}</p>
+              </button>
+            ))}
+          </div>
+        </details>
+      )}
       <details className="council-references">
         <summary>Dirección artística · referencias de la arena</summary>
         <p>

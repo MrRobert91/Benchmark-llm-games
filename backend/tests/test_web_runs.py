@@ -204,12 +204,75 @@ def test_runner_persists_live_events_result_and_private_trace(tmp_path, monkeypa
     assert public["replay"]["outcome"]["kind"] == "restraint"
     assert "private" not in json.dumps(public)
     assert len(db.get_private_analysis(conn, "played-live")) > 0
-    event_types = [event["event_type"] for event in db.get_events_after(conn, "played-live", 0)]
+    events = db.get_events_after(conn, "played-live", 0)
+    event_types = [event["event_type"] for event in events]
     assert "speaking" in event_types
     assert "speech" in event_types
     assert "round_resolved" in event_types
     assert event_types[-1] == "completed"
+    thinking = next(event for event in events if event["event_type"] == "thinking")
+    assert thinking["detail"] == {
+        "round": 1,
+        "player_id": "p0",
+        "label": "Helios",
+        "model": "vendor/model",
+    }
+    reveal = next(event for event in events if event["event_type"] == "round_resolved")
+    assert {action["player_id"] for action in reveal["detail"]["actions"]} == {
+        "p0",
+        "p1",
+        "p2",
+    }
+    assert len(reveal["detail"]["state_after"]) == 3
     conn.close()
+
+
+def test_run_event_stream_exposes_public_turn_details(tmp_path, monkeypatch):
+    database = tmp_path / "events.db"
+    conn = db.connect(database)
+    db.create_web_run(
+        conn,
+        game_id="streamed-run",
+        seed=7,
+        nick="Ada",
+        url=None,
+        models=["vendor/model-a", "vendor/model-b"],
+        budget_limit=0.5,
+    )
+    db.update_web_run(
+        conn,
+        "streamed-run",
+        status="completed",
+        phase="Partida completada",
+        event_type="round_resolved",
+        event_detail={
+            "round": 1,
+            "actions": [
+                {"player_id": "p0", "action": "SAFE"},
+                {"player_id": "p1", "action": "UNSAFE"},
+            ],
+        },
+    )
+    conn.close()
+    monkeypatch.setattr(api, "DB_PATH", database)
+    monkeypatch.setattr(api, "RUN_QUEUE", runs.RunQueue(database))
+
+    with TestClient(api.app) as client:
+        with client.stream("GET", "/api/runs/streamed-run/events") as response:
+            assert response.status_code == 200
+            data_line = next(
+                line for line in response.iter_lines() if line.startswith("data: ")
+            )
+
+    payload = json.loads(data_line.removeprefix("data: "))
+    reveal = next(
+        event for event in payload["events"] if event["event_type"] == "round_resolved"
+    )
+    assert reveal["detail"]["round"] == 1
+    assert reveal["detail"]["actions"][1] == {
+        "player_id": "p1",
+        "action": "UNSAFE",
+    }
 
 
 def test_runner_persists_descriptive_openrouter_failure_and_logs_context(

@@ -2,11 +2,12 @@
 
 import { useEffect, useState } from "react";
 
-import type { Replay, WebRun } from "@/lib/types";
+import type { LiveRunEvent, Replay, WebRun } from "@/lib/types";
 import { ReplayViewer } from "./ReplayViewer";
 
 export function LiveArena({ initialRun }: { initialRun: WebRun }) {
   const [run, setRun] = useState(initialRun);
+  const [liveEvents, setLiveEvents] = useState<LiveRunEvent[]>([]);
   const [connection, setConnection] = useState<"connecting" | "live" | "retrying">(
     initialRun.status === "completed" || initialRun.status === "failed" ? "live" : "connecting",
   );
@@ -15,8 +16,18 @@ export function LiveArena({ initialRun }: { initialRun: WebRun }) {
     if (run.status === "completed" || run.status === "failed") return;
     const source = new EventSource(`/api/runs/${encodeURIComponent(run.game_id)}/events`);
     source.addEventListener("run", (event) => {
-      const payload = JSON.parse((event as MessageEvent).data) as { run: WebRun };
+      const payload = JSON.parse((event as MessageEvent).data) as {
+        run: WebRun;
+        events?: LiveRunEvent[];
+      };
       setRun(payload.run);
+      if (payload.events?.length) {
+        setLiveEvents((current) => {
+          const bySequence = new Map(current.map((entry) => [entry.seq, entry]));
+          for (const entry of payload.events ?? []) bySequence.set(entry.seq, entry);
+          return [...bySequence.values()].sort((a, b) => a.seq - b.seq);
+        });
+      }
       setConnection("live");
       if (payload.run.status === "completed" || payload.run.status === "failed") source.close();
     });
@@ -63,7 +74,8 @@ export function LiveArena({ initialRun }: { initialRun: WebRun }) {
           replay={run.replay as Replay}
           live={run.status !== "completed"}
           completed={run.status === "completed"}
-          thinking={run.status === "running"}
+          thinking={liveEvents.at(-1)?.event_type === "thinking"}
+          liveEvents={liveEvents}
         />
       ) : (
         <div className="queued-council card">

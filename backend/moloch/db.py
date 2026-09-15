@@ -73,6 +73,7 @@ CREATE TABLE IF NOT EXISTS run_events (
     seq        INTEGER NOT NULL,
     created_at TEXT NOT NULL,
     event_type TEXT NOT NULL,
+    detail_json TEXT NOT NULL DEFAULT '{}',
     PRIMARY KEY (game_id, seq)
 );
 
@@ -179,6 +180,7 @@ def connect(path: Path | str = DEFAULT_DB) -> sqlite3.Connection:
         _backfill_scored_pledges(conn)
     _ensure_column(conn, "web_runs", "parse_incidents_json", "TEXT NOT NULL DEFAULT '[]'")
     _ensure_column(conn, "web_runs", "parse_failures", "INTEGER NOT NULL DEFAULT 0")
+    _ensure_column(conn, "run_events", "detail_json", "TEXT NOT NULL DEFAULT '{}'")
     _ensure_column(
         conn, "games", "benchmark_version", "TEXT NOT NULL DEFAULT 'legacy-moloch-v0'"
     )
@@ -717,6 +719,7 @@ def update_web_run(
     usage: dict[str, Any] | None = None,
     error_message: str | None = None,
     event_type: str | None = None,
+    event_detail: dict[str, Any] | None = None,
     parse_incidents: list[dict[str, Any]] | None = None,
 ) -> None:
     fields = ["updated_at = ?"]
@@ -753,7 +756,7 @@ def update_web_run(
     values.append(game_id)
     conn.execute(f"UPDATE web_runs SET {', '.join(fields)} WHERE game_id = ?", values)
     if event_type:
-        _append_event(conn, game_id, event_type)
+        _append_event(conn, game_id, event_type, event_detail)
     conn.commit()
 
 
@@ -794,14 +797,16 @@ def get_private_analysis(conn: sqlite3.Connection, game_id: str) -> list[dict[st
 def get_events_after(
     conn: sqlite3.Connection, game_id: str, after_seq: int
 ) -> list[dict[str, Any]]:
-    return [
-        dict(row)
-        for row in conn.execute(
-            """SELECT seq, created_at, event_type FROM run_events
-               WHERE game_id = ? AND seq > ? ORDER BY seq""",
-            (game_id, after_seq),
-        )
-    ]
+    events = []
+    for row in conn.execute(
+        """SELECT seq, created_at, event_type, detail_json FROM run_events
+           WHERE game_id = ? AND seq > ? ORDER BY seq""",
+        (game_id, after_seq),
+    ):
+        event = dict(row)
+        event["detail"] = json.loads(event.pop("detail_json") or "{}")
+        events.append(event)
+    return events
 
 
 def list_contributions(conn: sqlite3.Connection, limit: int = 100) -> list[dict[str, Any]]:
@@ -1028,14 +1033,27 @@ def fail_interrupted_runs(conn: sqlite3.Connection) -> int:
     return len(rows)
 
 
-def _append_event(conn: sqlite3.Connection, game_id: str, event_type: str) -> None:
+def _append_event(
+    conn: sqlite3.Connection,
+    game_id: str,
+    event_type: str,
+    detail: dict[str, Any] | None = None,
+) -> None:
     next_seq = conn.execute(
         "SELECT COALESCE(MAX(seq), 0) + 1 AS n FROM run_events WHERE game_id = ?",
         (game_id,),
     ).fetchone()["n"]
     conn.execute(
-        "INSERT INTO run_events (game_id, seq, created_at, event_type) VALUES (?, ?, ?, ?)",
-        (game_id, next_seq, _utc_now(), event_type),
+        """INSERT INTO run_events
+           (game_id, seq, created_at, event_type, detail_json)
+           VALUES (?, ?, ?, ?, ?)""",
+        (
+            game_id,
+            next_seq,
+            _utc_now(),
+            event_type,
+            json.dumps(detail or {}, ensure_ascii=False),
+        ),
     )
 
 
