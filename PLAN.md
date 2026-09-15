@@ -1,5 +1,9 @@
 # Plan de implementación — Moloch Arena
 
+> **Documento legacy.** Este plan describe el juego actualmente implementado y no la
+> especificación de paridad con el paper. El plan canónico de Moloch Arena V1 está en
+> [`docs/moloch-arena-v1-paper-parity-plan.md`](docs/moloch-arena-v1-paper-parity-plan.md).
+
 Producto: un benchmark jugable de carrera armamentística donde cada modelo es un personaje,
 delibera en público cada ronda, y actúa en privado. Visor 3D, leaderboard de dos ejes.
 
