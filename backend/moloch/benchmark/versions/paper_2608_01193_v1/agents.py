@@ -6,7 +6,11 @@ from dataclasses import dataclass
 from typing import Any, Callable, Protocol
 
 from ....agents import parsing
-from ....agents.openrouter import BudgetGuard, OpenRouterAgent
+from ....agents.openrouter import (
+    PAPER_ACTION_MAX_TOKENS,
+    BudgetGuard,
+    OpenRouterAgent,
+)
 from ....rules import Action as LegacyAction
 from .spec import PAPER_SPEC, PaperAction, PaperSpec
 
@@ -106,7 +110,7 @@ class PaperOpenRouterAgent(OpenRouterAgent):
         temperature: float = 0.0,
         timeout: float = 60.0,
         audit_sink: Callable[[dict[str, Any]], None] | None = None,
-        action_max_tokens: int = 160,
+        action_max_tokens: int = PAPER_ACTION_MAX_TOKENS,
     ) -> None:
         super().__init__(
             player_id=player_id,
@@ -157,6 +161,7 @@ class PaperOpenRouterAgent(OpenRouterAgent):
             ],
             max_tokens=self.action_max_tokens,
             phase=phase,
+            require_strict_json=True,
         )
         outcome = self._parse(completion, phase)
         read = parsing.read_action_field(outcome, parsing.ACTION_KEYS)
@@ -209,7 +214,7 @@ def protocol_description() -> dict[str, Any]:
         "prompt": PAPER_SYSTEM_PROMPT,
         "spec": PAPER_SPEC.to_dict(),
         "temperature": 0.0,
-        "max_tokens": 160,
+        "max_tokens": PAPER_ACTION_MAX_TOKENS,
         "calls_per_player_round": 1,
-        "provenance": "published-reconstruction-v1",
+        "provenance": "published-reconstruction-v1.1",
     }

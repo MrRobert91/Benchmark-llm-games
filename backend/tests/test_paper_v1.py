@@ -10,6 +10,7 @@ from moloch.benchmark.analysis import compare_value, summarize, wilson_interval
 from moloch.benchmark.manifest import build_manifest
 from moloch.benchmark.registry import (
     PAPER_BENCHMARK_VERSION,
+    PAPER_PROTOCOL_VERSION,
     get_benchmark,
     list_benchmarks,
 )
@@ -17,8 +18,9 @@ from moloch.benchmark.versions.paper_2608_01193_v1.agents import (
     PaperGameView,
     PaperPublicPlayer,
     build_scripted,
+    protocol_description,
 )
-from moloch.benchmark.versions.paper_2608_01193_v1.engine import PaperGame
+from moloch.benchmark.versions.paper_2608_01193_v1.engine import PROTOCOL_VERSION, PaperGame
 from moloch.benchmark.versions.paper_2608_01193_v1.spec import PAPER_SPEC, PaperAction
 from moloch import db
 
@@ -173,6 +175,10 @@ def test_manifest_is_stable_and_uses_paired_design():
 
 def test_registry_and_analysis_report_explicit_statuses():
     assert list_benchmarks()[0]["benchmark_version"] == PAPER_BENCHMARK_VERSION
+    assert list_benchmarks()[0]["protocol_version"] == PAPER_PROTOCOL_VERSION
+    assert PAPER_PROTOCOL_VERSION == "published-reconstruction-v1.1"
+    assert PROTOCOL_VERSION == PAPER_PROTOCOL_VERSION
+    assert protocol_description()["max_tokens"] == 1_600
     record = game(seed=2).play().to_dict()
     report = summarize([record])
     assert report["races_total"] == 1
@@ -192,7 +198,7 @@ def test_paper_database_roundtrip_is_versioned_and_normalized(tmp_path):
         "SELECT benchmark_version, protocol_version, admission_status FROM games"
     ).fetchone()
     assert row["benchmark_version"] == PAPER_BENCHMARK_VERSION
-    assert row["protocol_version"] == "published-reconstruction-v1"
+    assert row["protocol_version"] == "published-reconstruction-v1.1"
     assert row["admission_status"] == "admitted"
     decisions = conn.execute("SELECT * FROM race_decisions").fetchall()
     assert len(decisions) == record["realized_horizon"] * 2

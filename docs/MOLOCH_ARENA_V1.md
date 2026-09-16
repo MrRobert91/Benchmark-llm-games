@@ -3,12 +3,19 @@
 ## Identidad
 
 - Benchmark: `moloch-arena-v1-paper-2608.01193v1`
-- Protocolo: `published-reconstruction-v1`
+- Protocolo activo: `published-reconstruction-v1.1`
+- Protocolo histórico: `published-reconstruction-v1` (inmutable; resultados no recalculados)
 - Fuente mecánica: arXiv:2608.01193v1
 - Fuente humana y evolutiva: arXiv:2607.26034v1
 
 Los hashes de especificación y protocolo se calculan desde el registry y se persisten con
 cada carrera. Cambiar cualquier regla exige una versión nueva.
+
+V1.1 no modifica la mecánica del juego ni la información que recibe cada agente. Versiona
+únicamente la envolvente de transporte: 1.600 tokens de salida normal, 12.800 para endpoints
+que obligan a razonar (factor 8) y 40.000 como techo absoluto de recuperación. Una respuesta
+truncada se reintenta dentro de la misma decisión lógica; si sigue sin ser legible, se aplica
+SAFE técnico y se excluye la carrera completa.
 
 ## Estado y orden de una ronda
 

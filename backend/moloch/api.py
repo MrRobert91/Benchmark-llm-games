@@ -15,7 +15,7 @@ from pathlib import Path
 from typing import Annotated
 
 import httpx
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, Header, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field, SecretStr, field_validator
@@ -27,6 +27,11 @@ from .benchmark.registry import (
     PAPER_BENCHMARK_VERSION,
     get_benchmark,
     list_benchmarks,
+)
+from .agents.openrouter import (
+    MAX_TOKENS_CEILING,
+    PAPER_ACTION_MAX_TOKENS,
+    PAPER_REASONING_MAX_TOKENS,
 )
 from .openrouter_catalog import list_text_models, validate_key
 from .runs import RunQueue
@@ -241,6 +246,9 @@ def openrouter_models() -> dict:
             "calls_per_player_max": 30,
             "estimated_input_tokens_per_call": 650,
             "estimated_output_tokens_per_call": 80,
+            "normal_output_token_limit": PAPER_ACTION_MAX_TOKENS,
+            "reasoning_output_token_limit": PAPER_REASONING_MAX_TOKENS,
+            "absolute_output_token_ceiling": MAX_TOKENS_CEILING,
         },
         "default_benchmark_version": DEFAULT_BENCHMARK_VERSION,
         "benchmark_versions": list_benchmarks(),
@@ -347,10 +355,15 @@ def experiment(experiment_id: str) -> dict:
 
 
 @app.post("/api/runs", status_code=202)
-def create_run(request: CreateRunRequest) -> dict:
+def create_run(
+    request: CreateRunRequest,
+    x_moloch_request_id: Annotated[str | None, Header()] = None,
+) -> dict:
     api_key = request.api_key.get_secret_value()
+    request_id = (x_moloch_request_id or "-")[:80]
     logger.info(
-        "run.request.received models=%s budget_usd=%.2f",
+        "run.request.received request_id=%s models=%s budget_usd=%.2f",
+        request_id,
         ",".join(request.models),
         request.budget_usd,
     )
@@ -359,7 +372,9 @@ def create_run(request: CreateRunRequest) -> dict:
     except httpx.HTTPStatusError as exc:
         status = 401 if exc.response.status_code in {401, 403} else 502
         logger.warning(
-            "run.request.rejected stage=key_validation openrouter_status=%s models=%s",
+            "run.request.rejected request_id=%s stage=key_validation "
+            "openrouter_status=%s models=%s",
+            request_id,
             exc.response.status_code,
             ",".join(request.models),
         )
@@ -369,7 +384,8 @@ def create_run(request: CreateRunRequest) -> dict:
         ) from exc
     except httpx.HTTPError as exc:
         logger.warning(
-            "run.request.rejected stage=key_validation error_type=%s models=%s",
+            "run.request.rejected request_id=%s stage=key_validation error_type=%s models=%s",
+            request_id,
             type(exc).__name__,
             ",".join(request.models),
         )
@@ -381,20 +397,27 @@ def create_run(request: CreateRunRequest) -> dict:
         allowed = {model["id"] for model in list_text_models()}
     except httpx.HTTPError as exc:
         logger.warning(
-            "run.request.rejected stage=catalog_validation error_type=%s models=%s",
+            "run.request.rejected request_id=%s stage=catalog_validation error_type=%s models=%s",
+            request_id,
             type(exc).__name__,
             ",".join(request.models),
         )
         raise HTTPException(status_code=502, detail="No se pudo validar el catálogo.") from exc
     unknown = [model for model in request.models if model not in allowed]
     if unknown:
-        logger.warning("run.request.rejected stage=model_validation model=%s", unknown[0])
+        logger.warning(
+            "run.request.rejected request_id=%s stage=model_validation model=%s",
+            request_id,
+            unknown[0],
+        )
         raise HTTPException(status_code=400, detail=f"Modelo no disponible: {unknown[0]}")
 
     remaining = key_info.get("limit_remaining")
     if isinstance(remaining, (int, float)) and remaining < request.budget_usd:
         logger.warning(
-            "run.request.rejected stage=budget_validation remaining_usd=%.4f budget_usd=%.2f",
+            "run.request.rejected request_id=%s stage=budget_validation "
+            "remaining_usd=%.4f budget_usd=%.2f",
+            request_id,
             remaining,
             request.budget_usd,
         )
@@ -417,12 +440,16 @@ def create_run(request: CreateRunRequest) -> dict:
             seed=request.seed,
         )
     except queue.Full as exc:
-        logger.warning("run.request.rejected stage=queue queue_size=%s", RUN_QUEUE.max_waiting)
+        logger.warning(
+            "run.request.rejected request_id=%s stage=queue queue_size=%s",
+            request_id,
+            RUN_QUEUE.max_waiting,
+        )
         raise HTTPException(
             status_code=503,
             detail="La cola está completa. Inténtalo de nuevo en unos minutos.",
         ) from exc
-    logger.info("run.request.accepted run_id=%s", game_id)
+    logger.info("run.request.accepted request_id=%s run_id=%s", request_id, game_id)
     return {
         "game_id": game_id,
         "url": f"/arena/{game_id}",

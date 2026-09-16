@@ -67,7 +67,7 @@ def test_v1_contributions_expose_benchmark_metrics(tmp_path):
     conn.close()
 
 
-def test_create_run_validates_key_but_never_persists_it(tmp_path, monkeypatch):
+def test_create_run_validates_key_but_never_persists_it(tmp_path, monkeypatch, caplog):
     database = tmp_path / "api.db"
 
     class DummyQueue:
@@ -100,9 +100,10 @@ def test_create_run_validates_key_but_never_persists_it(tmp_path, monkeypatch):
         lambda: [{"id": "vendor/model"}],
     )
     secret = "test-openrouter-key-must-never-be-written"
-    with TestClient(api.app) as client:
+    with caplog.at_level("INFO"), TestClient(api.app) as client:
         response = client.post(
             "/api/runs",
+            headers={"x-moloch-request-id": "front-req-123"},
             json={
                 "api_key": secret,
                 "nick": "Ada",
@@ -115,6 +116,8 @@ def test_create_run_validates_key_but_never_persists_it(tmp_path, monkeypatch):
         assert response.json()["game_id"] == "web-run"
     raw_database = database.read_bytes()
     assert secret.encode() not in raw_database
+    assert "request_id=front-req-123" in caplog.text
+    assert secret not in caplog.text
 
 
 def test_contributor_url_must_use_https():

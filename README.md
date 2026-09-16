@@ -121,7 +121,10 @@ confiar en agregados previamente calculados.
 ## Paridad metodológica
 
 La mecánica y las ecuaciones publicadas están implementadas y cubiertas por pruebas. El
-protocolo se identifica como `published-reconstruction-v1`: los prompts exactos, probes,
+protocolo activo se identifica como `published-reconstruction-v1.1`: conserva las reglas y
+el prompt reconstruido de V1, pero amplía diez veces el margen de salida para evitar que los
+modelos con razonamiento agoten sus tokens antes de emitir el JSON. Los resultados históricos
+`published-reconstruction-v1` permanecen separados. Los prompts exactos, probes,
 manifiestos, logs y código de análisis de los autores no están publicados, por lo que no se
 afirma una réplica exacta de sus endpoints. Consulta
 [la especificación V1](docs/MOLOCH_ARENA_V1.md) y el

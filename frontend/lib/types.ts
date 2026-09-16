@@ -279,6 +279,9 @@ export interface ModelCatalog {
     calls_per_player_max: number;
     estimated_input_tokens_per_call: number;
     estimated_output_tokens_per_call: number;
+    normal_output_token_limit?: number;
+    reasoning_output_token_limit?: number;
+    absolute_output_token_ceiling?: number;
   };
   default_benchmark_version?: BenchmarkVersion;
   benchmark_versions?: BenchmarkDefinition[];
