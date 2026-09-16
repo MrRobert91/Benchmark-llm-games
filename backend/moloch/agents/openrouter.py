@@ -357,6 +357,9 @@ class OpenRouterAgent(Agent):
         self.parse_incidents: list[ParseIncident] = []
         #: Índice en REASONING_LADDER que este modelo ha demostrado aceptar.
         self._reasoning_index = 0
+        #: Tope mínimo que ya produjo JSON V1 estricto. Evita volver a pagar en cada ronda
+        #: una respuesta truncada antes de repetir exactamente la misma petición con más sitio.
+        self._strict_json_token_floor = 0
 
     # ------------------------------------------------------------ incidencias
 
@@ -436,7 +439,10 @@ class OpenRouterAgent(Agent):
         """
         attempt = 0
         transport_retries = 0
-        budget_tokens = max_tokens
+        budget_tokens = max(
+            max_tokens,
+            self._strict_json_token_floor if require_strict_json else 0,
+        )
         last: CompletionResult | None = None
         while attempt < 3:
             attempt += 1
@@ -513,6 +519,21 @@ class OpenRouterAgent(Agent):
                         budget_tokens,
                     )
                     continue
+                if require_strict_json and parsed.clean and budget_tokens > max_tokens:
+                    previous_floor = self._strict_json_token_floor
+                    self._strict_json_token_floor = max(
+                        self._strict_json_token_floor,
+                        budget_tokens,
+                    )
+                    if self._strict_json_token_floor > previous_floor:
+                        logger.info(
+                            "openrouter.token_floor.learned player_id=%s model=%s phase=%s "
+                            "max_tokens=%s",
+                            self.player_id,
+                            self.model,
+                            phase,
+                            self._strict_json_token_floor,
+                        )
                 return result
             if (
                 result.truncated

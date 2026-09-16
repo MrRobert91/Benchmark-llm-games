@@ -8,6 +8,7 @@ de más.
 
 from __future__ import annotations
 
+import json
 import sys
 from pathlib import Path
 
@@ -315,6 +316,52 @@ def test_paper_call_retries_nonempty_truncated_json_with_more_tokens():
     assert len(attempts) == 2
     assert '"max_tokens":160' in attempts[0]
     assert '"max_tokens":1280' in attempts[1]
+
+
+def test_paper_agent_remembers_a_working_token_floor_for_later_rounds():
+    max_tokens_seen = []
+    attempts = 0
+
+    def handler(request):
+        nonlocal attempts
+        attempts += 1
+        payload = json.loads(request.read())
+        max_tokens_seen.append(payload["max_tokens"])
+        if attempts == 1:
+            return httpx.Response(
+                400,
+                json={
+                    "error": {
+                        "message": "Reasoning is mandatory for this endpoint and cannot be disabled"
+                    }
+                },
+            )
+        return httpx.Response(
+            200,
+            json={
+                "id": f"gen-{attempts}",
+                "choices": [
+                    {"message": {"content": '{"action":"SAFE"}'}, "finish_reason": "stop"}
+                ],
+                "usage": {"cost": 0.0001},
+            },
+        )
+
+    agent = OpenRouterAgent(
+        "p0", "Helios", "vendor/reasoning", BudgetGuard(), api_key="test-secret"
+    )
+    agent._client.close()
+    agent._client = httpx.Client(transport=httpx.MockTransport(handler))
+    first = agent._call(
+        [], max_tokens=160, phase="paper_round_1_action", require_strict_json=True
+    )
+    second = agent._call(
+        [], max_tokens=160, phase="paper_round_2_action", require_strict_json=True
+    )
+    agent.close()
+
+    assert first.content == second.content == '{"action":"SAFE"}'
+    assert max_tokens_seen == [160, 1280, 1280]
 
 
 def test_age_confirmation_403_is_explicit_and_not_retried(monkeypatch):
