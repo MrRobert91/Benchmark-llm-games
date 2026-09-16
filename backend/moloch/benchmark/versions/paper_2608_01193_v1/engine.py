@@ -14,7 +14,7 @@ from .agents import PaperAgent, PaperGameView, PaperPublicPlayer
 from .spec import PAPER_SPEC, PaperAction, PaperSpec
 
 BENCHMARK_VERSION = "moloch-arena-v1-paper-2608.01193v1"
-PROTOCOL_VERSION = "published-reconstruction-v1"
+PROTOCOL_VERSION = "published-reconstruction-v1.1"
 
 
 def derive_seed(master_seed: int, namespace: str) -> int:

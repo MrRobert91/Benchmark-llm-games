@@ -57,8 +57,9 @@ export function BenchmarkDashboard({ initialData }: { initialData: LeaderboardDa
       <div className="card benchmark-chart" aria-label="Tasa UNSAFE por modelo y celda comparable">
         {models.length ? models.map((row) => {
           const color = RISK_COLOR[String(row.risk_treatment)] ?? "var(--accent)";
+          const hasComparableResults = row.admitted_trajectories > 0;
           return <div className="benchmark-chart-row" key={`${row.model}-${row.protocol_version}-${row.n_players}-${row.risk_treatment}`}>
-            <div><strong>{shortModel(row.model)}</strong><small>{row.n_players}P · riesgo {Math.round(row.risk_treatment * 100)}% · {row.games} carreras</small></div>
+            <div><strong>{shortModel(row.model)}</strong><small>{row.n_players}P · riesgo {Math.round(row.risk_treatment * 100)}% · {row.games} carreras{hasComparableResults ? "" : " · sin muestra admitida"}</small></div>
             <AverageBar value={row.avg_unsafe_rate} color={color} /><b>{percent(row.avg_unsafe_rate)}</b>
           </div>;
         }) : <p>Todavía no hay carreras V1 guardadas.</p>}
@@ -74,14 +75,29 @@ export function BenchmarkDashboard({ initialData }: { initialData: LeaderboardDa
       </tr>)}</tbody>
     </table></div></section>
 
+    {models.some((row) => row.contaminated_games > 0 || row.parse_failures > 0) && <section>
+      <p className="eyebrow">Compatibilidad de formato</p><h2>Ejecuciones excluidas, visibles para diagnóstico</h2>
+      <p style={{ maxWidth: "74ch" }}>Estas ejecuciones se guardaron, pero no alteran las medias. La admisión se decide por carrera completa: si un modelo necesita fallback, también se excluye la trayectoria de su rival limpio.</p>
+      <div className="card scroll-x" style={{ padding: 0 }}><table>
+        <thead><tr><th style={{ paddingLeft: 22 }}>Modelo / celda</th><th className="num">Admitidas</th><th className="num">Carreras excluidas</th><th className="num" style={{ paddingRight: 22 }}>Respuestas ilegibles</th></tr></thead>
+        <tbody>{models.filter((row) => row.contaminated_games > 0 || row.parse_failures > 0).map((row) => <tr key={`diagnostic-${row.model}-${row.protocol_version}-${row.n_players}-${row.risk_treatment}`}>
+          <td style={{ paddingLeft: 22 }}><strong>{shortModel(row.model)}</strong><small style={{ display: "block" }}>{row.n_players}P · riesgo {Math.round(row.risk_treatment * 100)}% · {row.protocol_version}</small></td>
+          <td className="num">{row.admitted_trajectories}/{row.trajectories}</td><td className="num">{row.contaminated_games}</td><td className="num" style={{ paddingRight: 22 }}>{row.parse_failures}</td>
+        </tr>)}</tbody>
+      </table></div>
+    </section>}
+
     <section><p className="eyebrow">Ruta real</p><h2>Resultados por backend servido</h2>
       <p style={{ maxWidth: "72ch" }}>OpenRouter puede enrutar una trayectoria por varios proveedores. Cada fila muestra las trayectorias en las que participó ese proveedor, con sus llamadas y coste exactos; una ruta mixta aparece en todas las filas correspondientes.</p>
       <div className="card scroll-x" style={{ padding: 0 }}><table><thead><tr><th style={{ paddingLeft: 22 }}>Proveedor / celda</th><th>Motor</th><th className="num">Carreras</th><th className="num">Trayectorias</th><th className="num">UNSAFE</th><th className="num">Pago</th><th className="num">Llamadas</th><th className="num" style={{ paddingRight: 22 }}>Coste</th></tr></thead>
       <tbody>{data.paper_backends.map((row) => <tr key={`${row.provider}-${row.backend}-${row.protocol_version}-${row.n_players}-${row.risk_treatment}`}><td style={{ paddingLeft: 22 }}><strong>{row.provider}</strong><small style={{ display: "block" }}>{row.n_players}P · riesgo {Math.round(row.risk_treatment * 100)}% · {row.served_models} modelos servidos</small></td><td>{row.backend}</td><td className="num">{row.games}</td><td className="num">{row.admitted_trajectories}/{row.trajectories}</td><td className="num">{percent(row.avg_unsafe_rate)}</td><td className="num">{row.avg_payoff?.toFixed(2) ?? "—"}</td><td className="num">{row.calls}</td><td className="num" style={{ paddingRight: 22 }}>${row.cost_usd.toFixed(4)}</td></tr>)}</tbody></table></div>
     </section>
 
-    {data.contributors.length > 0 && <section><p className="eyebrow">Ejecuciones web</p><h2>Aportaciones recientes</h2><div className="card scroll-x" style={{ padding: 0 }}><table><thead><tr><th style={{ paddingLeft: 22 }}>Aportación</th><th>Partida</th><th className="num">Riesgo</th><th className="num">UNSAFE</th><th className="num" style={{ paddingRight: 22 }}>Pago medio</th></tr></thead>
-      <tbody>{data.contributors.map((row) => <tr key={row.game_id}><td style={{ paddingLeft: 22 }}><strong>{row.url ? <a className="link" href={row.url} target="_blank" rel="nofollow noreferrer">{row.nick} ↗</a> : row.nick}</strong></td><td><a className="archive-game-id" href={`/arena/${row.game_id}`}>{row.game_id}</a></td><td className="num">{Math.round(row.risk_treatment * 100)}%</td><td className="num">{percent(row.unsafe_rate)}</td><td className="num" style={{ paddingRight: 22 }}>{row.mean_payoff.toFixed(2)}</td></tr>)}</tbody>
+    {data.contributors.length > 0 && <section><p className="eyebrow">Ejecuciones web</p><h2>Aportaciones recientes</h2><div className="card scroll-x" style={{ padding: 0 }}><table><thead><tr><th style={{ paddingLeft: 22 }}>Aportación</th><th>Partida</th><th>Estado</th><th className="num">Riesgo</th><th className="num">UNSAFE</th><th className="num" style={{ paddingRight: 22 }}>Pago medio</th></tr></thead>
+      <tbody>{data.contributors.map((row) => {
+        const admitted = row.admission_status === "admitted";
+        return <tr key={row.game_id}><td style={{ paddingLeft: 22 }}><strong>{row.url ? <a className="link" href={row.url} target="_blank" rel="nofollow noreferrer">{row.nick} ↗</a> : row.nick}</strong></td><td><a className="archive-game-id" href={`/arena/${row.game_id}`}>{row.game_id}</a></td><td style={{ color: admitted ? "var(--safe)" : "var(--warn)" }}>{admitted ? "Admitida" : "Excluida"}</td><td className="num">{Math.round(row.risk_treatment * 100)}%</td><td className="num">{admitted ? percent(row.unsafe_rate) : "—"}</td><td className="num" style={{ paddingRight: 22 }}>{admitted ? row.mean_payoff.toFixed(2) : "—"}</td></tr>;
+      })}</tbody>
     </table></div></section>}
   </>;
 }

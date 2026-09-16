@@ -12,7 +12,7 @@ from .versions.paper_2608_01193_v1.spec import PAPER_SPEC, PaperSpec
 LEGACY_BENCHMARK_VERSION = "legacy-moloch-v0"
 PAPER_BENCHMARK_VERSION = "moloch-arena-v1-paper-2608.01193v1"
 DEFAULT_BENCHMARK_VERSION = PAPER_BENCHMARK_VERSION
-PAPER_PROTOCOL_VERSION = "published-reconstruction-v1"
+PAPER_PROTOCOL_VERSION = "published-reconstruction-v1.1"
 LEGACY_PROTOCOL_VERSION = "legacy-council-v0"
 
 
@@ -52,6 +52,11 @@ PAPER_PROTOCOL_CONTRACT = {
     "action_schema": {"action": ["SAFE", "UNSAFE"]},
     "fallback": "SAFE-and-contaminate-race",
     "prompt_provenance": "reconstructed-from-published-methods",
+    "normal_output_max_tokens": 1600,
+    "reasoning_token_factor": 8,
+    "reasoning_output_max_tokens": 12800,
+    "absolute_output_ceiling": 40000,
+    "strict_json_truncation_retry": True,
 }
 
 _PAPER = BenchmarkDefinition(

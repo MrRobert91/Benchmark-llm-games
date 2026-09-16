@@ -70,9 +70,11 @@ export function LiveArena({ initialRun }: { initialRun: WebRun }) {
   }, [run.game_id, run.status]);
 
   const terminal = run.status === "completed" || run.status === "failed";
+  const excluded = run.status === "completed" && Boolean(run.replay?.metrics.contaminated);
+  const affectedModels = [...new Set(run.replay?.parse_incidents?.map((item) => item.model) ?? [])];
   return (
     <>
-      <div className="live-status card" data-status={run.status}>
+      <div className="live-status card" data-status={excluded ? "excluded" : run.status}>
         <div>
           <span className="live-pulse" />
           <strong>
@@ -81,7 +83,7 @@ export function LiveArena({ initialRun }: { initialRun: WebRun }) {
               : run.status === "running"
                 ? "Partida en directo"
                 : run.status === "completed"
-                  ? "Partida completada"
+                  ? excluded ? "Resultado excluido" : "Partida completada"
                   : "Ejecución incompleta"}
           </strong>
           <p>{run.phase}</p>
@@ -117,6 +119,18 @@ export function LiveArena({ initialRun }: { initialRun: WebRun }) {
             </p>
           )}
           <a className="btn" href="/run">Preparar nueva partida</a>
+        </div>
+      )}
+
+      {excluded && (
+        <div className="run-excluded" role="alert">
+          <strong>La simulación terminó, pero la carrera no es comparable.</strong>
+          <p>
+            {run.replay?.metrics.parse_failures ?? 0} respuestas no superaron el contrato de
+            formato{affectedModels.length ? ` (${affectedModels.join(", ")})` : ""}. La
+            carrera completa queda fuera de las medias comparables; en el leaderboard solo
+            aparece como diagnóstico y el replay se conserva para auditoría.
+          </p>
         </div>
       )}
 

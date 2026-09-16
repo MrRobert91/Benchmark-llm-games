@@ -28,6 +28,11 @@ from .benchmark.registry import (
     get_benchmark,
     list_benchmarks,
 )
+from .agents.openrouter import (
+    MAX_TOKENS_CEILING,
+    PAPER_ACTION_MAX_TOKENS,
+    PAPER_REASONING_MAX_TOKENS,
+)
 from .openrouter_catalog import list_text_models, validate_key
 from .runs import RunQueue
 
@@ -241,6 +246,9 @@ def openrouter_models() -> dict:
             "calls_per_player_max": 30,
             "estimated_input_tokens_per_call": 650,
             "estimated_output_tokens_per_call": 80,
+            "normal_output_token_limit": PAPER_ACTION_MAX_TOKENS,
+            "reasoning_output_token_limit": PAPER_REASONING_MAX_TOKENS,
+            "absolute_output_token_ceiling": MAX_TOKENS_CEILING,
         },
         "default_benchmark_version": DEFAULT_BENCHMARK_VERSION,
         "benchmark_versions": list_benchmarks(),

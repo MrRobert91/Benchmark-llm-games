@@ -65,7 +65,17 @@ REASONING_LADDER: tuple[dict[str, Any] | None, ...] = (
 #: Multiplicador de ``max_tokens`` cuando hay que dejar sitio al razonamiento del modelo.
 REASONING_TOKEN_FACTOR = 8
 #: Tope absoluto para que un modelo que razone sin parar no se coma el presupuesto.
-MAX_TOKENS_CEILING = 4000
+MAX_TOKENS_CEILING = 40_000
+
+# Límites públicos del protocolo V1.1. El margen normal pasa de 160 a 1.600 tokens y el
+# margen de un endpoint que obliga a razonar pasa de 1.280 a 12.800. El techo absoluto
+# también aumenta diez veces para que la escalera de recuperación pueda acomodar modelos
+# con razonamiento especialmente verboso sin falsear una acción truncada.
+PAPER_ACTION_MAX_TOKENS = 1_600
+PAPER_REASONING_MAX_TOKENS = min(
+    MAX_TOKENS_CEILING,
+    PAPER_ACTION_MAX_TOKENS * REASONING_TOKEN_FACTOR,
+)
 
 # Los fallos transitorios se reintentan dentro de la misma llamada lógica. El runner web es
 # deliberadamente monohilo, de modo que las esperas largas bloquean también las partidas que
@@ -326,8 +336,8 @@ class OpenRouterAgent(Agent):
         temperature: float = 0.8,
         timeout: float = 60.0,
         audit_sink: Callable[[dict[str, Any]], None] | None = None,
-        meeting_max_tokens: int = 600,
-        action_max_tokens: int = 400,
+        meeting_max_tokens: int = 6_000,
+        action_max_tokens: int = 4_000,
     ) -> None:
         self.player_id = player_id
         self.label = label
@@ -427,7 +437,7 @@ class OpenRouterAgent(Agent):
     def _call(
         self,
         messages: list[dict[str, str]],
-        max_tokens: int = 320,
+        max_tokens: int = 3_200,
         phase: str = "unknown",
         require_strict_json: bool = False,
     ) -> CompletionResult:

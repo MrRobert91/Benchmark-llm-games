@@ -60,10 +60,16 @@ export function RunExperimentForm() {
         ? Array.from({ length: 6 }, () => selected[0]).filter(Boolean)
         : selected;
     const seatCount = mode === "smoke" ? 6 : models.length;
-    const costFor = (model: OpenRouterModel, calls: number) =>
+    const normalOutputLimit = limits.normal_output_token_limit ?? limits.estimated_output_tokens_per_call;
+    const reasoningOutputLimit = limits.reasoning_output_token_limit ?? normalOutputLimit;
+    const outputLimitFor = (model: OpenRouterModel) =>
+      model.supports_reasoning
+        ? reasoningOutputLimit
+        : normalOutputLimit;
+    const costFor = (model: OpenRouterModel, calls: number, outputTokens: number) =>
       calls *
       (limits.estimated_input_tokens_per_call * model.pricing.prompt +
-        limits.estimated_output_tokens_per_call * model.pricing.completion +
+        outputTokens * model.pricing.completion +
         model.pricing.request);
     return {
       expectedCalls: seatCount * expectedCallsPerSeat,
@@ -72,18 +78,34 @@ export function RunExperimentForm() {
         seatCount *
         expectedCallsPerSeat *
         (limits.estimated_input_tokens_per_call + limits.estimated_output_tokens_per_call),
-      maxTokens:
-        seatCount *
-        limits.calls_per_player_max *
-        (limits.estimated_input_tokens_per_call + limits.estimated_output_tokens_per_call),
+      maxTokens: seatModels.reduce(
+        (sum, model) => sum + limits.calls_per_player_max *
+          (limits.estimated_input_tokens_per_call + outputLimitFor(model)),
+        0,
+      ),
       expectedCost: seatModels.reduce(
-        (sum, model) => sum + costFor(model, expectedCallsPerSeat),
+        (sum, model) => sum + costFor(
+          model,
+          expectedCallsPerSeat,
+          limits.estimated_output_tokens_per_call,
+        ),
         0,
       ),
       maxCost: seatModels.reduce(
-        (sum, model) => sum + costFor(model, limits.calls_per_player_max),
+        (sum, model) => sum + costFor(
+          model,
+          limits.calls_per_player_max,
+          outputLimitFor(model),
+        ),
         0,
       ),
+      tokenPolicy: limits.normal_output_token_limit && limits.reasoning_output_token_limit && limits.absolute_output_token_ceiling
+        ? {
+            normal: limits.normal_output_token_limit,
+            reasoning: limits.reasoning_output_token_limit,
+            ceiling: limits.absolute_output_token_ceiling,
+          }
+        : null,
     };
   }, [limits, mode, models.length, selected]);
 
@@ -366,8 +388,7 @@ export function RunExperimentForm() {
         <p className="note">
           Es una estimación: en V1 el horizonte no tiene máximo matemático (su media es 9
           rondas). Los tokens de razonamiento cuentan como salida y OpenRouter decide el
-          proveedor final. Si se alcanza un límite operativo, la carrera queda incompleta y
-          nunca entra en los resultados admitidos.
+          proveedor final. {estimate?.tokenPolicy && <>El protocolo reserva hasta {estimate.tokenPolicy.normal.toLocaleString("es-ES")} tokens de salida normal y hasta {estimate.tokenPolicy.reasoning.toLocaleString("es-ES")} cuando el endpoint obliga a razonar, con un techo de recuperación de {estimate.tokenPolicy.ceiling.toLocaleString("es-ES")}. </>}Si se alcanza un límite operativo, la carrera queda incompleta y nunca entra en los resultados admitidos.
         </p>
       </section>
 

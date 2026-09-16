@@ -3,8 +3,8 @@
 ## Claim boundary
 
 Moloch Arena V1 implements the mechanism described in arXiv:2608.01193v1 and the reduced
-evolutionary model described in arXiv:2607.26034v1. The executable protocol is named
-`published-reconstruction-v1` because the authors have not published their exact prompt,
+evolutionary model described in arXiv:2607.26034v1. The active executable protocol is named
+`published-reconstruction-v1.1` because the authors have not published their exact prompt,
 41 audit probes, model manifests, raw logs or analysis code.
 
 The product must report four claims separately:
@@ -17,7 +17,7 @@ The product must report four claims separately:
 | P3 | blocked | Exact author artifacts are not publicly available. |
 | P4 | partial | Evolutionary anchors reproduce within frozen tolerance; full LLM/human replication is blocked by P3. |
 
-No result produced by `published-reconstruction-v1` may be labelled
+No result produced by `published-reconstruction-v1` or `published-reconstruction-v1.1` may be labelled
 `authors-exact-v1` or `paper-reproduced`.
 
 ## Frozen source inventory
@@ -32,6 +32,12 @@ No result produced by `published-reconstruction-v1` may be labelled
 
 If an upstream artifact appears, record its immutable URL and hash before creating a new
 protocol. Do not mutate `published-reconstruction-v1`.
+
+`published-reconstruction-v1.1` is the current successor. It keeps the game rules, prompt,
+temperature and information boundary unchanged, but raises the normal output allowance from
+160 to 1,600 tokens, the mandatory-reasoning allowance from 1,280 to 12,800 tokens, and the
+absolute recovery ceiling from 4,000 to 40,000 tokens. This transport change has its own
+protocol hash, so old and new runs are never averaged together.
 
 ## Mechanical verification
 

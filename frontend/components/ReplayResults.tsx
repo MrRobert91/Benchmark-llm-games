@@ -1,8 +1,31 @@
 import { labColor, type Replay } from "@/lib/types";
 
+const PARSE_REASON_LABELS: Record<string, string> = {
+  empty_content: "respuesta vacía",
+  no_json_object: "sin objeto JSON",
+  invalid_json: "JSON incompleto o inválido",
+  missing_field: "falta el campo action",
+  ambiguous_value: "acción ambigua",
+  unknown_value: "acción desconocida",
+};
+
 export function ReplayResults({ replay }: { replay: Replay }) {
   const metrics = replay.metrics;
   const terminal = new Map(replay.outcome.terminal_results?.map((result) => [result.player_id, result]) ?? []);
+  const incidents = replay.parse_incidents ?? [];
+  const affectedPlayers = new Set(incidents.map((incident) => incident.player_id));
+  const incidentGroups = [...incidents.reduce((groups, incident) => {
+    const key = `${incident.player_id}:${incident.model}`;
+    const current = groups.get(key) ?? { playerId: incident.player_id, model: incident.model, rounds: new Set<number>(), reasons: new Set<string>() };
+    const phaseRound = Number(/paper_round_(\d+)/.exec(incident.phase)?.[1]);
+    const round = incident.round ?? (Number.isFinite(phaseRound) ? phaseRound : undefined);
+    if (round !== undefined) current.rounds.add(round);
+    const reason = PARSE_REASON_LABELS[incident.reason] ?? incident.reason;
+    current.reasons.add(incident.finish_reason === "length" ? `${reason} (salida truncada)` : reason);
+    groups.set(key, current);
+    return groups;
+  }, new Map<string, { playerId: string; model: string; rounds: Set<number>; reasons: Set<string> }>()).values()];
+  const unaffected = replay.players.filter((player) => !affectedPlayers.has(player.player_id));
   return <section style={{ marginTop: 44 }} data-benchmark-version={replay.benchmark_version}>
     <p className="eyebrow">Moloch Arena V1 · resultado reproducible</p>
     <div className="grid grid-3">
@@ -10,6 +33,16 @@ export function ReplayResults({ replay }: { replay: Replay }) {
       <div className="card metric"><span className="metric-label">Riesgo asignado</span><span className="metric-value" style={{ color: "var(--warn)" }}>{Math.round((replay.risk_treatment ?? 0) * 100)}%</span><p className="metric-note">Tratamiento máximo fijado antes de empezar.</p></div>
       <div className="card metric"><span className="metric-label">Admisión</span><span className="metric-value" style={{ fontSize: 20, color: metrics.contaminated ? "var(--warn)" : "var(--safe)" }}>{metrics.contaminated ? "Excluida" : "Admitida"}</span><p className="metric-note">{metrics.parse_failures ?? 0} fallos de formato · protocolo {replay.protocol_version}</p></div>
     </div>
+    {metrics.contaminated && <div className="exclusion-diagnostic" role="note">
+      <strong>Por qué se excluye la carrera completa</strong>
+      <p>El protocolo usa la carrera como unidad de admisión. Una sola acción ilegible activa el fallback técnico SAFE y excluye todas sus trayectorias para no mezclar decisiones observadas con decisiones sustituidas.</p>
+      <ul>{incidentGroups.map((group) => {
+        const label = replay.players.find((player) => player.player_id === group.playerId)?.label ?? group.playerId;
+        return <li key={`${group.playerId}-${group.model}`}><b>{label}</b> · {group.model}: rondas {[...group.rounds].sort((a, b) => a - b).join(", ") || "sin identificar"} · {group.reasons.size === 1 ? "motivo" : "motivos"} {[...group.reasons].join(", ")}</li>;
+      })}</ul>
+      {unaffected.length > 0 && <p>{unaffected.map((player) => `${player.label} (${player.model})`).join(", ")} no tuvo fallos propios, pero también queda fuera porque participó en la misma carrera.</p>}
+      <p>El replay y el coste se conservan para auditoría; sus pagos, UNSAFE y liderazgo no alimentan ninguna media comparable.</p>
+    </div>}
     <div className="card scroll-x" style={{ padding: 0, marginTop: 14 }}><table><thead><tr><th style={{ paddingLeft: 22 }}>Laboratorio</th><th>Modelo</th><th className="num">Progreso</th><th className="num">UNSAFE</th><th className="num">Pago etapas</th><th className="num">Premio</th><th className="num">Riesgo privado</th><th className="num">Setback</th><th className="num" style={{ paddingRight: 22 }}>Pago final</th></tr></thead>
       <tbody>{metrics.players.map((player) => {
         const seat = replay.players.find((item) => item.player_id === player.player_id)?.seat ?? 0;

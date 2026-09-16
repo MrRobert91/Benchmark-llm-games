@@ -377,7 +377,7 @@ class RunQueue:
                     item.game_id,
                     status="completed",
                     phase=(
-                        "Partida completada con respuestas ilegibles"
+                        "Simulación finalizada · resultado excluido del benchmark"
                         if incidents
                         else "Partida completada"
                     ),

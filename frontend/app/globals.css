@@ -676,6 +676,11 @@ code {
 .run-error { margin: 0; }
 .run-failed { margin-bottom: 20px; }
 .run-failed p { margin: 6px 0 0; color: #dca8ad; }
+.run-excluded,.exclusion-diagnostic { padding: 16px 18px; border-radius: 9px; border: 1px solid #8c6b28; background: #2a200d; color: #f1d595; margin-bottom: 20px; }
+.run-excluded p,.exclusion-diagnostic p { margin: 7px 0 0; color: #d8c49d; line-height: 1.55; }
+.exclusion-diagnostic { margin-top: 14px; }
+.exclusion-diagnostic ul { margin: 11px 0 0; padding-left: 20px; color: #e4d2ac; }
+.exclusion-diagnostic li + li { margin-top: 6px; }
 .run-submit { justify-self: end; padding: 13px 22px; }
 .live-status { margin-bottom: 18px; padding: 15px 18px; display: flex; justify-content: space-between; align-items: center; gap: 15px; }
 .live-status > div:first-child { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 5px 9px; }
@@ -683,6 +688,7 @@ code {
 .live-pulse { width: 8px; height: 8px; border-radius: 50%; background: var(--warn); box-shadow: 0 0 13px var(--warn); }
 .live-status[data-status=running] .live-pulse { background: var(--fast); box-shadow: 0 0 13px var(--fast); animation: live-pulse 1.3s ease-in-out infinite; }
 .live-status[data-status=completed] .live-pulse { background: var(--safe); box-shadow: 0 0 13px var(--safe); }
+.live-status[data-status=excluded] .live-pulse { background: var(--warn); box-shadow: 0 0 13px var(--warn); }
 .live-status[data-status=failed] .live-pulse { background: var(--fast); box-shadow: none; }
 .live-usage { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
 .live-usage span { font: 10px var(--mono); color: #b8c2d2; border: 1px solid #334057; border-radius: 99px; padding: 5px 8px; }

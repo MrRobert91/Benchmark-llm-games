@@ -18,6 +18,9 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from moloch.agents.openrouter import (  # noqa: E402
+    MAX_TOKENS_CEILING,
+    PAPER_ACTION_MAX_TOKENS,
+    PAPER_REASONING_MAX_TOKENS,
     BudgetExceeded,
     BudgetGuard,
     OpenRouterAgent,
@@ -29,6 +32,12 @@ from moloch.rules import Action  # noqa: E402
 
 
 # ------------------------------------------------------------------ parseo
+
+
+def test_paper_v11_token_envelope_is_ten_times_larger():
+    assert PAPER_ACTION_MAX_TOKENS == 1_600
+    assert PAPER_REASONING_MAX_TOKENS == 12_800
+    assert MAX_TOKENS_CEILING == 40_000
 
 def test_parse_plain_json():
     assert _parse_json('{"action": "FAST"}') == {"action": "FAST"}
