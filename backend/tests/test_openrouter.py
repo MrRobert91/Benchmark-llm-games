@@ -198,5 +198,153 @@ def test_429_retries_with_bounded_backoff(monkeypatch):
     agent.close()
     assert result.content == '{"action":"SAFE"}'
     assert attempts == 3
-    assert delays == [20, 40]
+    assert delays == [0.5, 1.0]
     assert [entry.get("status_code") for entry in trace] == [429, 429, None]
+
+
+def test_transient_503_honours_retry_after_but_caps_the_wait(monkeypatch):
+    attempts = 0
+
+    def handler(_request):
+        nonlocal attempts
+        attempts += 1
+        if attempts == 1:
+            return httpx.Response(
+                503,
+                headers={"retry-after": "120"},
+                json={"error": {"message": "provider warming up"}},
+            )
+        return httpx.Response(
+            200,
+            json={
+                "id": "gen-ok",
+                "choices": [
+                    {"message": {"content": '{"action":"SAFE"}'}, "finish_reason": "stop"}
+                ],
+                "usage": {"cost": 0.0},
+            },
+        )
+
+    delays = []
+    monkeypatch.setattr("moloch.agents.openrouter.time.sleep", delays.append)
+    agent = OpenRouterAgent(
+        "p0", "Helios", "vendor/model", BudgetGuard(), api_key="test-secret"
+    )
+    agent._client.close()
+    agent._client = httpx.Client(transport=httpx.MockTransport(handler))
+    assert agent._call([], phase="paper_round_1_action").content
+    agent.close()
+    assert attempts == 2
+    assert delays == [5.0]
+
+
+def test_timeout_is_retried_before_failing(monkeypatch):
+    attempts = 0
+
+    def handler(request):
+        nonlocal attempts
+        attempts += 1
+        if attempts < 3:
+            raise httpx.ReadTimeout("temporary timeout", request=request)
+        return httpx.Response(
+            200,
+            json={
+                "id": "gen-ok",
+                "choices": [
+                    {"message": {"content": '{"action":"UNSAFE"}'}, "finish_reason": "stop"}
+                ],
+                "usage": {"cost": 0.0},
+            },
+        )
+
+    delays = []
+    monkeypatch.setattr("moloch.agents.openrouter.time.sleep", delays.append)
+    agent = OpenRouterAgent(
+        "p0", "Helios", "vendor/model", BudgetGuard(), api_key="test-secret"
+    )
+    agent._client.close()
+    agent._client = httpx.Client(transport=httpx.MockTransport(handler))
+    assert "UNSAFE" in agent._call([], phase="paper_round_1_action").content
+    agent.close()
+    assert attempts == 3
+    assert delays == [0.5, 1.0]
+
+
+def test_paper_call_retries_nonempty_truncated_json_with_more_tokens():
+    attempts = []
+
+    def handler(request):
+        payload = request.read().decode()
+        attempts.append(payload)
+        if len(attempts) == 1:
+            return httpx.Response(
+                200,
+                json={
+                    "id": "gen-cut",
+                    "choices": [
+                        {"message": {"content": '{"action":"'}, "finish_reason": "length"}
+                    ],
+                    "usage": {"cost": 0.0001, "completion_tokens": 160},
+                },
+            )
+        return httpx.Response(
+            200,
+            json={
+                "id": "gen-full",
+                "choices": [
+                    {"message": {"content": '{"action":"UNSAFE"}'}, "finish_reason": "stop"}
+                ],
+                "usage": {"cost": 0.0001, "completion_tokens": 20},
+            },
+        )
+
+    agent = OpenRouterAgent(
+        "p0", "Helios", "vendor/model", BudgetGuard(), api_key="test-secret"
+    )
+    agent._client.close()
+    agent._client = httpx.Client(transport=httpx.MockTransport(handler))
+    result = agent._call(
+        [],
+        max_tokens=160,
+        phase="paper_round_1_action",
+        require_strict_json=True,
+    )
+    agent.close()
+
+    assert result.content == '{"action":"UNSAFE"}'
+    assert len(attempts) == 2
+    assert '"max_tokens":160' in attempts[0]
+    assert '"max_tokens":1280' in attempts[1]
+
+
+def test_age_confirmation_403_is_explicit_and_not_retried(monkeypatch):
+    attempts = 0
+
+    def handler(_request):
+        nonlocal attempts
+        attempts += 1
+        return httpx.Response(
+            403,
+            json={
+                "error": {
+                    "message": "This model requires you to complete 18+ age confirmation"
+                }
+            },
+        )
+
+    monkeypatch.setattr(
+        "moloch.agents.openrouter.time.sleep",
+        lambda _delay: pytest.fail("a non-retryable 403 must not sleep"),
+    )
+    agent = OpenRouterAgent(
+        "p0", "Helios", "vendor/restricted", BudgetGuard(), api_key="test-secret"
+    )
+    agent._client.close()
+    agent._client = httpx.Client(transport=httpx.MockTransport(handler))
+    with pytest.raises(OpenRouterError) as caught:
+        agent._call([], phase="paper_round_1_action")
+    agent.close()
+    assert attempts == 1
+    assert "mayoría de edad" in str(caught.value)
+    assert "ronda 1, decisión sellada V1" in str(caught.value)
+    assert "repetir esta misma solicitud no lo solucionará" in str(caught.value)

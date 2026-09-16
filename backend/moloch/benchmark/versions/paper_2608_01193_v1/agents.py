@@ -157,6 +157,7 @@ class PaperOpenRouterAgent(OpenRouterAgent):
             ],
             max_tokens=self.action_max_tokens,
             phase=phase,
+            require_strict_json=True,
         )
         outcome = self._parse(completion, phase)
         read = parsing.read_action_field(outcome, parsing.ACTION_KEYS)

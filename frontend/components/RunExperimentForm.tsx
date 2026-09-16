@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
+import { readApiResponse } from "@/lib/api-response";
 import type { BenchmarkVersion, ModelCatalog, OpenRouterModel } from "@/lib/types";
 
 const PAPER_V1: BenchmarkVersion = "moloch-arena-v1-paper-2608.01193v1";
@@ -34,11 +35,9 @@ export function RunExperimentForm() {
 
   useEffect(() => {
     fetch("/api/openrouter/models", { cache: "no-store" })
-      .then(async (response) => {
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.detail || "No se pudo cargar el catálogo.");
-        return data as ModelCatalog;
-      })
+      .then((response) =>
+        readApiResponse<ModelCatalog>(response, "No se pudo cargar el catálogo."),
+      )
       .then((data) => {
         setCatalog(data);
         setBudget(data.limits.default_budget_usd);
@@ -118,8 +117,10 @@ export function RunExperimentForm() {
           players: isSmoke ? 2 : undefined,
         }),
       });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.detail || "No se pudo iniciar la partida.");
+      const data = await readApiResponse<{ game_id: string; experiment_id: string }>(
+        response,
+        isSmoke ? "No se pudo iniciar el experimento." : "No se pudo iniciar la partida.",
+      );
       setApiKey("");
       router.push(isSmoke ? `/experiments/${data.experiment_id}` : `/arena/${data.game_id}`);
     } catch (reason) {

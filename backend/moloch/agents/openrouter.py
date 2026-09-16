@@ -67,6 +67,14 @@ REASONING_TOKEN_FACTOR = 8
 #: Tope absoluto para que un modelo que razone sin parar no se coma el presupuesto.
 MAX_TOKENS_CEILING = 4000
 
+# Los fallos transitorios se reintentan dentro de la misma llamada lógica. El runner web es
+# deliberadamente monohilo, de modo que las esperas largas bloquean también las partidas que
+# están en cola. Dos reintentos cortos cubren rate limits y fallos puntuales sin congelar la UI.
+TRANSIENT_STATUS_CODES = frozenset({408, 409, 425, 429, 500, 502, 503, 504})
+MAX_TRANSPORT_RETRIES = 2
+BASE_RETRY_DELAY_SECONDS = 0.5
+MAX_RETRY_DELAY_SECONDS = 5.0
+
 _REASONING_MANDATORY = re.compile(
     r"reasoning.*(mandatory|cannot be disabled|required)|"
     r"(effort|reasoning).*not supported",
@@ -90,6 +98,7 @@ class OpenRouterError(RuntimeError):
         provider_message: str | None = None,
         request_id: str | None = None,
         kind: str = "http",
+        retry_after_seconds: float | None = None,
     ) -> None:
         self.model = model
         self.phase = phase
@@ -97,7 +106,12 @@ class OpenRouterError(RuntimeError):
         self.provider_message = _single_line(provider_message)
         self.request_id = _single_line(request_id)
         self.kind = kind
+        self.retry_after_seconds = retry_after_seconds
         super().__init__(self.public_message())
+
+    @property
+    def retryable(self) -> bool:
+        return self.kind in {"timeout", "network"} or self.status_code in TRANSIENT_STATUS_CODES
 
     def public_message(self) -> str:
         moment = _phase_label(self.phase)
@@ -112,6 +126,12 @@ class OpenRouterError(RuntimeError):
             explanation = "OpenRouter rechazó la clave API; puede haber caducado o sido revocada."
         elif self.status_code == 402:
             explanation = "OpenRouter indica que la cuenta no tiene crédito suficiente."
+        elif self.status_code == 403 and self.provider_message and _requires_age_confirmation(
+            self.provider_message
+        ):
+            explanation = (
+                "Este modelo exige confirmar la mayoría de edad en la cuenta de OpenRouter."
+            )
         elif self.status_code == 403:
             explanation = (
                 "OpenRouter bloqueó la solicitud. Suele deberse a límites o permisos de la "
@@ -137,7 +157,14 @@ class OpenRouterError(RuntimeError):
             parts.append(f"Detalle del proveedor: {self.provider_message}.")
         if self.request_id:
             parts.append(f"Referencia: {self.request_id}.")
-        if self.status_code == 403:
+        if self.status_code == 403 and self.provider_message and _requires_age_confirmation(
+            self.provider_message
+        ):
+            parts.append(
+                "Completa la confirmación en OpenRouter > Settings > Preferences o elige "
+                "otro modelo; repetir esta misma solicitud no lo solucionará."
+            )
+        elif self.status_code == 403:
             parts.append(
                 "Revisa en OpenRouter los límites y la allowlist de la clave, Privacy y "
                 "Guardrails; después prueba el modelo por separado."
@@ -399,6 +426,7 @@ class OpenRouterAgent(Agent):
         messages: list[dict[str, str]],
         max_tokens: int = 320,
         phase: str = "unknown",
+        require_strict_json: bool = False,
     ) -> CompletionResult:
         """Pide una respuesta con texto utilizable, subiendo el tope de tokens si hace falta.
 
@@ -407,6 +435,7 @@ class OpenRouterAgent(Agent):
         mucho mayor antes de darlo por ilegible.
         """
         attempt = 0
+        transport_retries = 0
         budget_tokens = max_tokens
         last: CompletionResult | None = None
         while attempt < 3:
@@ -417,14 +446,21 @@ class OpenRouterAgent(Agent):
                     messages, budget_tokens, phase, reasoning, attempt=attempt
                 )
             except OpenRouterError as exc:
-                if exc.status_code == 429 and attempt < 3:
-                    delay = 20 * attempt
+                if (
+                    exc.retryable
+                    and transport_retries < MAX_TRANSPORT_RETRIES
+                    and attempt < 3
+                ):
+                    transport_retries += 1
+                    delay = _retry_delay(exc, transport_retries)
                     logger.info(
-                        "openrouter.rate_limit.retry player_id=%s model=%s phase=%s "
-                        "delay_seconds=%s attempt=%s",
+                        "openrouter.transport.retry player_id=%s model=%s phase=%s "
+                        "status=%s kind=%s delay_seconds=%.2f attempt=%s",
                         self.player_id,
                         self.model,
                         phase,
+                        exc.status_code or "-",
+                        exc.kind,
                         delay,
                         attempt,
                     )
@@ -454,8 +490,35 @@ class OpenRouterAgent(Agent):
                 raise
             last = result
             if result.content.strip():
+                parsed = parsing.parse_json_object(result.content)
+                if (
+                    require_strict_json
+                    and result.truncated
+                    and not parsed.clean
+                    and budget_tokens < MAX_TOKENS_CEILING
+                    and attempt < 3
+                ):
+                    budget_tokens = min(
+                        MAX_TOKENS_CEILING,
+                        max(budget_tokens * REASONING_TOKEN_FACTOR, max_tokens * 2),
+                    )
+                    logger.warning(
+                        "openrouter.response.truncated_json player_id=%s model=%s phase=%s "
+                        "strategy=%s content_chars=%s retrying_with_max_tokens=%s",
+                        self.player_id,
+                        self.model,
+                        phase,
+                        parsed.strategy,
+                        len(result.content),
+                        budget_tokens,
+                    )
+                    continue
                 return result
-            if result.truncated and budget_tokens < MAX_TOKENS_CEILING:
+            if (
+                result.truncated
+                and budget_tokens < MAX_TOKENS_CEILING
+                and attempt < 3
+            ):
                 budget_tokens = min(MAX_TOKENS_CEILING, budget_tokens * REASONING_TOKEN_FACTOR)
                 logger.warning(
                     "openrouter.response.empty player_id=%s model=%s phase=%s "
@@ -583,6 +646,7 @@ class OpenRouterAgent(Agent):
                 status_code=resp.status_code,
                 provider_message=provider_message,
                 request_id=request_id,
+                retry_after_seconds=_retry_after_seconds(resp.headers.get("retry-after")),
             )
         try:
             data = resp.json()
@@ -923,7 +987,35 @@ def _error_message(response: httpx.Response) -> str | None:
     return _single_line(payload.get("message"))
 
 
+def _retry_after_seconds(value: str | None) -> float | None:
+    """Lee el formato numérico de Retry-After y descarta valores no fiables."""
+    if value is None:
+        return None
+    try:
+        seconds = float(value)
+    except (TypeError, ValueError):
+        return None
+    return max(0.0, min(seconds, MAX_RETRY_DELAY_SECONDS))
+
+
+def _retry_delay(error: OpenRouterError, retry_number: int) -> float:
+    if error.retry_after_seconds is not None:
+        return error.retry_after_seconds
+    return min(
+        BASE_RETRY_DELAY_SECONDS * (2 ** max(0, retry_number - 1)),
+        MAX_RETRY_DELAY_SECONDS,
+    )
+
+
+def _requires_age_confirmation(message: str) -> bool:
+    lowered = message.casefold()
+    return "18+" in lowered or "age confirmation" in lowered or "confirm your age" in lowered
+
+
 def _phase_label(phase: str) -> str:
+    paper_match = re.fullmatch(r"paper_round_(\d+)_action", phase)
+    if paper_match:
+        return f"ronda {paper_match.group(1)}, decisión sellada V1"
     match = re.fullmatch(r"round_(\d+)_(meeting|action)", phase)
     if not match:
         return phase.replace("_", " ")
