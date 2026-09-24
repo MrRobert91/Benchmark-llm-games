@@ -11,11 +11,11 @@ import {
   OUTCOME_LABEL,
   outcomeSummary,
   labColor,
-  shortModel,
   type LiveRunEvent,
   type Replay,
 } from "@/lib/types";
-import { buildTimeline, CHARACTER_NAMES } from "@/lib/replay-timeline";
+import { buildTimeline } from "@/lib/replay-timeline";
+import { arenaReplay } from "@/lib/arena-identity";
 import { describeLiveEvent, liveEventTitle } from "@/lib/live-narration";
 import { ReplayResults } from "./ReplayResults";
 import { robotGesture, GESTURE_LABEL } from "@/lib/robot-performance";
@@ -37,7 +37,7 @@ const PHASE = {
 };
 
 export function ReplayViewer({
-  replay,
+  replay: recordedReplay,
   live = false,
   completed = false,
   thinking = false,
@@ -49,6 +49,7 @@ export function ReplayViewer({
   thinking?: boolean;
   liveEvents?: LiveRunEvent[];
 }) {
+  const replay = useMemo(() => arenaReplay(recordedReplay), [recordedReplay]);
   const playerRef = useRef<HTMLDivElement>(null);
   const beats = useMemo(() => buildTimeline(replay, !live), [replay, live]);
   const phaseLabel = (kind: keyof typeof PHASE) => PHASE[kind];
@@ -211,8 +212,8 @@ export function ReplayViewer({
                 }}
               >
                 <i style={{ background: labColor(i) }} />
-                {p.label}
-                <small>{CHARACTER_NAMES[i % 5]}</small>
+                {p.model}
+                <small>Participante {i + 1}</small>
               </span>
             ))}
           </div>
@@ -230,14 +231,14 @@ export function ReplayViewer({
               </span>
               <h3>
                 {player
-                  ? player.label
+                  ? player.model
                   : resolved
                     ? OUTCOME_LABEL[replay.outcome.kind]
                     : "La carrera"}
               </h3>
               {player && (
                 <span className="dialogue-model">
-                  {CHARACTER_NAMES[seat % 5]} · {shortModel(player.model)}
+                  Participante {seat + 1}
                 </span>
               )}
             </div>
@@ -286,8 +287,7 @@ export function ReplayViewer({
                       key={action.player_id}
                       className={`tag tag-${action.action === "SAFE" ? "safe" : "fast"}`}
                     >
-                      {action.player_id} · {actionPlayer?.label} ·{" "}
-                      {shortModel(actionPlayer?.model ?? "")} = {action.action}
+                      {actionPlayer?.label ?? action.player_id} = {action.action}
                     </span>
                   );
                 })}
@@ -399,13 +399,13 @@ export function ReplayViewer({
               <div key={p.player_id}>
                 <span>
                   <i style={{ background: labColor(i) }} />
-                  {p.label}
+                  {p.model}
                 </span>
                 <strong>
                   {state?.progress ?? 0}
                   <small> progreso</small>
                 </strong>
-                <span className="balance-model">{p.model}</span>
+                <span className="balance-model">Participante {i + 1}</span>
                 <span className="balance-public-vote">
                   {beat.revealedActions[p.player_id]
                     ? <>Decisión revelada: <b>{beat.revealedActions[p.player_id].action}</b></>
@@ -507,7 +507,7 @@ export function ReplayViewer({
           />
           <img
             src="/art/character-reference.png"
-            alt="Diseño de Atlas, Forge, Vega, Aurum y Echo"
+            alt="Diseño de cinco robots de referencia"
             loading="lazy"
           />
         </div>

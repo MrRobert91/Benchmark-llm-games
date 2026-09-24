@@ -751,8 +751,11 @@ export function createCouncil(
       c.textAlign = "center";
       c.textBaseline = "middle";
       c.fillStyle = "#bdcadc";
-      c.font = "600 32px sans-serif";
-      c.fillText(`${player.label} · ${terminal ? "RESULTADO FINAL" : vote ? "VOTO PÚBLICO" : action ? "DECISIÓN REVELADA" : "DECISIÓN SELLADA"}`, 384, 54, 710);
+      c.font = "600 33px sans-serif";
+      c.fillText(player.model, 384, 48, 710);
+      c.fillStyle = "#9cabbe";
+      c.font = "600 24px sans-serif";
+      c.fillText(`PARTICIPANTE ${i + 1} · ${terminal ? "RESULTADO FINAL" : vote ? "VOTO PÚBLICO" : action ? "DECISIÓN REVELADA" : "DECISIÓN SELLADA"}`, 384, 90, 710);
       c.fillStyle =
         ballot === "FAST" || ballot === "UNSAFE" ? "#ff9c53" : ballot === "SAFE" ? "#67e9b2" : "#b9c4d4";
       c.font = `800 ${ballot ? 128 : 72}px sans-serif`;

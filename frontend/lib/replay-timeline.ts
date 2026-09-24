@@ -49,5 +49,3 @@ export function buildTimeline(replay: Replay, includeOutcome = true): ReplayBeat
   });
   return beats;
 }
-
-export const CHARACTER_NAMES = ["Atlas", "Forge", "Vega", "Aurum", "Echo"];
