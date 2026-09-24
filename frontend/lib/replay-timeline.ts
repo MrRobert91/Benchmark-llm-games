@@ -1,4 +1,4 @@
-import type { ActionName, ActionRecord, Replay, SpeechRecord, StateRecord } from "./types";
+import { outcomeSummary, type ActionName, type ActionRecord, type Replay, type SpeechRecord, type StateRecord } from "./types.ts";
 import { describeSimultaneousReveal } from "./live-narration.ts";
 
 export interface ReplayBeat {
@@ -27,7 +27,8 @@ export function buildTimeline(replay: Replay, includeOutcome = true): ReplayBeat
     states, publicVotes: {}, revealedActions, verdicts: {},
   }];
   for (const round of replay.rounds) {
-    if (!round.actions.length) continue;
+    // A live snapshot may contain only some sealed responses; reveal none until all arrived.
+    if (round.actions.length !== replay.players.length) continue;
     revealedActions = Object.fromEntries(round.actions.map((action) => [action.player_id, action]));
     beats.push({
       kind: "action", round: round.index,
@@ -38,12 +39,12 @@ export function buildTimeline(replay: Replay, includeOutcome = true): ReplayBeat
     states = round.state_after;
     beats.push({
       kind: "resolution", round: round.index,
-      text: round.events.join("\n") || "Se actualizan progreso, pagos de etapa y riesgo privado.",
+      text: "Progreso, pagos acumulados y riesgo actualizados para todos los participantes.",
       states, publicVotes: {}, revealedActions, verdicts: {},
     });
   }
   if (includeOutcome) beats.push({
-    kind: "outcome", round: replay.outcome.final_round, text: replay.outcome.headline,
+    kind: "outcome", round: replay.outcome.final_round, text: outcomeSummary(replay),
     states, publicVotes: {}, revealedActions, verdicts: {},
   });
   return beats;

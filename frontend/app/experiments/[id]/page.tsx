@@ -58,12 +58,12 @@ export default function ExperimentPage({ params }: { params: Promise<{ id: strin
   return (
     <>
       <section className="run-hero">
-        <p className="eyebrow">Experimento reproducible</p>
+        <p className="eyebrow">Prueba de diagnóstico</p>
         <h1>{experiment?.experiment_id ?? id}</h1>
         <p className="lede">
           {experiment
             ? `${experiment.preset} · ${experiment.protocol_version}`
-            : "Cargando manifiesto y estado de las celdas…"}
+            : "Cargando las partidas y su estado…"}
         </p>
         {experiment && (
           <p className="note">Manifest SHA-256: <code>{experiment.manifest_hash}</code></p>
@@ -80,7 +80,7 @@ export default function ExperimentPage({ params }: { params: Promise<{ id: strin
                   <th className="num">Riesgo</th>
                   <th className="num">Repetición</th>
                   <th>Estado</th>
-                  <th style={{ paddingRight: 22 }}>Replay</th>
+                  <th style={{ paddingRight: 22 }}>Repetición</th>
                 </tr>
               </thead>
               <tbody>
@@ -99,8 +99,8 @@ export default function ExperimentPage({ params }: { params: Promise<{ id: strin
             </table>
           </div>
           <p className="note" style={{ marginTop: 16 }}>
-            Presupuesto compartido por todas las celdas. Una carrera contaminada permanece
-            visible, pero queda excluida del leaderboard V1.
+            Las partidas comparten un mismo límite de gasto. Si una tiene respuestas ilegibles,
+            permanece visible para revisión, pero no se incluye en la comparativa.
           </p>
         </section>
       )}

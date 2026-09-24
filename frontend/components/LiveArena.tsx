@@ -108,7 +108,7 @@ export function LiveArena({ initialRun }: { initialRun: WebRun }) {
         <div className="run-failed" role="alert">
           <strong>La partida no pudo completarse.</strong>
           <p>{run.error_message}</p>
-          <p>No se incluye en las métricas ni en el leaderboard.</p>
+          <p>No se incluye en la comparativa de modelos.</p>
           {run.error_message?.includes("HTTP 403") && (
             <p>
               Revisa los permisos, Privacy, Guardrails y la confirmación de edad en las{" "}
@@ -124,12 +124,11 @@ export function LiveArena({ initialRun }: { initialRun: WebRun }) {
 
       {excluded && (
         <div className="run-excluded" role="alert">
-          <strong>La simulación terminó, pero la carrera no es comparable.</strong>
+          <strong>La partida terminó, pero no puede compararse con otras.</strong>
           <p>
-            {run.replay?.metrics.parse_failures ?? 0} respuestas no superaron el contrato de
-            formato{affectedModels.length ? ` (${affectedModels.join(", ")})` : ""}. La
-            carrera completa queda fuera de las medias comparables; en el leaderboard solo
-            aparece como diagnóstico y el replay se conserva para auditoría.
+            {run.replay?.metrics.parse_failures ?? 0} respuestas tenían un formato ilegible
+            {affectedModels.length ? ` (${affectedModels.join(", ")})` : ""}. La partida queda
+            fuera de las medias, pero puedes revisar la repetición y sus datos.
           </p>
         </div>
       )}
@@ -139,16 +138,16 @@ export function LiveArena({ initialRun }: { initialRun: WebRun }) {
           replay={run.replay as Replay}
           live={run.status !== "completed"}
           completed={run.status === "completed"}
-          thinking={liveEvents.at(-1)?.event_type === "thinking"}
+          thinking={run.status === "running" && liveEvents.at(-1)?.event_type === "thinking"}
           liveEvents={liveEvents}
         />
       ) : (
         <div className="queued-council card">
           <div className="queue-orbit" aria-hidden><i /><i /><i /></div>
-          <h2>Preparando la carrera V1</h2>
+          <h2>Preparando la partida</h2>
           <p>
-            La clave ya fue validada y permanece solamente en la memoria del proceso. La
-            ejecución comenzará cuando quede libre el runner.
+            La clave ya se ha validado y solo permanece en la memoria del servidor.
+            La partida empezará cuando haya capacidad disponible.
           </p>
           <div className="queued-models">
             {run.models.map((model, index) => <span key={`${model}-${index}`}>{model}</span>)}

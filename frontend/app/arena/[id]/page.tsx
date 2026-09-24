@@ -25,7 +25,7 @@ export default async function ArenaPage({
           <div className="game-head">
             <div>
               <h1 style={{ fontSize: 28, marginBottom: 8, marginTop: 12 }}>
-                Moloch Arena V1 · carrera del paper
+                Moloch Arena V1 · repetición de partida
               </h1>
               <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                 <span className="tag">{run.models.length} laboratorios</span>
@@ -64,7 +64,7 @@ export default async function ArenaPage({
         <div className="game-head">
           <div>
             <h1 style={{ fontSize: 28, marginBottom: 8, marginTop: 12 }}>
-              Moloch Arena V1 · carrera del paper
+              Moloch Arena V1 · repetición de partida
             </h1>
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
               <span className="tag">{replay.players.length} laboratorios</span>
@@ -83,9 +83,8 @@ export default async function ArenaPage({
 
       {scripted && (
         <p className="note" style={{ marginBottom: 22 }}>
-          Esta partida la jugaron los agentes guionizados de referencia: las cuatro
-          estrategias del modelo evolutivo reducido de <em>Falling Behind</em>. Son un ancla
-          determinista del benchmark, no modelos de lenguaje.
+          Esta partida la jugaron agentes con estrategias programadas. Sirven como referencia
+          para comparar resultados; no son modelos de lenguaje.
         </p>
       )}
 

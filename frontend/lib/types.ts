@@ -439,3 +439,23 @@ export function shortModel(model: string): string {
   const tail = model.includes("/") ? model.split("/").slice(1).join("/") : model;
   return tail.replace(/-instruct$/, "");
 }
+
+/** Plain-language outcome copy derived from the recorded leaders and terminal draws. */
+export function outcomeSummary(replay: Replay): string {
+  const outcome = replay.outcome;
+  const leaders = outcome.leader_labels ?? [];
+  if (outcome.kind !== "paper_terminal" || !leaders.length)
+    return outcome.headline.replace(/Setback privado para/g, "Revés para");
+  const names = leaders.length === 1
+    ? leaders[0]
+    : `${leaders.slice(0, -1).join(", ")} y ${leaders.at(-1)}`;
+  const opening = leaders.length === 1
+    ? `${names} lidera al terminar y recibe el premio.`
+    : `${names} lideran al terminar y comparten el premio.`;
+  const setbacks = outcome.terminal_results?.filter((result) => result.setback) ?? [];
+  const losses = setbacks.map((result) => {
+    const name = replay.players.find((player) => player.player_id === result.player_id)?.label ?? result.player_id;
+    return `${name} sufre un revés y pierde su pago.`;
+  });
+  return [opening, ...losses].join(" ");
+}

@@ -333,6 +333,9 @@ export function createCouncil(
     root.position.set(Math.sin(a) * 4, 0, -Math.cos(a) * 4);
     root.rotation.y = -a;
     scene.add(root);
+    const signalMaterial = new T.MeshBasicMaterial({ color: labColor(i), transparent: true, opacity: 0, depthWrite: false });
+    const floorSignal = ring(root, 1.04, 0.035, signalMaterial, 0.13);
+    floorSignal.visible = false;
     const armor = new T.MeshPhysicalMaterial({
       color: ["#2854be", "#cf491c", "#558d34", "#e2a715", "#ce2869"][variant],
       metalness: 0.68,
@@ -728,17 +731,20 @@ export function createCouncil(
     const screenContext = screenCanvas.getContext("2d")!;
     let screenKey = "";
     const paintBallot = (current: ReplayBeat) => {
+      const terminal = current.kind === "outcome"
+        ? replay.outcome.terminal_results?.find((result) => result.player_id === player.player_id)
+        : undefined;
       const vote = current.publicVotes[player.player_id];
       const action = current.revealedActions[player.player_id]?.action;
       const ballot = vote ?? action;
       const verdict = current.verdicts[player.player_id];
-      const key = `${vote}|${action}|${verdict}|${current.round}`;
+      const key = `${current.kind}|${vote}|${action}|${verdict}|${current.round}|${terminal?.payoff}`;
       if (key === screenKey) return;
       screenKey = key;
       const c = screenContext;
       c.fillStyle = "#091322";
       c.fillRect(0, 0, 768, 384);
-      c.strokeStyle =
+      c.strokeStyle = terminal?.setback ? "#ff6868" : terminal?.is_leader ? "#e7c782" :
         ballot === "FAST" || ballot === "UNSAFE" ? "#ff9c53" : ballot === "SAFE" ? "#67e9b2" : "#62738b";
       c.lineWidth = 8;
       c.strokeRect(5, 5, 758, 374);
@@ -746,24 +752,24 @@ export function createCouncil(
       c.textBaseline = "middle";
       c.fillStyle = "#bdcadc";
       c.font = "600 32px sans-serif";
-      c.fillText(`${player.label} · ${vote ? "VOTO PÚBLICO" : "DECISIÓN SELLADA"}`, 384, 54, 710);
+      c.fillText(`${player.label} · ${terminal ? "RESULTADO FINAL" : vote ? "VOTO PÚBLICO" : action ? "DECISIÓN REVELADA" : "DECISIÓN SELLADA"}`, 384, 54, 710);
       c.fillStyle =
         ballot === "FAST" || ballot === "UNSAFE" ? "#ff9c53" : ballot === "SAFE" ? "#67e9b2" : "#b9c4d4";
       c.font = `800 ${ballot ? 128 : 72}px sans-serif`;
-      c.fillText(ballot ?? "PENDIENTE", 384, 169, 700);
+      c.fillText(terminal ? terminal.payoff.toFixed(2) : ballot ?? "PENDIENTE", 384, 169, 700);
       c.fillStyle = "#e8edf4";
       c.font = "600 35px sans-serif";
       c.fillText(
-        action ? `DECISIÓN: ${action}` : "DECISIÓN SIN REVELAR",
+        terminal ? terminal.is_leader ? `PREMIO ${terminal.prize_share.toFixed(2)}` : "SIN PREMIO" : action ? `DECISIÓN: ${action}` : "DECISIÓN SIN REVELAR",
         384,
         272,
         710,
       );
-      if (verdict !== undefined) {
-        c.fillStyle = verdict ? "#67e9b2" : "#ff9c53";
+      if (terminal || verdict !== undefined) {
+        c.fillStyle = terminal?.setback || verdict === false ? "#ff9c53" : "#67e9b2";
         c.font = "700 36px sans-serif";
         c.fillText(
-          verdict ? "✓ CUMPLE SU PALABRA" : "✕ ROMPE SU PALABRA",
+          terminal ? terminal.is_leader ? terminal.setback ? "REVÉS: PIERDE EL PAGO" : "SIN REVÉS" : "CONSERVA SUS PAGOS" : verdict ? "✓ CUMPLE SU PALABRA" : "✕ ROMPE SU PALABRA",
           384,
           335,
           710,
@@ -825,6 +831,8 @@ export function createCouncil(
       screenTexture,
       screen,
       terminal,
+      floorSignal,
+      signalMaterial,
       a,
       playerId: player.player_id,
     };
@@ -908,7 +916,7 @@ export function createCouncil(
     camera.fov += (desiredFov - camera.fov) * lerp;
     camera.updateProjectionMatrix();
     delegates.forEach((d) => {
-      const gesture = thinking ? "thinking" : robotGesture(beat, d.playerId);
+      const gesture = thinking && beat.playerId === d.playerId ? "thinking" : robotGesture(beat, d.playerId);
       const pose = robotPose(gesture, beatTime, reduced.matches);
       // Seek directly to the pose; transitions and oscillations never carry future state backward.
       d.body.rotation.set(pose.bodyX, 0, pose.bodyZ);
@@ -929,6 +937,16 @@ export function createCouncil(
       d.speakingHalo.scale.setScalar(
         reduced.matches ? 1 : 1 + Math.sin(beatTime * 4) * 0.035,
       );
+      const terminal = replay.outcome.terminal_results?.find((result) => result.player_id === d.playerId);
+      const lit = beat.kind === "action" && Boolean(beat.revealedActions[d.playerId]) ||
+        beat.kind === "outcome" && Boolean(terminal?.is_leader);
+      d.floorSignal.visible = lit;
+      if (lit) {
+        d.signalMaterial.color.set(beat.kind === "outcome" && terminal?.setback ? "#ff6868" :
+          beat.kind === "action" && beat.revealedActions[d.playerId]?.action !== "SAFE" ? "#ff9c53" : "#79e3c0");
+        d.signalMaterial.opacity = reduced.matches ? 0.7 : 0.5 + Math.sin(beatTime * 5) * 0.2;
+        d.floorSignal.scale.setScalar(reduced.matches ? 1 : 1 + Math.sin(beatTime * 3) * 0.05);
+      }
       d.paintBallot(beat);
     });
     const catastrophe =

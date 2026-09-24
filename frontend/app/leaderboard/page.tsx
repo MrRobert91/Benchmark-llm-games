@@ -8,8 +8,8 @@ export default async function LeaderboardPage() {
   return <>
     <section style={{ marginTop: 44, marginBottom: 26 }}>
       <p className="eyebrow">Moloch Arena V1</p>
-      <h1 style={{ fontSize: 34 }}>Leaderboard reproducible</h1>
-      <p className="lede">Compara modelos y proveedores con las métricas del benchmark: tasa UNSAFE, payoff, liderazgo, setback y admisión. Los resultados proceden de las trazas persistidas y se actualizan al terminar cada ejecución web.</p>
+      <h1 style={{ fontSize: 34 }}>Compara modelos</h1>
+      <p className="lede">Consulta la frecuencia de decisiones UNSAFE, los pagos y los resultados finales. Cada media reúne solo partidas válidas jugadas con las mismas reglas y condiciones.</p>
     </section>
     <BenchmarkDashboard initialData={leaderboard} />
   </>;
