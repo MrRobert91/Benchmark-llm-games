@@ -212,7 +212,7 @@ export function ReplayViewer({
                 }}
               >
                 <i style={{ background: labColor(i) }} />
-                {p.model}
+                <strong>{p.model}</strong>
                 <small>Participante {i + 1}</small>
               </span>
             ))}

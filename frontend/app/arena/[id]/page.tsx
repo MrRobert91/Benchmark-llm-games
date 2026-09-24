@@ -13,7 +13,8 @@ export default async function ArenaPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const run = await getWebRun(id);
+  // A URL can refer to either a live run or a saved replay. Check both at once.
+  const [run, replay] = await Promise.all([getWebRun(id), getReplay(id)]);
   if (run) {
     if (run.benchmark_version !== "moloch-arena-v1-paper-2608.01193v1") notFound();
     return (
@@ -50,7 +51,6 @@ export default async function ArenaPage({
       </>
     );
   }
-  const replay = await getReplay(id);
   if (!replay || replay.benchmark_version !== "moloch-arena-v1-paper-2608.01193v1") notFound();
 
   const scripted = replay.backend.includes("scripted");

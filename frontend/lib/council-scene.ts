@@ -1,11 +1,6 @@
 import * as T from "three";
 import { RoundedBoxGeometry } from "three/addons/geometries/RoundedBoxGeometry.js";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
-import { Reflector } from "three/addons/objects/Reflector.js";
-import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
-import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
-import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";
-import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
 import { labColor, type Replay } from "./types";
 import type { ReplayBeat } from "./replay-timeline";
 import { robotGesture, robotPose } from "./robot-performance";
@@ -21,7 +16,7 @@ export function createCouncil(
     antialias: true,
     powerPreference: "high-performance",
   });
-  renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 1.25));
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = T.PCFShadowMap;
   renderer.toneMapping = T.ACESFilmicToneMapping;
@@ -33,7 +28,7 @@ export function createCouncil(
   const camera = new T.PerspectiveCamera(40, 1, 0.1, 80);
   const environment = new RoomEnvironment();
   const pmrem = new T.PMREMGenerator(renderer);
-  const envTarget = pmrem.fromScene(environment, 0.04);
+  const envTarget = pmrem.fromScene(environment, 0.04, 0.1, 100, { size: 64 });
   scene.environment = envTarget.texture;
   scene.environmentIntensity = 0.55;
   environment.dispose();
@@ -57,6 +52,34 @@ export function createCouncil(
       roughness: 0.4,
     });
   const warm = luminous("#ffd9a0", 3);
+  const geometryCache = new Map<string, T.BufferGeometry>();
+  const geometry = <G extends T.BufferGeometry>(key: string, create: () => G): G => {
+    let cached = geometryCache.get(key) as G | undefined;
+    if (!cached) {
+      cached = create();
+      cached.computeBoundingSphere();
+      geometryCache.set(key, cached);
+    }
+    return cached;
+  };
+  type BoxInstance = { x: number; y: number; z: number; w: number; h: number; d: number; rotationY?: number };
+  const instanceBoxes = (material: T.Material, boxes: BoxInstance[]) => {
+    const instances = new T.InstancedMesh(
+      geometry("unit-box", () => new T.BoxGeometry(1, 1, 1)),
+      material,
+      boxes.length,
+    );
+    const transform = new T.Object3D();
+    boxes.forEach((box, i) => {
+      transform.position.set(box.x, box.y, box.z);
+      transform.rotation.set(0, box.rotationY ?? 0, 0);
+      transform.scale.set(box.w, box.h, box.d);
+      transform.updateMatrix();
+      instances.setMatrixAt(i, transform.matrix);
+    });
+    instances.computeBoundingSphere();
+    scene.add(instances);
+  };
   const mesh = (
     parent: T.Object3D,
     geometry: T.BufferGeometry,
@@ -67,8 +90,10 @@ export function createCouncil(
   ) => {
     const m = new T.Mesh(geometry, material);
     m.position.set(x, y, z);
-    m.castShadow = true;
-    m.receiveShadow = true;
+    const radius = geometry.boundingSphere?.radius ?? 0;
+    // Tiny details and distant scenery need neither a shadow-map draw nor a shadow lookup.
+    m.castShadow = parent !== scene && radius > 0.25;
+    m.receiveShadow = radius > 0.3;
     parent.add(m);
     return m;
   };
@@ -82,7 +107,7 @@ export function createCouncil(
     y = 0,
     z = 0,
     r = 0.06,
-  ) => mesh(p, new RoundedBoxGeometry(w, h, d, 3, r), m, x, y, z);
+  ) => mesh(p, geometry(`box:${w}:${h}:${d}:${r}`, () => new RoundedBoxGeometry(w, h, d, 3, r)), m, x, y, z);
   const sphere = (
     p: T.Object3D,
     r: number,
@@ -90,7 +115,7 @@ export function createCouncil(
     x = 0,
     y = 0,
     z = 0,
-  ) => mesh(p, new T.SphereGeometry(r, 32, 24), m, x, y, z);
+  ) => mesh(p, geometry(`sphere:${r}`, () => new T.SphereGeometry(r, 20, 14)), m, x, y, z);
   const cylinder = (
     p: T.Object3D,
     a: number,
@@ -100,7 +125,7 @@ export function createCouncil(
     x = 0,
     y = 0,
     z = 0,
-  ) => mesh(p, new T.CylinderGeometry(a, b, h, 96), m, x, y, z);
+  ) => mesh(p, geometry(`cylinder:${a}:${b}:${h}`, () => new T.CylinderGeometry(a, b, h, Math.max(a, b) > 2 ? 64 : 24)), m, x, y, z);
   const ring = (
     p: T.Object3D,
     r: number,
@@ -108,7 +133,7 @@ export function createCouncil(
     m: T.Material,
     y: number,
   ) => {
-    const o = mesh(p, new T.TorusGeometry(r, t, 12, 160), m, 0, y);
+    const o = mesh(p, geometry(`ring:${r}:${t}`, () => new T.TorusGeometry(r, t, 8, r > 2 ? 96 : 48)), m, 0, y);
     o.rotation.x = Math.PI / 2;
     return o;
   };
@@ -121,7 +146,7 @@ export function createCouncil(
   ) => {
     const o = mesh(
       p,
-      new T.CylinderGeometry(r * 0.85, r, a.distanceTo(b), 16),
+      geometry(`limb:${r}:${a.distanceTo(b)}`, () => new T.CylinderGeometry(r * 0.85, r, a.distanceTo(b), 12)),
       m,
     );
     o.position.copy(a).add(b).multiplyScalar(0.5);
@@ -163,52 +188,30 @@ export function createCouncil(
     starShape.closePath();
     mesh(scene, new T.ShapeGeometry(starShape), brass, x, 5.5, -10.79);
   }
+  const columns: BoxInstance[] = [];
+  const columnLights: BoxInstance[] = [];
   for (let i = 0; i < 84; i++) {
     const a = (i / 84) * Math.PI * 2;
     const x = Math.sin(a) * 12,
       z = Math.cos(a) * 12;
     if (z > 4) continue;
-    const col = box(scene, 0.22, 10, 0.5, dark, x, 4.6, z);
-    col.rotation.y = a;
+    columns.push({ x, y: 4.6, z, w: 0.22, h: 10, d: 0.5, rotationY: a });
     if (i % 7 === 0) {
-      const light = box(
-        scene,
-        0.055,
-        6,
-        0.08,
-        warm,
-        x * 0.988,
-        5,
-        z * 0.988,
-        0.015,
-      );
-      light.rotation.y = a;
+      columnLights.push({ x: x * 0.988, y: 5, z: z * 0.988, w: 0.055, h: 6, d: 0.08, rotationY: a });
     }
   }
+  instanceBoxes(dark, columns);
+  instanceBoxes(warm, columnLights);
+  const cityMaterial = mat("#172638", 0.5, 0.5);
+  const skyline: BoxInstance[] = [];
+  const skylineLights: BoxInstance[] = [];
   for (let i = 0; i < 32; i++) {
     const h = 0.4 + ((i * 17) % 13) * 0.22;
-    box(
-      scene,
-      0.4,
-      h,
-      0.5,
-      mat("#172638", 0.5, 0.5),
-      (i - 16) * 0.33,
-      h / 2,
-      -15,
-    );
-    box(
-      scene,
-      0.04,
-      0.045,
-      0.03,
-      warm,
-      (i - 16) * 0.33,
-      h * 0.7,
-      -14.73,
-      0.005,
-    );
+    skyline.push({ x: (i - 16) * 0.33, y: h / 2, z: -15, w: 0.4, h, d: 0.5 });
+    skylineLights.push({ x: (i - 16) * 0.33, y: h * 0.7, z: -14.73, w: 0.04, h: 0.045, d: 0.03 });
   }
+  instanceBoxes(cityMaterial, skyline);
+  instanceBoxes(warm, skylineLights);
   for (const x of [-7, 7]) {
     box(scene, 1.3, 8, 1.3, dark, x, 3.9, -8);
     box(scene, 0.06, 6, 0.08, warm, x, 4.4, -7.3);
@@ -227,7 +230,7 @@ export function createCouncil(
   const key = new T.SpotLight("#ffe2b8", 190, 25, 1.0, 0.75, 1.7);
   key.position.set(1, 8, 3);
   key.castShadow = true;
-  key.shadow.mapSize.set(2048, 2048);
+  key.shadow.mapSize.set(1024, 1024);
   key.shadow.bias = -0.0003;
   key.shadow.normalBias = 0.025;
   scene.add(key);
@@ -239,30 +242,21 @@ export function createCouncil(
   rim.position.set(5, 5, -5);
   scene.add(rim);
 
-  // Actual planar reflection, covered by a translucent marble surface and gold inlay.
+  // Polished marble surface and gold inlay.
   cylinder(scene, 2.35, 2.75, 1.45, dark, 0, 0.73);
   cylinder(scene, 3.35, 3.35, 0.18, brass, 0, 1.52);
   cylinder(scene, 3.4, 3.4, 0.13, black, 0, 1.64);
-  const reflection = new Reflector(new T.CircleGeometry(3.38, 128), {
-    textureWidth: 768,
-    textureHeight: 768,
-    color: 0x465674,
-    clipBias: 0.003,
-  });
-  reflection.rotation.x = -Math.PI / 2;
-  reflection.position.y = 1.708;
-  scene.add(reflection);
   const marbleCanvas = document.createElement("canvas");
-  marbleCanvas.width = 1024;
-  marbleCanvas.height = 1024;
+  marbleCanvas.width = 512;
+  marbleCanvas.height = 512;
   const ctx = marbleCanvas.getContext("2d")!;
   ctx.fillStyle = "#11151d";
-  ctx.fillRect(0, 0, 1024, 1024);
-  for (let i = 0; i < 160; i++) {
+  ctx.fillRect(0, 0, 512, 512);
+  for (let i = 0; i < 80; i++) {
     ctx.beginPath();
     ctx.strokeStyle = `rgba(196,184,159,${0.025 + (i % 7) * 0.012})`;
     ctx.lineWidth = 0.4 + (i % 4) * 0.45;
-    for (let x = 0; x <= 1024; x += 8) {
+    for (let x = 0; x <= 512; x += 8) {
       const y =
         i * 9 -
         200 +
@@ -278,14 +272,12 @@ export function createCouncil(
   marbleTexture.colorSpace = T.SRGBColorSpace;
   const marbleMat = new T.MeshStandardMaterial({
     map: marbleTexture,
-    transparent: true,
-    opacity: 0.8,
     metalness: 0.7,
     roughness: 0.22,
   });
   const surface = mesh(
     scene,
-    new T.CircleGeometry(3.39, 128),
+    new T.CircleGeometry(3.39, 64),
     marbleMat,
     0,
     1.715,
@@ -804,12 +796,13 @@ export function createCouncil(
       outlined.push(object);
     });
     outlined.forEach((object) => {
+      if ((object.geometry.boundingSphere?.radius ?? 0) < 0.22) return;
       const outline = new T.Mesh(object.geometry, ink);
       outline.scale.setScalar(1.045);
       object.add(outline);
       if (
         object.geometry instanceof RoundedBoxGeometry &&
-        object.geometry.parameters.width > 0.3
+        object.geometry.parameters.width > 0.6
       ) {
         const edges = new T.LineSegments(
           new T.EdgesGeometry(object.geometry, 35),
@@ -841,16 +834,6 @@ export function createCouncil(
     };
   });
 
-  const target = new T.WebGLRenderTarget(1, 1, {
-    type: T.HalfFloatType,
-    samples: 4,
-  });
-  const composer = new EffectComposer(renderer, target);
-  composer.addPass(new RenderPass(scene, camera));
-  const bloom = new UnrealBloomPass(new T.Vector2(1, 1), 0.12, 0.4, 1.6);
-  composer.addPass(bloom);
-  const output = new OutputPass();
-  composer.addPass(output);
   let beat = initial,
     wide = false,
     thinking = false,
@@ -862,6 +845,10 @@ export function createCouncil(
     desiredLook = look.clone(),
     desiredPosition = new T.Vector3();
   camera.position.set(0, 4.8, 10.2);
+  const pixelRatioCaps = [1.25, 1, 0.8];
+  let qualityLevel = devicePixelRatio <= 1 ? 1 : 0;
+  let qualityFrames = 0;
+  let qualityTime = 0;
   const resize = () => {
     const w = mount.clientWidth,
       h = mount.clientHeight;
@@ -869,7 +856,6 @@ export function createCouncil(
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
     renderer.setSize(w, h, false);
-    composer.setSize(w, h);
   };
   const ro = new ResizeObserver(resize);
   ro.observe(mount);
@@ -886,7 +872,26 @@ export function createCouncil(
     raf = requestAnimationFrame(tick);
     const dt = Math.min((now - previous) / 1000, 0.05);
     previous = now;
-    if (!visible || document.hidden) return;
+    if (!visible || document.hidden) {
+      qualityFrames = 0;
+      qualityTime = 0;
+      return;
+    }
+    qualityFrames += 1;
+    qualityTime += dt;
+    if (qualityFrames >= 90) {
+      mount.dataset.renderFps = String(Math.round(qualityFrames / qualityTime));
+      mount.dataset.renderCalls = String(renderer.info.render.calls);
+      // Lower resolution only after sustained slow frames; never let a hidden tab skew it.
+      if (qualityTime / qualityFrames > 0.028 && qualityLevel < pixelRatioCaps.length - 1) {
+        qualityLevel += 1;
+        renderer.setPixelRatio(Math.min(devicePixelRatio, pixelRatioCaps[qualityLevel]));
+        resize();
+      }
+      mount.dataset.renderScale = renderer.getPixelRatio().toFixed(2);
+      qualityFrames = 0;
+      qualityTime = 0;
+    }
     if (!reduced.matches) {
       t += dt;
       beatTime += dt;
@@ -916,8 +921,10 @@ export function createCouncil(
     look.lerp(desiredLook, lerp);
     camera.lookAt(look);
     const desiredFov = focus || camera.aspect < 1 ? 40 : 32;
-    camera.fov += (desiredFov - camera.fov) * lerp;
-    camera.updateProjectionMatrix();
+    if (Math.abs(desiredFov - camera.fov) > 0.01) {
+      camera.fov += (desiredFov - camera.fov) * lerp;
+      camera.updateProjectionMatrix();
+    }
     delegates.forEach((d) => {
       const gesture = thinking && beat.playerId === d.playerId ? "thinking" : robotGesture(beat, d.playerId);
       const pose = robotPose(gesture, beatTime, reduced.matches);
@@ -960,7 +967,7 @@ export function createCouncil(
     crystal.rotation.y = t * 0.3;
     cage.rotation.y = -t * 0.2;
     crystal.position.y = cage.position.y = 2.22 + Math.sin(t) * 0.035;
-    composer.render();
+    renderer.render(scene, camera);
   };
   const lost = (e: Event) => {
     e.preventDefault();
@@ -999,12 +1006,11 @@ export function createCouncil(
       delegates.forEach((d) => d.screenTexture.dispose());
       gradient.dispose();
       marbleTexture.dispose();
-      reflection.getRenderTarget().dispose();
       envTarget.dispose();
-      bloom.dispose();
-      output.dispose();
-      composer.dispose();
       renderer.dispose();
+      delete mount.dataset.renderFps;
+      delete mount.dataset.renderCalls;
+      delete mount.dataset.renderScale;
       renderer.domElement.remove();
     },
   };
