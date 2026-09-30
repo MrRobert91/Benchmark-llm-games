@@ -14,7 +14,9 @@ export function arenaReplay(replay: Replay): Replay {
   );
   const headline = replay.players.reduce(
     (text, player) => text.replaceAll(player.label, labelFor(player.player_id)),
-    replay.outcome.headline,
+    // The backend publishes a partial replay during a live run. Its outcome and
+    // metrics stay empty until the final round has been resolved.
+    replay.outcome.headline ?? "",
   );
 
   return {
@@ -25,7 +27,7 @@ export function arenaReplay(replay: Replay): Replay {
     })),
     metrics: {
       ...replay.metrics,
-      players: replay.metrics.players.map((player) => ({
+      players: (replay.metrics.players ?? []).map((player) => ({
         ...player,
         label: labelFor(player.player_id),
       })),

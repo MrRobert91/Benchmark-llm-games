@@ -24,6 +24,38 @@ test("the 3D replay names models and distinguishes seats without changing record
   assert.equal(JSON.stringify(recorded), original);
 });
 
+test("a five-model live snapshot renders before outcome and metrics are calculated", () => {
+  const models = [
+    "openai/gpt-5.4-nano",
+    "deepseek/deepseek-v4.1-flash",
+    "openai/gpt-5.6-luna",
+    "xiaomi/mimo-v2.6-flash",
+    "minimax/minimax-m3",
+  ];
+  const partial = structuredClone(games[0]);
+  partial.game_id = "c514230b9c92";
+  partial.players = models.map((model, index) => ({
+    ...partial.players[0],
+    player_id: `p${index}`,
+    label: `Lab ${index + 1}`,
+    model,
+    seat: index,
+  }));
+  partial.rounds = [];
+  // PaperGameRecord.to_dict() emits these empty objects until the run finishes.
+  partial.outcome = {} as Replay["outcome"];
+  partial.metrics = {} as Replay["metrics"];
+  const original = JSON.stringify(partial);
+
+  const arena = arenaReplay(partial);
+
+  assert.equal(arena.players.length, 5);
+  assert.deepEqual(arena.metrics.players, []);
+  assert.equal(arena.outcome.headline, "");
+  assert.deepEqual(buildTimeline(arena, false).map((beat) => beat.kind), ["intro"]);
+  assert.equal(JSON.stringify(partial), original);
+});
+
 test("every bundled V1 replay reveals sealed actions together and preserves resolved state", () => {
   assert.ok(games.length > 0);
   for (const replay of games) {
