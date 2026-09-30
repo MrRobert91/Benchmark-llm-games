@@ -5,6 +5,7 @@ import type {
   Replay,
   StateRecord,
 } from "./types";
+import { outcomeSummary } from "./types.ts";
 
 function playerFor(
   replay: Replay,
@@ -87,7 +88,7 @@ export function describeLiveEvent(event: LiveRunEvent, replay: Replay): string {
     case "finished":
       return "El horizonte ha terminado. Calculando premios, riesgo y pagos finales.";
     case "completed":
-      return detail.headline ?? "Partida completada.";
+      return replay.outcome ? outcomeSummary(replay) : detail.headline?.replace(/Setback privado para/g, "Revés para") ?? "Partida completada.";
     case "failed":
       return detail.message ?? "La ejecución se ha detenido antes de completar la partida.";
   }

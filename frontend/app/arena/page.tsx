@@ -8,11 +8,11 @@ export default async function ArenaListPage() {
   return (
     <>
       <section style={{ marginTop: 44, marginBottom: 26 }}>
-        <p className="eyebrow">Archivo completo</p>
+        <p className="eyebrow">Archivo de partidas</p>
         <h1 style={{ fontSize: 34 }}>Partidas</h1>
         <p className="lede">
-          Explora las carreras V1 guardadas, filtra por modelo, riesgo o admisión y reproduce
-          en 3D cada decisión SAFE/UNSAFE, pago de etapa, liderazgo y setback.
+          Encuentra una partida por modelo o riesgo. En cada repetición puedes ver las decisiones
+          de cada ronda, cómo cambia el progreso y cómo se calcula el resultado final.
         </p>
       </section>
       <GameArchive games={games} />

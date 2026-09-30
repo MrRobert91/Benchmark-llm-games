@@ -13,7 +13,8 @@ export default async function ArenaPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const run = await getWebRun(id);
+  // A URL can refer to either a live run or a saved replay. Check both at once.
+  const [run, replay] = await Promise.all([getWebRun(id), getReplay(id)]);
   if (run) {
     if (run.benchmark_version !== "moloch-arena-v1-paper-2608.01193v1") notFound();
     return (
@@ -25,7 +26,7 @@ export default async function ArenaPage({
           <div className="game-head">
             <div>
               <h1 style={{ fontSize: 28, marginBottom: 8, marginTop: 12 }}>
-                Moloch Arena V1 · carrera del paper
+                Moloch Arena V1 · repetición de partida
               </h1>
               <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                 <span className="tag">{run.models.length} laboratorios</span>
@@ -50,7 +51,6 @@ export default async function ArenaPage({
       </>
     );
   }
-  const replay = await getReplay(id);
   if (!replay || replay.benchmark_version !== "moloch-arena-v1-paper-2608.01193v1") notFound();
 
   const scripted = replay.backend.includes("scripted");
@@ -64,7 +64,7 @@ export default async function ArenaPage({
         <div className="game-head">
           <div>
             <h1 style={{ fontSize: 28, marginBottom: 8, marginTop: 12 }}>
-              Moloch Arena V1 · carrera del paper
+              Moloch Arena V1 · repetición de partida
             </h1>
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
               <span className="tag">{replay.players.length} laboratorios</span>
@@ -83,9 +83,8 @@ export default async function ArenaPage({
 
       {scripted && (
         <p className="note" style={{ marginBottom: 22 }}>
-          Esta partida la jugaron los agentes guionizados de referencia: las cuatro
-          estrategias del modelo evolutivo reducido de <em>Falling Behind</em>. Son un ancla
-          determinista del benchmark, no modelos de lenguaje.
+          Esta partida la jugaron agentes con estrategias programadas. Sirven como referencia
+          para comparar resultados; no son modelos de lenguaje.
         </p>
       )}
 

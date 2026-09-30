@@ -164,9 +164,15 @@ export async function getLeaderboard(): Promise<LeaderboardData> {
 }
 
 export async function getReplay(gameId: string): Promise<Replay | null> {
-  return liveOrSnapshot(`/api/games/${encodeURIComponent(gameId)}`, () =>
-    readJson<Replay | null>(`games/${gameId}.json`, null),
-  );
+  const route = `/api/games/${encodeURIComponent(gameId)}`;
+  try {
+    return await fetchFromApi<Replay>(route);
+  } catch (error) {
+    // Live run IDs have no saved game yet; their game lookup normally returns 404.
+    if (!(error instanceof Error && error.message.includes("returned 404")))
+      console.warn(`Falling back to bundled data for ${route}`, error);
+    return readJson<Replay | null>(`games/${gameId}.json`, null);
+  }
 }
 
 export async function getWebRun(gameId: string): Promise<WebRun | null> {

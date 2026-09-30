@@ -159,8 +159,8 @@ export function RunExperimentForm() {
         <div className="run-section-head">
           <span className="run-step">01</span>
           <div>
-            <h2>Elige versión y laboratorios</h2>
-            <p>V1 reproduce las reglas publicadas y admite entre 2 y 5 asientos.</p>
+            <h2>Elige las reglas y los modelos</h2>
+            <p>La versión V1 sigue las reglas publicadas y admite entre dos y cinco participantes.</p>
           </div>
         </div>
         <div className="field-grid" style={{ marginBottom: 20 }}>
@@ -196,11 +196,11 @@ export function RunExperimentForm() {
         </div>
         {benchmarkVersion === PAPER_V1 && (
           <div className="key-safety" style={{ marginBottom: 20 }}>
-            <strong>Protocolo fiel al mecanismo del paper.</strong>
+            <strong>Cómo se juega esta versión</strong>
             <p>
-              Una decisión sellada SAFE/UNSAFE por jugador y ronda; horizonte geométrico
-              oculto, pagos de etapa, premio compartido y setback privado. La repetición 3D
-              revela el estado y las acciones sin introducir información en la partida.
+              Cada modelo elige SAFE o UNSAFE sin conocer las decisiones actuales de los demás.
+              La partida dura al menos cinco rondas. Al terminar, los líderes comparten el premio
+              y cada uno afronta su propio sorteo de riesgo.
             </p>
           </div>
         )}
@@ -211,14 +211,14 @@ export function RunExperimentForm() {
               value={mode}
               onChange={(event) => setMode(event.target.value as "single" | "smoke")}
             >
-              <option value="single">Carrera individual</option>
+              <option value="single">Una partida</option>
               {benchmarkVersion === PAPER_V1 && (
-                <option value="smoke">Smoke reproducible · 3 riesgos</option>
+                <option value="smoke">Prueba de diagnóstico · 3 niveles de riesgo</option>
               )}
             </select>
           </label>
           <label>
-            Semilla maestra
+            Semilla para repetir el experimento
             <input
               type="number"
               min={0}
@@ -231,8 +231,8 @@ export function RunExperimentForm() {
         </div>
         {mode === "smoke" && (
           <p className="note" style={{ marginBottom: 20 }}>
-            Ejecuta el primer modelo en self-play de dos jugadores una vez con riesgo 10%,
-            60% y 90%. Es diagnóstico, no evidencia confirmatoria.
+            El primer modelo jugará contra otra copia de sí mismo con riesgos del 10 %, 60 % y
+            90 %. Esta prueba sirve para comprobar el sistema, no para extraer conclusiones.
           </p>
         )}
         {!catalog && !error && <p className="note">Cargando el catálogo en tiempo real…</p>}
@@ -271,7 +271,7 @@ export function RunExperimentForm() {
                     className="seat-remove"
                     onClick={() => setModels((current) => current.filter((_, i) => i !== index))}
                   >
-                    Quitar asiento
+                    Quitar participante
                   </button>
                 )}
               </div>
@@ -280,7 +280,7 @@ export function RunExperimentForm() {
         </div>
         {models.length < 5 && (
           <button type="button" className="btn" onClick={() => setModels((m) => [...m, ""])}>
-            + Añadir laboratorio
+            + Añadir participante
           </button>
         )}
       </section>
@@ -289,13 +289,13 @@ export function RunExperimentForm() {
         <div className="run-section-head">
           <span className="run-step">02</span>
           <div>
-            <h2>Tu aportación</h2>
-            <p>Cada partida es una colaboración independiente. No hay cuenta ni perfil.</p>
+            <h2>Cómo aparecerá tu aportación</h2>
+            <p>Mostraremos este nombre junto a la partida. No necesitas crear una cuenta.</p>
           </div>
         </div>
         <div className="field-grid">
           <label>
-            Nick público
+            Nombre público
             <input value={nick} onChange={(e) => setNick(e.target.value)} maxLength={40} required />
           </label>
           <label>
@@ -320,8 +320,8 @@ export function RunExperimentForm() {
         <div className="run-section-head">
           <span className="run-step">03</span>
           <div>
-            <h2>Autoriza esta partida</h2>
-            <p>La ejecución usa tu saldo de OpenRouter y nunca nuestra cuenta.</p>
+            <h2>Clave y límite de gasto</h2>
+            <p>La partida se cargará a tu cuenta de OpenRouter, hasta el límite que indiques.</p>
           </div>
         </div>
         <div className="key-safety">
@@ -339,7 +339,7 @@ export function RunExperimentForm() {
         </div>
         <div className="field-grid key-fields">
           <label>
-            OpenRouter API key
+            Clave de OpenRouter
             <input
               type="password"
               value={apiKey}
@@ -386,15 +386,15 @@ export function RunExperimentForm() {
           </div>
         )}
         <p className="note">
-          Es una estimación: en V1 el horizonte no tiene máximo matemático (su media es 9
-          rondas). Los tokens de razonamiento cuentan como salida y OpenRouter decide el
-          proveedor final. {estimate?.tokenPolicy && <>El protocolo reserva hasta {estimate.tokenPolicy.normal.toLocaleString("es-ES")} tokens de salida normal y hasta {estimate.tokenPolicy.reasoning.toLocaleString("es-ES")} cuando el endpoint obliga a razonar, con un techo de recuperación de {estimate.tokenPolicy.ceiling.toLocaleString("es-ES")}. </>}Si se alcanza un límite operativo, la carrera queda incompleta y nunca entra en los resultados admitidos.
+          El coste es orientativo: la duración de V1 no tiene un máximo fijo (la media es de nueve
+          rondas), los tokens de razonamiento también cuestan dinero y OpenRouter elige el
+          proveedor final. {estimate?.tokenPolicy && <>Se reservan hasta {estimate.tokenPolicy.normal.toLocaleString("es-ES")} tokens de salida normal o {estimate.tokenPolicy.reasoning.toLocaleString("es-ES")} si el modelo necesita razonamiento; el límite de recuperación es {estimate.tokenPolicy.ceiling.toLocaleString("es-ES")}. </>}Si se alcanza un límite operativo, la partida queda incompleta y no se incluye en la comparativa.
         </p>
       </section>
 
       {error && <p className="run-error" role="alert">{error}</p>}
       <button className="btn btn-primary run-submit" disabled={submitting || !catalog}>
-        {submitting ? "Validando clave y reservando asiento…" : "Lanzar partida en directo →"}
+        {submitting ? "Validando clave y preparando la partida…" : "Iniciar partida →"}
       </button>
     </form>
   );

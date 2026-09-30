@@ -43,17 +43,17 @@ export function BenchmarkDashboard({ initialData }: { initialData: LeaderboardDa
   return <>
     <div className="benchmark-live" role="status" aria-live="polite">
       <span className={refreshState === "live" ? "live-pulse" : ""} />
-      {refreshState === "live" ? "Datos SQLite · actualización automática cada 5 segundos" : "Mostrando el último dato confirmado; reintentando conexión"}
+      {refreshState === "live" ? "Resultados actualizados automáticamente" : "Mostrando los últimos resultados disponibles; reintentando conexión"}
     </div>
     <div className="grid grid-3" style={{ marginBottom: 28 }}>
-      <div className="card metric"><span className="metric-label">Carreras V1 admitidas</span><span className="metric-value">{summary.admitted_games}/{summary.games}</span><p className="metric-note">{summary.trajectories} trayectorias guardadas.</p></div>
-      <div className="card metric"><span className="metric-label">Tasa UNSAFE</span><span className="metric-value" style={{ color: "var(--fast)" }}>{percent(summary.avg_unsafe_rate)}</span><p className="metric-note">Solo decisiones de carreras admitidas.</p></div>
+      <div className="card metric"><span className="metric-label">Partidas comparables</span><span className="metric-value">{summary.admitted_games}/{summary.games}</span><p className="metric-note">{summary.trajectories} resultados individuales guardados.</p></div>
+      <div className="card metric"><span className="metric-label">Decisiones UNSAFE</span><span className="metric-value" style={{ color: "var(--fast)" }}>{percent(summary.avg_unsafe_rate)}</span><p className="metric-note">Solo en partidas comparables.</p></div>
       <div className="card metric"><span className="metric-label">Pago medio</span><span className="metric-value" style={{ color: "var(--accent)" }}>{summary.avg_payoff?.toFixed(2) ?? "—"}</span><p className="metric-note">{summary.requested_models} modelos solicitados.</p></div>
     </div>
 
     <section>
-      <p className="eyebrow">Todos los modelos</p><h2>Conducta por celda comparable</h2>
-      <p style={{ maxWidth: "74ch" }}>Cada barra es el promedio del mismo modelo con idéntico protocolo, riesgo y número de jugadores. Una nueva ejecución comparable actualiza esa media; nunca se mezclan tratamientos distintos.</p>
+      <p className="eyebrow">Todos los modelos</p><h2>Decisiones UNSAFE por modelo</h2>
+      <p style={{ maxWidth: "74ch" }}>Cada barra reúne partidas del mismo modelo, protocolo, riesgo y número de participantes. Así puedes comparar resultados obtenidos en las mismas condiciones.</p>
       <div className="card benchmark-chart" aria-label="Tasa UNSAFE por modelo y celda comparable">
         {models.length ? models.map((row) => {
           const color = RISK_COLOR[String(row.risk_treatment)] ?? "var(--accent)";
@@ -68,7 +68,7 @@ export function BenchmarkDashboard({ initialData }: { initialData: LeaderboardDa
     </section>
 
     <section><h2>Resultados por modelo</h2><div className="card scroll-x" style={{ padding: 0 }}><table>
-      <thead><tr><th style={{ paddingLeft: 22 }}>Modelo / celda</th><th className="num">Carreras</th><th className="num">Trayectorias</th><th className="num">UNSAFE</th><th className="num">Pago</th><th className="num">Lidera</th><th className="num">Setback</th><th className="num" style={{ paddingRight: 22 }}>Excluidas</th></tr></thead>
+      <thead><tr><th style={{ paddingLeft: 22 }}>Modelo y condiciones</th><th className="num">Partidas</th><th className="num">Resultados</th><th className="num">UNSAFE</th><th className="num">Pago</th><th className="num">Lidera</th><th className="num">Revés</th><th className="num" style={{ paddingRight: 22 }}>Excluidas</th></tr></thead>
       <tbody>{models.map((row) => <tr key={`table-${row.model}-${row.protocol_version}-${row.n_players}-${row.risk_treatment}`}>
         <td style={{ paddingLeft: 22 }}><strong>{shortModel(row.model)}</strong><small style={{ display: "block" }}>{row.n_players}P · riesgo {Math.round(row.risk_treatment * 100)}% · {row.protocol_version}</small></td>
         <td className="num">{row.games}</td><td className="num">{row.admitted_trajectories}/{row.trajectories}</td><td className="num">{percent(row.avg_unsafe_rate)}</td><td className="num">{row.avg_payoff?.toFixed(2) ?? "—"}</td><td className="num">{percent(row.leader_rate)}</td><td className="num">{percent(row.setback_rate)}</td><td className="num" style={{ paddingRight: 22 }}>{row.contaminated_games}</td>
@@ -76,8 +76,8 @@ export function BenchmarkDashboard({ initialData }: { initialData: LeaderboardDa
     </table></div></section>
 
     {models.some((row) => row.contaminated_games > 0 || row.parse_failures > 0) && <section>
-      <p className="eyebrow">Compatibilidad de formato</p><h2>Ejecuciones excluidas, visibles para diagnóstico</h2>
-      <p style={{ maxWidth: "74ch" }}>Estas ejecuciones se guardaron, pero no alteran las medias. La admisión se decide por carrera completa: si un modelo necesita fallback, también se excluye la trayectoria de su rival limpio.</p>
+      <p className="eyebrow">Respuestas ilegibles</p><h2>Partidas excluidas de las medias</h2>
+      <p style={{ maxWidth: "74ch" }}>Estas partidas se guardaron para revisión. Si una decisión no tiene un formato legible, se excluye la partida completa, incluidos los demás participantes.</p>
       <div className="card scroll-x" style={{ padding: 0 }}><table>
         <thead><tr><th style={{ paddingLeft: 22 }}>Modelo / celda</th><th className="num">Admitidas</th><th className="num">Carreras excluidas</th><th className="num" style={{ paddingRight: 22 }}>Respuestas ilegibles</th></tr></thead>
         <tbody>{models.filter((row) => row.contaminated_games > 0 || row.parse_failures > 0).map((row) => <tr key={`diagnostic-${row.model}-${row.protocol_version}-${row.n_players}-${row.risk_treatment}`}>
@@ -87,8 +87,8 @@ export function BenchmarkDashboard({ initialData }: { initialData: LeaderboardDa
       </table></div>
     </section>}
 
-    <section><p className="eyebrow">Ruta real</p><h2>Resultados por backend servido</h2>
-      <p style={{ maxWidth: "72ch" }}>OpenRouter puede enrutar una trayectoria por varios proveedores. Cada fila muestra las trayectorias en las que participó ese proveedor, con sus llamadas y coste exactos; una ruta mixta aparece en todas las filas correspondientes.</p>
+    <section><p className="eyebrow">Proveedor utilizado</p><h2>Resultados por proveedor</h2>
+      <p style={{ maxWidth: "72ch" }}>OpenRouter puede usar varios proveedores durante una partida. Cada fila muestra los resultados en los que intervino ese proveedor, junto con sus llamadas y coste.</p>
       <div className="card scroll-x" style={{ padding: 0 }}><table><thead><tr><th style={{ paddingLeft: 22 }}>Proveedor / celda</th><th>Motor</th><th className="num">Carreras</th><th className="num">Trayectorias</th><th className="num">UNSAFE</th><th className="num">Pago</th><th className="num">Llamadas</th><th className="num" style={{ paddingRight: 22 }}>Coste</th></tr></thead>
       <tbody>{data.paper_backends.map((row) => <tr key={`${row.provider}-${row.backend}-${row.protocol_version}-${row.n_players}-${row.risk_treatment}`}><td style={{ paddingLeft: 22 }}><strong>{row.provider}</strong><small style={{ display: "block" }}>{row.n_players}P · riesgo {Math.round(row.risk_treatment * 100)}% · {row.served_models} modelos servidos</small></td><td>{row.backend}</td><td className="num">{row.games}</td><td className="num">{row.admitted_trajectories}/{row.trajectories}</td><td className="num">{percent(row.avg_unsafe_rate)}</td><td className="num">{row.avg_payoff?.toFixed(2) ?? "—"}</td><td className="num">{row.calls}</td><td className="num" style={{ paddingRight: 22 }}>${row.cost_usd.toFixed(4)}</td></tr>)}</tbody></table></div>
     </section>

@@ -4,10 +4,10 @@ import "./globals.css";
 import { Nav } from "@/components/Nav";
 
 export const metadata: Metadata = {
-  title: "Moloch Arena V1 — benchmark reproducible de carreras de IA",
+  title: "Moloch Arena V1 — decisiones y resultados de modelos de IA",
   description:
-    "Modelos eligen SAFE o UNSAFE bajo un horizonte incierto. Compara tasa UNSAFE, " +
-    "payoff, liderazgo y setback con trazabilidad SQLite y replay 3D.",
+    "Observa cómo modelos de IA eligen SAFE o UNSAFE, sigue cada ronda en 3D " +
+    "y compara sus decisiones y pagos finales.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -7,7 +7,7 @@ const LINKS = [
   { href: "/", label: "Moloch Arena V1" },
   { href: "/arena", label: "Partidas" },
   { href: "/run", label: "Ejecutar" },
-  { href: "/leaderboard", label: "Leaderboard" },
+  { href: "/leaderboard", label: "Comparativa" },
 ];
 
 export function Nav() {

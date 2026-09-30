@@ -2,10 +2,27 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import fs from "node:fs";
 import { buildTimeline } from "../lib/replay-timeline.ts";
+import { arenaReplay } from "../lib/arena-identity.ts";
 import { describeLiveEvent } from "../lib/live-narration.ts";
-import type { LiveRunEvent, Replay } from "../lib/types.ts";
+import { outcomeSummary, type LiveRunEvent, type Replay } from "../lib/types.ts";
 
 const games: Replay[] = fs.readdirSync("public/data/games").filter((file) => file.endsWith(".json")).map((file) => JSON.parse(fs.readFileSync(`public/data/games/${file}`, "utf8")));
+
+test("the 3D replay names models and distinguishes seats without changing recorded labels", () => {
+  const recorded = structuredClone(games.find((game) => game.players.length === 2)!);
+  recorded.players[1].model = recorded.players[0].model;
+  const original = JSON.stringify(recorded);
+  const arena = arenaReplay(recorded);
+
+  assert.equal(arena.players[0].label, `${recorded.players[0].model} (participante 1)`);
+  assert.equal(arena.players[1].label, `${recorded.players[1].model} (participante 2)`);
+  assert.equal(arena.metrics.players[0].label, arena.players[0].label);
+  assert.deepEqual(arena.outcome.leader_labels, arena.outcome.leader_ids?.map((id) => arena.players.find((player) => player.player_id === id)?.label));
+  for (const label of recorded.players.map((player) => player.label)) {
+    assert.ok(!buildTimeline(arena).some((beat) => beat.text.includes(label)));
+  }
+  assert.equal(JSON.stringify(recorded), original);
+});
 
 test("every bundled V1 replay reveals sealed actions together and preserves resolved state", () => {
   assert.ok(games.length > 0);
@@ -79,4 +96,22 @@ test("an empty live replay contains only the truthful initial state", () => {
   const replay = structuredClone(games[0]);
   replay.rounds = [];
   assert.deepEqual(buildTimeline(replay, false).map((beat) => beat.kind), ["intro"]);
+});
+
+test("a partial live round keeps every sealed action hidden until all players respond", () => {
+  const replay = structuredClone(games[0]);
+  replay.rounds = [{ ...replay.rounds[0], actions: [replay.rounds[0].actions[0]], state_after: [] }];
+  const beats = buildTimeline(replay, false);
+  assert.deepEqual(beats.map((beat) => beat.kind), ["intro"]);
+  assert.deepEqual(beats[0].revealedActions, {});
+});
+
+test("final narration names the leaders and any player who lost their payout", () => {
+  const replay = games.find((game) => game.outcome.terminal_results?.some((result) => result.setback))!;
+  const affected = replay.outcome.terminal_results!.find((result) => result.setback)!;
+  const name = replay.players.find((player) => player.player_id === affected.player_id)!.label;
+  const summary = outcomeSummary(replay);
+  assert.match(summary, new RegExp(`${name} sufre un revés y pierde su pago`));
+  assert.doesNotMatch(summary, /Setback/);
+  assert.equal(buildTimeline(replay).at(-1)?.text, summary);
 });
