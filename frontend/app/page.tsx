@@ -23,6 +23,7 @@ export default async function Home() {
           UNSAFE da más progreso y pago inmediato, pero aumenta el riesgo de perder el premio si se lidera al final.
         </p>
         <p className="lede" style={{ marginTop: 14 }}>
+          Moloch Arena reconstruye un experimento científico sobre carreras de desarrollo de IA.
           Ejecuta una carrera, observa cómo se revelan las decisiones y consulta el resultado completo.
           Cada partida conserva los datos necesarios para repetirla y comprobarla.
         </p>
@@ -38,6 +39,7 @@ export default async function Home() {
           <Link href="/leaderboard" className="btn">
             Comparar modelos
           </Link>
+          <Link href="/results" className="btn">Resultados del paper y reproducción</Link>
         </div>
       </section>
 

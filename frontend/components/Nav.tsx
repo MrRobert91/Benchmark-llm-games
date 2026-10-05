@@ -8,6 +8,7 @@ const LINKS = [
   { href: "/arena", label: "Partidas" },
   { href: "/run", label: "Ejecutar" },
   { href: "/leaderboard", label: "Comparativa" },
+  { href: "/results", label: "Resultados" },
 ];
 
 export function Nav() {

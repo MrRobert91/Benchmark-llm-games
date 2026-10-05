@@ -1,8 +1,19 @@
 # Validation artifacts
 
-These files are committed evidence for Moloch Arena V1. They contain aggregate results and
-reproducibility metadata only; raw prompts, model responses and reasoning remain in the
-private local SQLite database and are deliberately excluded from Git.
+These files are committed evidence for Moloch Arena V1. The historical smoke run contains
+aggregate results only. The October reproduction additionally publishes a compressed
+trace archive with generated prompts, responses and provider metadata, without credentials.
+
+## Paper-results campaign · 2026-10-05
+
+- Plan and report: `reproduction-20261005/manifest.json` and `report.json`.
+- Results page: `/results`; every contribution is attributed to RustyRoboz with
+  `https://www.rustyrobozlabs.com`.
+- Complete downloadable trace archive: `frontend/public/research/reproduction-20261005.zip`.
+- Methodology and rebuild instructions: [`../PAPER_RESULTS.md`](../PAPER_RESULTS.md).
+- Eleven original paper figures, cited individually; local charts generated from raw races.
+- Canonical, arithmetic, persona, task-audit and fixed-state diagnostics remain separate.
+- The campaign uses a single conservative $5 API ceiling (below €5 at recorded reference FX).
 
 ## OpenRouter smoke run
 

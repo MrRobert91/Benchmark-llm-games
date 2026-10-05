@@ -45,6 +45,13 @@ sorteos de setback y payoff individual.
 
 ## Leaderboard vivo
 
+La nueva página [`/results`](docs/PAPER_RESULTS.md) explica el paper completo, cita sus once
+figuras y compara los datos publicados con una campaña de OpenRouter aportada por
+[RustyRoboz](https://www.rustyrobozlabs.com). Incluye repeticiones en tres riesgos, modelos
+originales y económicos, comprensión, aritmética, personas, trayectorias y N=3–5, con
+gráficas, diferencias por celda y una descarga íntegra. Sus resultados son una reconstrucción
+exploratoria y se mantienen separados de los nuevos datos del leaderboard vivo.
+
 ![Leaderboard por modelo y proveedor](docs/img/moloch-arena-v1-leaderboard.png)
 
 Cada ejecución web terminada se normaliza en SQLite. El dashboard vuelve a consultar la API
