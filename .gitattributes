@@ -1,0 +1,4 @@
+# Preserve the frozen diagnostic source bytes used by the campaign manifest.
+backend/moloch/research.py text eol=lf
+# Matplotlib emits trailing spaces inside multiline SVG path attributes.
+frontend/public/research/*.svg whitespace=-blank-at-eol

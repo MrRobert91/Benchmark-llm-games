@@ -1,0 +1,4628 @@
+{
+  "073e8ecccfb7": [
+    {
+      "player_id": "p0",
+      "model": "mistralai/mistral-nemo",
+      "phase": "paper_round_1_action",
+      "usage": {
+        "prompt_tokens": 436,
+        "completion_tokens": 7,
+        "total_tokens": 443,
+        "cost": 8.058e-06,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 8.058e-06,
+          "upstream_inference_prompt_cost": 7.848e-06,
+          "upstream_inference_completions_cost": 2.1e-07
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483522-Oc7ABM1VrAwZ4Fc9xyGp",
+      "provider": "DekaLLM",
+      "served_model": "mistralai/mistral-nemo",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 1578
+    },
+    {
+      "player_id": "p1",
+      "model": "mistralai/mistral-nemo",
+      "phase": "paper_round_1_action",
+      "usage": {
+        "prompt_tokens": 436,
+        "completion_tokens": 7,
+        "total_tokens": 443,
+        "cost": 8.058e-06,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 8.058e-06,
+          "upstream_inference_prompt_cost": 7.848e-06,
+          "upstream_inference_completions_cost": 2.1e-07
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483523-BSAyCSAGf3KQgo3QiwjO",
+      "provider": "DekaLLM",
+      "served_model": "mistralai/mistral-nemo",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 578
+    },
+    {
+      "player_id": "p0",
+      "model": "mistralai/mistral-nemo",
+      "phase": "paper_round_2_action",
+      "usage": {
+        "prompt_tokens": 440,
+        "completion_tokens": 8,
+        "total_tokens": 448,
+        "cost": 8.16e-06,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 8.16e-06,
+          "upstream_inference_prompt_cost": 7.92e-06,
+          "upstream_inference_completions_cost": 2.4e-07
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483524-XQCwoVYMRvACGWYD0GOm",
+      "provider": "DekaLLM",
+      "served_model": "mistralai/mistral-nemo",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 1203
+    },
+    {
+      "player_id": "p1",
+      "model": "mistralai/mistral-nemo",
+      "phase": "paper_round_2_action",
+      "usage": {
+        "prompt_tokens": 440,
+        "completion_tokens": 8,
+        "total_tokens": 448,
+        "cost": 8.16e-06,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 8.16e-06,
+          "upstream_inference_prompt_cost": 7.92e-06,
+          "upstream_inference_completions_cost": 2.4e-07
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483525-1C6Pgg6yxm2qfHjrO1Qh",
+      "provider": "DekaLLM",
+      "served_model": "mistralai/mistral-nemo",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 750
+    },
+    {
+      "player_id": "p0",
+      "model": "mistralai/mistral-nemo",
+      "phase": "paper_round_3_action",
+      "usage": {
+        "prompt_tokens": 442,
+        "completion_tokens": 7,
+        "total_tokens": 449,
+        "cost": 8.166e-06,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 8.166e-06,
+          "upstream_inference_prompt_cost": 7.956e-06,
+          "upstream_inference_completions_cost": 2.1e-07
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483526-irHgYgpNhurPcFZfy6L2",
+      "provider": "DekaLLM",
+      "served_model": "mistralai/mistral-nemo",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 938
+    },
+    {
+      "player_id": "p1",
+      "model": "mistralai/mistral-nemo",
+      "phase": "paper_round_3_action",
+      "usage": {
+        "prompt_tokens": 442,
+        "completion_tokens": 7,
+        "total_tokens": 449,
+        "cost": 8.166e-06,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 8.166e-06,
+          "upstream_inference_prompt_cost": 7.956e-06,
+          "upstream_inference_completions_cost": 2.1e-07
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483527-M5sLh5IiGw6YGBo3ecTt",
+      "provider": "DekaLLM",
+      "served_model": "mistralai/mistral-nemo",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 765
+    },
+    {
+      "player_id": "p0",
+      "model": "mistralai/mistral-nemo",
+      "phase": "paper_round_4_action",
+      "usage": {
+        "prompt_tokens": 440,
+        "completion_tokens": 7,
+        "total_tokens": 447,
+        "cost": 8.13e-06,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 8.13e-06,
+          "upstream_inference_prompt_cost": 7.92e-06,
+          "upstream_inference_completions_cost": 2.1e-07
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483528-UucHQKqBLHCUhYKLI4lT",
+      "provider": "DekaLLM",
+      "served_model": "mistralai/mistral-nemo",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 594
+    },
+    {
+      "player_id": "p1",
+      "model": "mistralai/mistral-nemo",
+      "phase": "paper_round_4_action",
+      "usage": {
+        "prompt_tokens": 440,
+        "completion_tokens": 8,
+        "total_tokens": 448,
+        "cost": 8.16e-06,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 8.16e-06,
+          "upstream_inference_prompt_cost": 7.92e-06,
+          "upstream_inference_completions_cost": 2.4e-07
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483528-GbNA6HacKcLqXkg0Exn1",
+      "provider": "DekaLLM",
+      "served_model": "mistralai/mistral-nemo",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 1266
+    },
+    {
+      "player_id": "p0",
+      "model": "mistralai/mistral-nemo",
+      "phase": "paper_round_5_action",
+      "usage": {
+        "prompt_tokens": 441,
+        "completion_tokens": 8,
+        "total_tokens": 449,
+        "cost": 8.178e-06,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 8.178e-06,
+          "upstream_inference_prompt_cost": 7.938e-06,
+          "upstream_inference_completions_cost": 2.4e-07
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483529-kmWloFPSfRCQtW0Fe3gl",
+      "provider": "DekaLLM",
+      "served_model": "mistralai/mistral-nemo",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 859
+    },
+    {
+      "player_id": "p1",
+      "model": "mistralai/mistral-nemo",
+      "phase": "paper_round_5_action",
+      "usage": {
+        "prompt_tokens": 441,
+        "completion_tokens": 7,
+        "total_tokens": 448,
+        "cost": 8.148e-06,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 8.148e-06,
+          "upstream_inference_prompt_cost": 7.938e-06,
+          "upstream_inference_completions_cost": 2.1e-07
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483530-8Pi0RsLN2mhOOwyB2D2W",
+      "provider": "DekaLLM",
+      "served_model": "mistralai/mistral-nemo",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 953
+    }
+  ],
+  "0d73b6ca97b6": [
+    {
+      "player_id": "p0",
+      "model": "amazon/nova-micro-v1",
+      "phase": "paper_round_1_action",
+      "usage": {
+        "prompt_tokens": 414,
+        "completion_tokens": 6,
+        "total_tokens": 420,
+        "cost": 1.533e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 1.533e-05,
+          "upstream_inference_prompt_cost": 1.449e-05,
+          "upstream_inference_completions_cost": 8.4e-07
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483670-7x58PHVuzKcQSSsvZCED",
+      "provider": "Amazon Bedrock",
+      "served_model": "amazon/nova-micro-v1",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 454
+    },
+    {
+      "player_id": "p1",
+      "model": "amazon/nova-micro-v1",
+      "phase": "paper_round_1_action",
+      "usage": {
+        "prompt_tokens": 413,
+        "completion_tokens": 10,
+        "total_tokens": 423,
+        "cost": 1.5855e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 1.5855e-05,
+          "upstream_inference_prompt_cost": 1.4455e-05,
+          "upstream_inference_completions_cost": 1.4e-06
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483671-PqVmbKeTF1cARECjfYpT",
+      "provider": "Amazon Bedrock",
+      "served_model": "amazon/nova-micro-v1",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 953
+    },
+    {
+      "player_id": "p0",
+      "model": "amazon/nova-micro-v1",
+      "phase": "paper_round_2_action",
+      "usage": {
+        "prompt_tokens": 416,
+        "completion_tokens": 10,
+        "total_tokens": 426,
+        "cost": 1.596e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 1.596e-05,
+          "upstream_inference_prompt_cost": 1.456e-05,
+          "upstream_inference_completions_cost": 1.4e-06
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483671-lGzo8IVqurqwgVR0sEyJ",
+      "provider": "Amazon Bedrock",
+      "served_model": "amazon/nova-micro-v1",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 406
+    },
+    {
+      "player_id": "p1",
+      "model": "amazon/nova-micro-v1",
+      "phase": "paper_round_2_action",
+      "usage": {
+        "prompt_tokens": 415,
+        "completion_tokens": 6,
+        "total_tokens": 421,
+        "cost": 1.5365e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 1.5365e-05,
+          "upstream_inference_prompt_cost": 1.4525e-05,
+          "upstream_inference_completions_cost": 8.4e-07
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483672-Wt8LuItX77vcVQv8bUMQ",
+      "provider": "Amazon Bedrock",
+      "served_model": "amazon/nova-micro-v1",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 391
+    },
+    {
+      "player_id": "p0",
+      "model": "amazon/nova-micro-v1",
+      "phase": "paper_round_3_action",
+      "usage": {
+        "prompt_tokens": 416,
+        "completion_tokens": 6,
+        "total_tokens": 422,
+        "cost": 1.54e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 1.54e-05,
+          "upstream_inference_prompt_cost": 1.456e-05,
+          "upstream_inference_completions_cost": 8.4e-07
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483672-1w92CQQ96uNH9JvIudSq",
+      "provider": "Amazon Bedrock",
+      "served_model": "amazon/nova-micro-v1",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 843
+    },
+    {
+      "player_id": "p1",
+      "model": "amazon/nova-micro-v1",
+      "phase": "paper_round_3_action",
+      "usage": {
+        "prompt_tokens": 415,
+        "completion_tokens": 10,
+        "total_tokens": 425,
+        "cost": 1.5925e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 1.5925e-05,
+          "upstream_inference_prompt_cost": 1.4525e-05,
+          "upstream_inference_completions_cost": 1.4e-06
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483673-YZw1o91BSovZqjeNpRJQ",
+      "provider": "Amazon Bedrock",
+      "served_model": "amazon/nova-micro-v1",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 610
+    },
+    {
+      "player_id": "p0",
+      "model": "amazon/nova-micro-v1",
+      "phase": "paper_round_4_action",
+      "usage": {
+        "prompt_tokens": 416,
+        "completion_tokens": 10,
+        "total_tokens": 426,
+        "cost": 1.596e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 1.596e-05,
+          "upstream_inference_prompt_cost": 1.456e-05,
+          "upstream_inference_completions_cost": 1.4e-06
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483674-tRsrgqBQBMooaTKwuG4X",
+      "provider": "Amazon Bedrock",
+      "served_model": "amazon/nova-micro-v1",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 437
+    },
+    {
+      "player_id": "p1",
+      "model": "amazon/nova-micro-v1",
+      "phase": "paper_round_4_action",
+      "usage": {
+        "prompt_tokens": 415,
+        "completion_tokens": 6,
+        "total_tokens": 421,
+        "cost": 1.5365e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 1.5365e-05,
+          "upstream_inference_prompt_cost": 1.4525e-05,
+          "upstream_inference_completions_cost": 8.4e-07
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483674-HmYJ5zLfetGKYCPzRhAI",
+      "provider": "Amazon Bedrock",
+      "served_model": "amazon/nova-micro-v1",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 1031
+    },
+    {
+      "player_id": "p0",
+      "model": "amazon/nova-micro-v1",
+      "phase": "paper_round_5_action",
+      "usage": {
+        "prompt_tokens": 416,
+        "completion_tokens": 10,
+        "total_tokens": 426,
+        "cost": 1.596e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 1.596e-05,
+          "upstream_inference_prompt_cost": 1.456e-05,
+          "upstream_inference_completions_cost": 1.4e-06
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483675-ZZu4FOee8Xo9x5EudV77",
+      "provider": "Amazon Bedrock",
+      "served_model": "amazon/nova-micro-v1",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 469
+    },
+    {
+      "player_id": "p1",
+      "model": "amazon/nova-micro-v1",
+      "phase": "paper_round_5_action",
+      "usage": {
+        "prompt_tokens": 415,
+        "completion_tokens": 6,
+        "total_tokens": 421,
+        "cost": 1.5365e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 1.5365e-05,
+          "upstream_inference_prompt_cost": 1.4525e-05,
+          "upstream_inference_completions_cost": 8.4e-07
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483676-W4nlUchTVGoDK9Ca58YZ",
+      "provider": "Amazon Bedrock",
+      "served_model": "amazon/nova-micro-v1",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 391
+    }
+  ],
+  "50705fdfbdd4": [
+    {
+      "player_id": "p0",
+      "model": "amazon/nova-micro-v1",
+      "phase": "paper_round_1_action",
+      "usage": {
+        "prompt_tokens": 414,
+        "completion_tokens": 10,
+        "total_tokens": 424,
+        "cost": 1.589e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 1.589e-05,
+          "upstream_inference_prompt_cost": 1.449e-05,
+          "upstream_inference_completions_cost": 1.4e-06
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483663-DVNTqBQbI1NlCgCIGS4X",
+      "provider": "Amazon Bedrock",
+      "served_model": "amazon/nova-micro-v1",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 453
+    },
+    {
+      "player_id": "p1",
+      "model": "amazon/nova-micro-v1",
+      "phase": "paper_round_1_action",
+      "usage": {
+        "prompt_tokens": 413,
+        "completion_tokens": 6,
+        "total_tokens": 419,
+        "cost": 1.5295e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 1.5295e-05,
+          "upstream_inference_prompt_cost": 1.4455e-05,
+          "upstream_inference_completions_cost": 8.4e-07
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483663-7BLe2bl8A4EA5ilDJWct",
+      "provider": "Amazon Bedrock",
+      "served_model": "amazon/nova-micro-v1",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 656
+    },
+    {
+      "player_id": "p0",
+      "model": "amazon/nova-micro-v1",
+      "phase": "paper_round_2_action",
+      "usage": {
+        "prompt_tokens": 416,
+        "completion_tokens": 10,
+        "total_tokens": 426,
+        "cost": 1.596e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 1.596e-05,
+          "upstream_inference_prompt_cost": 1.456e-05,
+          "upstream_inference_completions_cost": 1.4e-06
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483664-8JNnfRGFteAftdY13bqI",
+      "provider": "Amazon Bedrock",
+      "served_model": "amazon/nova-micro-v1",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 547
+    },
+    {
+      "player_id": "p1",
+      "model": "amazon/nova-micro-v1",
+      "phase": "paper_round_2_action",
+      "usage": {
+        "prompt_tokens": 415,
+        "completion_tokens": 6,
+        "total_tokens": 421,
+        "cost": 1.5365e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 1.5365e-05,
+          "upstream_inference_prompt_cost": 1.4525e-05,
+          "upstream_inference_completions_cost": 8.4e-07
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483664-uapNURhMKoXYaTMndbsX",
+      "provider": "Amazon Bedrock",
+      "served_model": "amazon/nova-micro-v1",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 453
+    },
+    {
+      "player_id": "p0",
+      "model": "amazon/nova-micro-v1",
+      "phase": "paper_round_3_action",
+      "usage": {
+        "prompt_tokens": 416,
+        "completion_tokens": 6,
+        "total_tokens": 422,
+        "cost": 1.54e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 1.54e-05,
+          "upstream_inference_prompt_cost": 1.456e-05,
+          "upstream_inference_completions_cost": 8.4e-07
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483665-irXXbRuH4xsSVelKSWnh",
+      "provider": "Amazon Bedrock",
+      "served_model": "amazon/nova-micro-v1",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 1203
+    },
+    {
+      "player_id": "p1",
+      "model": "amazon/nova-micro-v1",
+      "phase": "paper_round_3_action",
+      "usage": {
+        "prompt_tokens": 415,
+        "completion_tokens": 6,
+        "total_tokens": 421,
+        "cost": 1.5365e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 1.5365e-05,
+          "upstream_inference_prompt_cost": 1.4525e-05,
+          "upstream_inference_completions_cost": 8.4e-07
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483666-c4jzRdqG84AMjGuFdAF9",
+      "provider": "Amazon Bedrock",
+      "served_model": "amazon/nova-micro-v1",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 454
+    },
+    {
+      "player_id": "p0",
+      "model": "amazon/nova-micro-v1",
+      "phase": "paper_round_4_action",
+      "usage": {
+        "prompt_tokens": 416,
+        "completion_tokens": 6,
+        "total_tokens": 422,
+        "cost": 1.54e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 1.54e-05,
+          "upstream_inference_prompt_cost": 1.456e-05,
+          "upstream_inference_completions_cost": 8.4e-07
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483666-6CHEdzFjYpdTmgDFOwAg",
+      "provider": "Amazon Bedrock",
+      "served_model": "amazon/nova-micro-v1",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 562
+    },
+    {
+      "player_id": "p1",
+      "model": "amazon/nova-micro-v1",
+      "phase": "paper_round_4_action",
+      "usage": {
+        "prompt_tokens": 415,
+        "completion_tokens": 10,
+        "total_tokens": 425,
+        "cost": 1.5925e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 1.5925e-05,
+          "upstream_inference_prompt_cost": 1.4525e-05,
+          "upstream_inference_completions_cost": 1.4e-06
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483667-Hm8u1wVMYUCvf4y51fvG",
+      "provider": "Amazon Bedrock",
+      "served_model": "amazon/nova-micro-v1",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 547
+    },
+    {
+      "player_id": "p0",
+      "model": "amazon/nova-micro-v1",
+      "phase": "paper_round_5_action",
+      "usage": {
+        "prompt_tokens": 416,
+        "completion_tokens": 10,
+        "total_tokens": 426,
+        "cost": 1.596e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 1.596e-05,
+          "upstream_inference_prompt_cost": 1.456e-05,
+          "upstream_inference_completions_cost": 1.4e-06
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483667-azhSoQhIrTPRmgYHyEjh",
+      "provider": "Amazon Bedrock",
+      "served_model": "amazon/nova-micro-v1",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 406
+    },
+    {
+      "player_id": "p1",
+      "model": "amazon/nova-micro-v1",
+      "phase": "paper_round_5_action",
+      "usage": {
+        "prompt_tokens": 415,
+        "completion_tokens": 10,
+        "total_tokens": 425,
+        "cost": 1.5925e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 1.5925e-05,
+          "upstream_inference_prompt_cost": 1.4525e-05,
+          "upstream_inference_completions_cost": 1.4e-06
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483668-899pvx6XC5lghBL9QBxw",
+      "provider": "Amazon Bedrock",
+      "served_model": "amazon/nova-micro-v1",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 391
+    },
+    {
+      "player_id": "p0",
+      "model": "amazon/nova-micro-v1",
+      "phase": "paper_round_6_action",
+      "usage": {
+        "prompt_tokens": 416,
+        "completion_tokens": 10,
+        "total_tokens": 426,
+        "cost": 1.596e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 1.596e-05,
+          "upstream_inference_prompt_cost": 1.456e-05,
+          "upstream_inference_completions_cost": 1.4e-06
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483668-xu53C9hyM7c7MMUIblfW",
+      "provider": "Amazon Bedrock",
+      "served_model": "amazon/nova-micro-v1",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 500
+    },
+    {
+      "player_id": "p1",
+      "model": "amazon/nova-micro-v1",
+      "phase": "paper_round_6_action",
+      "usage": {
+        "prompt_tokens": 415,
+        "completion_tokens": 6,
+        "total_tokens": 421,
+        "cost": 1.5365e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 1.5365e-05,
+          "upstream_inference_prompt_cost": 1.4525e-05,
+          "upstream_inference_completions_cost": 8.4e-07
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483669-3jHLAnO3BRcQoVzIREok",
+      "provider": "Amazon Bedrock",
+      "served_model": "amazon/nova-micro-v1",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 797
+    }
+  ],
+  "7dbcd3da86ce": [
+    {
+      "player_id": "p0",
+      "model": "amazon/nova-micro-v1",
+      "phase": "paper_round_1_action",
+      "usage": {
+        "prompt_tokens": 414,
+        "completion_tokens": 6,
+        "total_tokens": 420,
+        "cost": 1.533e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 1.533e-05,
+          "upstream_inference_prompt_cost": 1.449e-05,
+          "upstream_inference_completions_cost": 8.4e-07
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483656-bjugfU7Aeqz0mSz9IhGX",
+      "provider": "Amazon Bedrock",
+      "served_model": "amazon/nova-micro-v1",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 688
+    },
+    {
+      "player_id": "p1",
+      "model": "amazon/nova-micro-v1",
+      "phase": "paper_round_1_action",
+      "usage": {
+        "prompt_tokens": 413,
+        "completion_tokens": 6,
+        "total_tokens": 419,
+        "cost": 1.5295e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 1.5295e-05,
+          "upstream_inference_prompt_cost": 1.4455e-05,
+          "upstream_inference_completions_cost": 8.4e-07
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483657-E75dhhAZ6ICm6c1pA8GZ",
+      "provider": "Amazon Bedrock",
+      "served_model": "amazon/nova-micro-v1",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 500
+    },
+    {
+      "player_id": "p0",
+      "model": "amazon/nova-micro-v1",
+      "phase": "paper_round_2_action",
+      "usage": {
+        "prompt_tokens": 416,
+        "completion_tokens": 10,
+        "total_tokens": 426,
+        "cost": 1.596e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 1.596e-05,
+          "upstream_inference_prompt_cost": 1.456e-05,
+          "upstream_inference_completions_cost": 1.4e-06
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483657-wYZ0bwjhVFwND8R9RGvW",
+      "provider": "Amazon Bedrock",
+      "served_model": "amazon/nova-micro-v1",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 422
+    },
+    {
+      "player_id": "p1",
+      "model": "amazon/nova-micro-v1",
+      "phase": "paper_round_2_action",
+      "usage": {
+        "prompt_tokens": 415,
+        "completion_tokens": 10,
+        "total_tokens": 425,
+        "cost": 1.5925e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 1.5925e-05,
+          "upstream_inference_prompt_cost": 1.4525e-05,
+          "upstream_inference_completions_cost": 1.4e-06
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483658-V3OlqnJcX6zfMOYk5Mow",
+      "provider": "Amazon Bedrock",
+      "served_model": "amazon/nova-micro-v1",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 750
+    },
+    {
+      "player_id": "p0",
+      "model": "amazon/nova-micro-v1",
+      "phase": "paper_round_3_action",
+      "usage": {
+        "prompt_tokens": 416,
+        "completion_tokens": 6,
+        "total_tokens": 422,
+        "cost": 1.54e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 1.54e-05,
+          "upstream_inference_prompt_cost": 1.456e-05,
+          "upstream_inference_completions_cost": 8.4e-07
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483658-ztPpbSNAm4HnwLLmKmEC",
+      "provider": "Amazon Bedrock",
+      "served_model": "amazon/nova-micro-v1",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 359
+    },
+    {
+      "player_id": "p1",
+      "model": "amazon/nova-micro-v1",
+      "phase": "paper_round_3_action",
+      "usage": {
+        "prompt_tokens": 415,
+        "completion_tokens": 10,
+        "total_tokens": 425,
+        "cost": 1.5925e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 1.5925e-05,
+          "upstream_inference_prompt_cost": 1.4525e-05,
+          "upstream_inference_completions_cost": 1.4e-06
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483659-jfArXxF2fjJqd2CGRNax",
+      "provider": "Amazon Bedrock",
+      "served_model": "amazon/nova-micro-v1",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 438
+    },
+    {
+      "player_id": "p0",
+      "model": "amazon/nova-micro-v1",
+      "phase": "paper_round_4_action",
+      "usage": {
+        "prompt_tokens": 416,
+        "completion_tokens": 10,
+        "total_tokens": 426,
+        "cost": 1.596e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 1.596e-05,
+          "upstream_inference_prompt_cost": 1.456e-05,
+          "upstream_inference_completions_cost": 1.4e-06
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483659-Jw8aCavGTvOsYqH9JYVK",
+      "provider": "Amazon Bedrock",
+      "served_model": "amazon/nova-micro-v1",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 390
+    },
+    {
+      "player_id": "p1",
+      "model": "amazon/nova-micro-v1",
+      "phase": "paper_round_4_action",
+      "usage": {
+        "prompt_tokens": 415,
+        "completion_tokens": 10,
+        "total_tokens": 425,
+        "cost": 1.5925e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 1.5925e-05,
+          "upstream_inference_prompt_cost": 1.4525e-05,
+          "upstream_inference_completions_cost": 1.4e-06
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483659-xbCGZrkdOH25c432ZOCM",
+      "provider": "Amazon Bedrock",
+      "served_model": "amazon/nova-micro-v1",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 922
+    },
+    {
+      "player_id": "p0",
+      "model": "amazon/nova-micro-v1",
+      "phase": "paper_round_5_action",
+      "usage": {
+        "prompt_tokens": 416,
+        "completion_tokens": 10,
+        "total_tokens": 426,
+        "cost": 1.596e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 1.596e-05,
+          "upstream_inference_prompt_cost": 1.456e-05,
+          "upstream_inference_completions_cost": 1.4e-06
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483660-kRwlS5fw95BSoFjeeXMW",
+      "provider": "Amazon Bedrock",
+      "served_model": "amazon/nova-micro-v1",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 406
+    },
+    {
+      "player_id": "p1",
+      "model": "amazon/nova-micro-v1",
+      "phase": "paper_round_5_action",
+      "usage": {
+        "prompt_tokens": 415,
+        "completion_tokens": 6,
+        "total_tokens": 421,
+        "cost": 1.5365e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 1.5365e-05,
+          "upstream_inference_prompt_cost": 1.4525e-05,
+          "upstream_inference_completions_cost": 8.4e-07
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483661-j5uhN681w6UuKEteiA9q",
+      "provider": "Amazon Bedrock",
+      "served_model": "amazon/nova-micro-v1",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 454
+    },
+    {
+      "player_id": "p0",
+      "model": "amazon/nova-micro-v1",
+      "phase": "paper_round_6_action",
+      "usage": {
+        "prompt_tokens": 416,
+        "completion_tokens": 6,
+        "total_tokens": 422,
+        "cost": 1.54e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 1.54e-05,
+          "upstream_inference_prompt_cost": 1.456e-05,
+          "upstream_inference_completions_cost": 8.4e-07
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483661-lrhyuqRWo9W2RnTiE7fo",
+      "provider": "Amazon Bedrock",
+      "served_model": "amazon/nova-micro-v1",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 390
+    },
+    {
+      "player_id": "p1",
+      "model": "amazon/nova-micro-v1",
+      "phase": "paper_round_6_action",
+      "usage": {
+        "prompt_tokens": 415,
+        "completion_tokens": 10,
+        "total_tokens": 425,
+        "cost": 1.5925e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 1.5925e-05,
+          "upstream_inference_prompt_cost": 1.4525e-05,
+          "upstream_inference_completions_cost": 1.4e-06
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483662-H6n4uFJU2MCSwgCyUVSZ",
+      "provider": "Amazon Bedrock",
+      "served_model": "amazon/nova-micro-v1",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 484
+    }
+  ],
+  "868a432cc1aa": [
+    {
+      "player_id": "p0",
+      "model": "mistralai/mistral-nemo",
+      "phase": "paper_round_1_action",
+      "usage": {
+        "prompt_tokens": 436,
+        "completion_tokens": 7,
+        "total_tokens": 443,
+        "cost": 8.058e-06,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 8.058e-06,
+          "upstream_inference_prompt_cost": 7.848e-06,
+          "upstream_inference_completions_cost": 2.1e-07
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483532-BlRx41QJ5PFWg99XQnk3",
+      "provider": "DekaLLM",
+      "served_model": "mistralai/mistral-nemo",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 5500
+    },
+    {
+      "player_id": "p1",
+      "model": "mistralai/mistral-nemo",
+      "phase": "paper_round_1_action",
+      "usage": {
+        "prompt_tokens": 436,
+        "completion_tokens": 7,
+        "total_tokens": 443,
+        "cost": 8.058e-06,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 8.058e-06,
+          "upstream_inference_prompt_cost": 7.848e-06,
+          "upstream_inference_completions_cost": 2.1e-07
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483537-LxLNYyYxbL1fCd7mAM0p",
+      "provider": "DekaLLM",
+      "served_model": "mistralai/mistral-nemo",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 1078
+    },
+    {
+      "player_id": "p0",
+      "model": "mistralai/mistral-nemo",
+      "phase": "paper_round_2_action",
+      "usage": {
+        "prompt_tokens": 440,
+        "completion_tokens": 8,
+        "total_tokens": 448,
+        "cost": 8.16e-06,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 8.16e-06,
+          "upstream_inference_prompt_cost": 7.92e-06,
+          "upstream_inference_completions_cost": 2.4e-07
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483538-LgflWBgwA7VDl9v44TIK",
+      "provider": "DekaLLM",
+      "served_model": "mistralai/mistral-nemo",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 625
+    },
+    {
+      "player_id": "p1",
+      "model": "mistralai/mistral-nemo",
+      "phase": "paper_round_2_action",
+      "usage": {
+        "prompt_tokens": 440,
+        "completion_tokens": 8,
+        "total_tokens": 448,
+        "cost": 8.16e-06,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 8.16e-06,
+          "upstream_inference_prompt_cost": 7.92e-06,
+          "upstream_inference_completions_cost": 2.4e-07
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483539-u9EItb5rd1KRSanXkFjf",
+      "provider": "DekaLLM",
+      "served_model": "mistralai/mistral-nemo",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 640
+    },
+    {
+      "player_id": "p0",
+      "model": "mistralai/mistral-nemo",
+      "phase": "paper_round_3_action",
+      "usage": {
+        "prompt_tokens": 442,
+        "completion_tokens": 7,
+        "total_tokens": 449,
+        "cost": 8.166e-06,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 8.166e-06,
+          "upstream_inference_prompt_cost": 7.956e-06,
+          "upstream_inference_completions_cost": 2.1e-07
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483540-TTwbgTDOoStBt6MqEFYs",
+      "provider": "DekaLLM",
+      "served_model": "mistralai/mistral-nemo",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 532
+    },
+    {
+      "player_id": "p1",
+      "model": "mistralai/mistral-nemo",
+      "phase": "paper_round_3_action",
+      "usage": {
+        "prompt_tokens": 442,
+        "completion_tokens": 7,
+        "total_tokens": 449,
+        "cost": 8.166e-06,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 8.166e-06,
+          "upstream_inference_prompt_cost": 7.956e-06,
+          "upstream_inference_completions_cost": 2.1e-07
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483540-qlqEtPcYAA8wavNNj0WU",
+      "provider": "DekaLLM",
+      "served_model": "mistralai/mistral-nemo",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 843
+    },
+    {
+      "player_id": "p0",
+      "model": "mistralai/mistral-nemo",
+      "phase": "paper_round_4_action",
+      "usage": {
+        "prompt_tokens": 440,
+        "completion_tokens": 8,
+        "total_tokens": 448,
+        "cost": 8.16e-06,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 8.16e-06,
+          "upstream_inference_prompt_cost": 7.92e-06,
+          "upstream_inference_completions_cost": 2.4e-07
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483541-CVDD6a9RuFWW0tSKefUW",
+      "provider": "DekaLLM",
+      "served_model": "mistralai/mistral-nemo",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 672
+    },
+    {
+      "player_id": "p1",
+      "model": "mistralai/mistral-nemo",
+      "phase": "paper_round_4_action",
+      "usage": {
+        "prompt_tokens": 440,
+        "completion_tokens": 8,
+        "total_tokens": 448,
+        "cost": 8.16e-06,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 8.16e-06,
+          "upstream_inference_prompt_cost": 7.92e-06,
+          "upstream_inference_completions_cost": 2.4e-07
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483542-u434Lj3lKbBkubw7x79L",
+      "provider": "DekaLLM",
+      "served_model": "mistralai/mistral-nemo",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 625
+    },
+    {
+      "player_id": "p0",
+      "model": "mistralai/mistral-nemo",
+      "phase": "paper_round_5_action",
+      "usage": {
+        "prompt_tokens": 442,
+        "completion_tokens": 7,
+        "total_tokens": 449,
+        "cost": 8.166e-06,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 8.166e-06,
+          "upstream_inference_prompt_cost": 7.956e-06,
+          "upstream_inference_completions_cost": 2.1e-07
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483542-FqUACtE5bAiPt6MLKQYj",
+      "provider": "DekaLLM",
+      "served_model": "mistralai/mistral-nemo",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 656
+    },
+    {
+      "player_id": "p1",
+      "model": "mistralai/mistral-nemo",
+      "phase": "paper_round_5_action",
+      "usage": {
+        "prompt_tokens": 442,
+        "completion_tokens": 7,
+        "total_tokens": 449,
+        "cost": 8.166e-06,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 8.166e-06,
+          "upstream_inference_prompt_cost": 7.956e-06,
+          "upstream_inference_completions_cost": 2.1e-07
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483543-tUFXEGoU1SJocEk9X8Qn",
+      "provider": "DekaLLM",
+      "served_model": "mistralai/mistral-nemo",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 829
+    },
+    {
+      "player_id": "p0",
+      "model": "mistralai/mistral-nemo",
+      "phase": "paper_round_6_action",
+      "usage": {
+        "prompt_tokens": 440,
+        "completion_tokens": 8,
+        "total_tokens": 448,
+        "cost": 8.16e-06,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 8.16e-06,
+          "upstream_inference_prompt_cost": 7.92e-06,
+          "upstream_inference_completions_cost": 2.4e-07
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483544-QFoX2r1L37g8VAmDupXh",
+      "provider": "DekaLLM",
+      "served_model": "mistralai/mistral-nemo",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 921
+    },
+    {
+      "player_id": "p1",
+      "model": "mistralai/mistral-nemo",
+      "phase": "paper_round_6_action",
+      "usage": {
+        "prompt_tokens": 440,
+        "completion_tokens": 8,
+        "total_tokens": 448,
+        "cost": 8.16e-06,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 8.16e-06,
+          "upstream_inference_prompt_cost": 7.92e-06,
+          "upstream_inference_completions_cost": 2.4e-07
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483545-5HJcllLG4W6oTKRT4I8W",
+      "provider": "DekaLLM",
+      "served_model": "mistralai/mistral-nemo",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 1094
+    }
+  ],
+  "88cd6615a0e7": [
+    {
+      "player_id": "p0",
+      "model": "qwen/qwen3.7-flash",
+      "phase": "paper_round_1_action",
+      "usage": {
+        "prompt_tokens": 433,
+        "completion_tokens": 10,
+        "total_tokens": 443,
+        "cost": 1.429e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 1.429e-05,
+          "upstream_inference_prompt_cost": 1.299e-05,
+          "upstream_inference_completions_cost": 1.3e-06
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483566-jztnnrsCwg4t1npZDRaQ",
+      "provider": "Alibaba",
+      "served_model": "qwen/qwen3.7-flash",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 813
+    },
+    {
+      "player_id": "p1",
+      "model": "qwen/qwen3.7-flash",
+      "phase": "paper_round_1_action",
+      "usage": {
+        "prompt_tokens": 433,
+        "completion_tokens": 11,
+        "total_tokens": 444,
+        "cost": 1.442e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 1.442e-05,
+          "upstream_inference_prompt_cost": 1.299e-05,
+          "upstream_inference_completions_cost": 1.43e-06
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483567-8sLQozc5oPejBjLG8FBN",
+      "provider": "Alibaba",
+      "served_model": "qwen/qwen3.7-flash",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 766
+    },
+    {
+      "player_id": "p0",
+      "model": "qwen/qwen3.7-flash",
+      "phase": "paper_round_2_action",
+      "usage": {
+        "prompt_tokens": 435,
+        "completion_tokens": 11,
+        "total_tokens": 446,
+        "cost": 1.448e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 1.448e-05,
+          "upstream_inference_prompt_cost": 1.305e-05,
+          "upstream_inference_completions_cost": 1.43e-06
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483568-dUKESrHyqzJ6jr18SJTb",
+      "provider": "Alibaba",
+      "served_model": "qwen/qwen3.7-flash",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 890
+    },
+    {
+      "player_id": "p1",
+      "model": "qwen/qwen3.7-flash",
+      "phase": "paper_round_2_action",
+      "usage": {
+        "prompt_tokens": 435,
+        "completion_tokens": 12,
+        "total_tokens": 447,
+        "cost": 1.461e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 1.461e-05,
+          "upstream_inference_prompt_cost": 1.305e-05,
+          "upstream_inference_completions_cost": 1.56e-06
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483569-jLVgfhlzKVJTcLObnROE",
+      "provider": "Alibaba",
+      "served_model": "qwen/qwen3.7-flash",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 750
+    },
+    {
+      "player_id": "p0",
+      "model": "qwen/qwen3.7-flash",
+      "phase": "paper_round_3_action",
+      "usage": {
+        "prompt_tokens": 436,
+        "completion_tokens": 11,
+        "total_tokens": 447,
+        "cost": 1.451e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 1.451e-05,
+          "upstream_inference_prompt_cost": 1.308e-05,
+          "upstream_inference_completions_cost": 1.43e-06
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483570-vRiwyrwnq9LzE4KvGOnA",
+      "provider": "Alibaba",
+      "served_model": "qwen/qwen3.7-flash",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 797
+    },
+    {
+      "player_id": "p1",
+      "model": "qwen/qwen3.7-flash",
+      "phase": "paper_round_3_action",
+      "usage": {
+        "prompt_tokens": 436,
+        "completion_tokens": 12,
+        "total_tokens": 448,
+        "cost": 1.464e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 1.464e-05,
+          "upstream_inference_prompt_cost": 1.308e-05,
+          "upstream_inference_completions_cost": 1.56e-06
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483570-GAkLR9XctaF3oaFuDNPD",
+      "provider": "Alibaba",
+      "served_model": "qwen/qwen3.7-flash",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 828
+    },
+    {
+      "player_id": "p0",
+      "model": "qwen/qwen3.7-flash",
+      "phase": "paper_round_4_action",
+      "usage": {
+        "prompt_tokens": 436,
+        "completion_tokens": 11,
+        "total_tokens": 447,
+        "cost": 1.451e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 1.451e-05,
+          "upstream_inference_prompt_cost": 1.308e-05,
+          "upstream_inference_completions_cost": 1.43e-06
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483592-47SMZiKF4rMp35th8uMU",
+      "provider": "Alibaba",
+      "served_model": "qwen/qwen3.7-flash",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 2,
+      "max_tokens": 160,
+      "latency_ms": 906
+    },
+    {
+      "player_id": "p1",
+      "model": "qwen/qwen3.7-flash",
+      "phase": "paper_round_4_action",
+      "usage": {
+        "prompt_tokens": 436,
+        "completion_tokens": 11,
+        "total_tokens": 447,
+        "cost": 1.451e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 1.451e-05,
+          "upstream_inference_prompt_cost": 1.308e-05,
+          "upstream_inference_completions_cost": 1.43e-06
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483593-UKT46cnwlUmButsN5bf9",
+      "provider": "Alibaba",
+      "served_model": "qwen/qwen3.7-flash",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 1297
+    },
+    {
+      "player_id": "p0",
+      "model": "qwen/qwen3.7-flash",
+      "phase": "paper_round_5_action",
+      "usage": {
+        "prompt_tokens": 436,
+        "completion_tokens": 10,
+        "total_tokens": 446,
+        "cost": 1.438e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 1.438e-05,
+          "upstream_inference_prompt_cost": 1.308e-05,
+          "upstream_inference_completions_cost": 1.3e-06
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483594-bFKvHsJDkWe17WksvHMF",
+      "provider": "Alibaba",
+      "served_model": "qwen/qwen3.7-flash",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 1063
+    },
+    {
+      "player_id": "p1",
+      "model": "qwen/qwen3.7-flash",
+      "phase": "paper_round_5_action",
+      "usage": {
+        "prompt_tokens": 436,
+        "completion_tokens": 12,
+        "total_tokens": 448,
+        "cost": 1.464e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 1.464e-05,
+          "upstream_inference_prompt_cost": 1.308e-05,
+          "upstream_inference_completions_cost": 1.56e-06
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483615-jVdeZQ95Tt9rnQGohMWY",
+      "provider": "Alibaba",
+      "served_model": "qwen/qwen3.7-flash",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 2,
+      "max_tokens": 160,
+      "latency_ms": 1140
+    },
+    {
+      "player_id": "p0",
+      "model": "qwen/qwen3.7-flash",
+      "phase": "paper_round_6_action",
+      "usage": {
+        "prompt_tokens": 436,
+        "completion_tokens": 12,
+        "total_tokens": 448,
+        "cost": 1.464e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 1.464e-05,
+          "upstream_inference_prompt_cost": 1.308e-05,
+          "upstream_inference_completions_cost": 1.56e-06
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483616-dzKv3T8DEwTyWjgMHArC",
+      "provider": "Alibaba",
+      "served_model": "qwen/qwen3.7-flash",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 985
+    },
+    {
+      "player_id": "p1",
+      "model": "qwen/qwen3.7-flash",
+      "phase": "paper_round_6_action",
+      "usage": {
+        "prompt_tokens": 436,
+        "completion_tokens": 12,
+        "total_tokens": 448,
+        "cost": 1.464e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 1.464e-05,
+          "upstream_inference_prompt_cost": 1.308e-05,
+          "upstream_inference_completions_cost": 1.56e-06
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483617-W64RW1jJtIyCLsdhN2US",
+      "provider": "Alibaba",
+      "served_model": "qwen/qwen3.7-flash",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 1297
+    }
+  ],
+  "88da3a203afc": [
+    {
+      "player_id": "p0",
+      "model": "qwen/qwen3.7-flash",
+      "phase": "paper_round_1_action",
+      "usage": {
+        "prompt_tokens": 433,
+        "completion_tokens": 11,
+        "total_tokens": 444,
+        "cost": 1.442e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 1.442e-05,
+          "upstream_inference_prompt_cost": 1.299e-05,
+          "upstream_inference_completions_cost": 1.43e-06
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483619-CrcybGOmusEbgEdtzh6Y",
+      "provider": "Alibaba",
+      "served_model": "qwen/qwen3.7-flash",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 1141
+    },
+    {
+      "player_id": "p1",
+      "model": "qwen/qwen3.7-flash",
+      "phase": "paper_round_1_action",
+      "usage": {
+        "prompt_tokens": 433,
+        "completion_tokens": 12,
+        "total_tokens": 445,
+        "cost": 1.455e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 1.455e-05,
+          "upstream_inference_prompt_cost": 1.299e-05,
+          "upstream_inference_completions_cost": 1.56e-06
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483620-dWaOzVsOPlY1nNtg0hic",
+      "provider": "Alibaba",
+      "served_model": "qwen/qwen3.7-flash",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 828
+    },
+    {
+      "player_id": "p0",
+      "model": "qwen/qwen3.7-flash",
+      "phase": "paper_round_2_action",
+      "usage": {
+        "prompt_tokens": 436,
+        "completion_tokens": 11,
+        "total_tokens": 447,
+        "cost": 1.451e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 1.451e-05,
+          "upstream_inference_prompt_cost": 1.308e-05,
+          "upstream_inference_completions_cost": 1.43e-06
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483621-Z9msAGpcFFXRbOXbdxGO",
+      "provider": "Alibaba",
+      "served_model": "qwen/qwen3.7-flash",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 813
+    },
+    {
+      "player_id": "p1",
+      "model": "qwen/qwen3.7-flash",
+      "phase": "paper_round_2_action",
+      "usage": {
+        "prompt_tokens": 436,
+        "completion_tokens": 11,
+        "total_tokens": 447,
+        "cost": 1.451e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 1.451e-05,
+          "upstream_inference_prompt_cost": 1.308e-05,
+          "upstream_inference_completions_cost": 1.43e-06
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483622-ZmUK88miU5duF9M6IrCL",
+      "provider": "Alibaba",
+      "served_model": "qwen/qwen3.7-flash",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 1046
+    },
+    {
+      "player_id": "p0",
+      "model": "qwen/qwen3.7-flash",
+      "phase": "paper_round_3_action",
+      "usage": {
+        "prompt_tokens": 436,
+        "completion_tokens": 11,
+        "total_tokens": 447,
+        "cost": 1.451e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 1.451e-05,
+          "upstream_inference_prompt_cost": 1.308e-05,
+          "upstream_inference_completions_cost": 1.43e-06
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483623-25rkLc8ROgyIyOqDExcv",
+      "provider": "Alibaba",
+      "served_model": "qwen/qwen3.7-flash",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 719
+    },
+    {
+      "player_id": "p1",
+      "model": "qwen/qwen3.7-flash",
+      "phase": "paper_round_3_action",
+      "usage": {
+        "prompt_tokens": 436,
+        "completion_tokens": 10,
+        "total_tokens": 446,
+        "cost": 1.438e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 1.438e-05,
+          "upstream_inference_prompt_cost": 1.308e-05,
+          "upstream_inference_completions_cost": 1.3e-06
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483624-2Ik7SvjZi3DjMlAYDdga",
+      "provider": "Alibaba",
+      "served_model": "qwen/qwen3.7-flash",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 735
+    },
+    {
+      "player_id": "p0",
+      "model": "qwen/qwen3.7-flash",
+      "phase": "paper_round_4_action",
+      "usage": {
+        "prompt_tokens": 435,
+        "completion_tokens": 11,
+        "total_tokens": 446,
+        "cost": 1.448e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 1.448e-05,
+          "upstream_inference_prompt_cost": 1.305e-05,
+          "upstream_inference_completions_cost": 1.43e-06
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483624-DP8vKYCFvZL7Qd3mehFx",
+      "provider": "Alibaba",
+      "served_model": "qwen/qwen3.7-flash",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 765
+    },
+    {
+      "player_id": "p1",
+      "model": "qwen/qwen3.7-flash",
+      "phase": "paper_round_4_action",
+      "usage": {
+        "prompt_tokens": 435,
+        "completion_tokens": 12,
+        "total_tokens": 447,
+        "cost": 1.461e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 1.461e-05,
+          "upstream_inference_prompt_cost": 1.305e-05,
+          "upstream_inference_completions_cost": 1.56e-06
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483625-4JLhyzdt1s8lzCwXYFfG",
+      "provider": "Alibaba",
+      "served_model": "qwen/qwen3.7-flash",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 735
+    },
+    {
+      "player_id": "p0",
+      "model": "qwen/qwen3.7-flash",
+      "phase": "paper_round_5_action",
+      "usage": {
+        "prompt_tokens": 436,
+        "completion_tokens": 12,
+        "total_tokens": 448,
+        "cost": 1.464e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 1.464e-05,
+          "upstream_inference_prompt_cost": 1.308e-05,
+          "upstream_inference_completions_cost": 1.56e-06
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483626-kEsZwdsH7isQxzKn69UF",
+      "provider": "Alibaba",
+      "served_model": "qwen/qwen3.7-flash",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 781
+    },
+    {
+      "player_id": "p1",
+      "model": "qwen/qwen3.7-flash",
+      "phase": "paper_round_5_action",
+      "usage": {
+        "prompt_tokens": 436,
+        "completion_tokens": 6,
+        "total_tokens": 442,
+        "cost": 1.386e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 1.386e-05,
+          "upstream_inference_prompt_cost": 1.308e-05,
+          "upstream_inference_completions_cost": 7.8e-07
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483627-DoVsoE3p8rZMf2LL1Xi2",
+      "provider": "Alibaba",
+      "served_model": "qwen/qwen3.7-flash",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 672
+    },
+    {
+      "player_id": "p0",
+      "model": "qwen/qwen3.7-flash",
+      "phase": "paper_round_6_action",
+      "usage": {
+        "prompt_tokens": 437,
+        "completion_tokens": 12,
+        "total_tokens": 449,
+        "cost": 1.467e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 1.467e-05,
+          "upstream_inference_prompt_cost": 1.311e-05,
+          "upstream_inference_completions_cost": 1.56e-06
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483627-3iHrgBIeDhRjEwYAQx9v",
+      "provider": "Alibaba",
+      "served_model": "qwen/qwen3.7-flash",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 1062
+    },
+    {
+      "player_id": "p1",
+      "model": "qwen/qwen3.7-flash",
+      "phase": "paper_round_6_action",
+      "usage": {
+        "prompt_tokens": 437,
+        "completion_tokens": 12,
+        "total_tokens": 449,
+        "cost": 1.467e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 1.467e-05,
+          "upstream_inference_prompt_cost": 1.311e-05,
+          "upstream_inference_completions_cost": 1.56e-06
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483628-05ttSdHeIoymhXjc7qyu",
+      "provider": "Alibaba",
+      "served_model": "qwen/qwen3.7-flash",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 766
+    },
+    {
+      "player_id": "p0",
+      "model": "qwen/qwen3.7-flash",
+      "phase": "paper_round_7_action",
+      "usage": {
+        "prompt_tokens": 438,
+        "completion_tokens": 11,
+        "total_tokens": 449,
+        "cost": 1.457e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 1.457e-05,
+          "upstream_inference_prompt_cost": 1.314e-05,
+          "upstream_inference_completions_cost": 1.43e-06
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483629-rwLehUkdYT8POIiOya3q",
+      "provider": "Alibaba",
+      "served_model": "qwen/qwen3.7-flash",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 812
+    },
+    {
+      "player_id": "p1",
+      "model": "qwen/qwen3.7-flash",
+      "phase": "paper_round_7_action",
+      "usage": {
+        "prompt_tokens": 438,
+        "completion_tokens": 11,
+        "total_tokens": 449,
+        "cost": 1.457e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 1.457e-05,
+          "upstream_inference_prompt_cost": 1.314e-05,
+          "upstream_inference_completions_cost": 1.43e-06
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483630-1ttUaeCntOcntmShu8UK",
+      "provider": "Alibaba",
+      "served_model": "qwen/qwen3.7-flash",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 1032
+    },
+    {
+      "player_id": "p0",
+      "model": "qwen/qwen3.7-flash",
+      "phase": "paper_round_8_action",
+      "usage": {
+        "prompt_tokens": 440,
+        "completion_tokens": 12,
+        "total_tokens": 452,
+        "cost": 1.476e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 1.476e-05,
+          "upstream_inference_prompt_cost": 1.32e-05,
+          "upstream_inference_completions_cost": 1.56e-06
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483631-ZpfQZnmHwVhLYY8cmhzO",
+      "provider": "Alibaba",
+      "served_model": "qwen/qwen3.7-flash",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 812
+    },
+    {
+      "player_id": "p1",
+      "model": "qwen/qwen3.7-flash",
+      "phase": "paper_round_8_action",
+      "usage": {
+        "prompt_tokens": 440,
+        "completion_tokens": 12,
+        "total_tokens": 452,
+        "cost": 1.476e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 1.476e-05,
+          "upstream_inference_prompt_cost": 1.32e-05,
+          "upstream_inference_completions_cost": 1.56e-06
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483632-2OLk2NlL5WtrxU0tHza3",
+      "provider": "Alibaba",
+      "served_model": "qwen/qwen3.7-flash",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 1141
+    },
+    {
+      "player_id": "p0",
+      "model": "qwen/qwen3.7-flash",
+      "phase": "paper_round_9_action",
+      "usage": {
+        "prompt_tokens": 440,
+        "completion_tokens": 12,
+        "total_tokens": 452,
+        "cost": 1.476e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 1.476e-05,
+          "upstream_inference_prompt_cost": 1.32e-05,
+          "upstream_inference_completions_cost": 1.56e-06
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483633-ZWhuMMH73RpcWdABQi7u",
+      "provider": "Alibaba",
+      "served_model": "qwen/qwen3.7-flash",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 797
+    },
+    {
+      "player_id": "p1",
+      "model": "qwen/qwen3.7-flash",
+      "phase": "paper_round_9_action",
+      "usage": {
+        "prompt_tokens": 440,
+        "completion_tokens": 12,
+        "total_tokens": 452,
+        "cost": 1.476e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 1.476e-05,
+          "upstream_inference_prompt_cost": 1.32e-05,
+          "upstream_inference_completions_cost": 1.56e-06
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483634-SiVrxqCsSHd7pAI3pKKA",
+      "provider": "Alibaba",
+      "served_model": "qwen/qwen3.7-flash",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 765
+    },
+    {
+      "player_id": "p0",
+      "model": "qwen/qwen3.7-flash",
+      "phase": "paper_round_10_action",
+      "usage": {
+        "prompt_tokens": 441,
+        "completion_tokens": 11,
+        "total_tokens": 452,
+        "cost": 1.466e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 1.466e-05,
+          "upstream_inference_prompt_cost": 1.323e-05,
+          "upstream_inference_completions_cost": 1.43e-06
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483635-zcnDDsFaMge2XxbckeOd",
+      "provider": "Alibaba",
+      "served_model": "qwen/qwen3.7-flash",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 844
+    },
+    {
+      "player_id": "p1",
+      "model": "qwen/qwen3.7-flash",
+      "phase": "paper_round_10_action",
+      "usage": {
+        "prompt_tokens": 441,
+        "completion_tokens": 11,
+        "total_tokens": 452,
+        "cost": 1.466e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 1.466e-05,
+          "upstream_inference_prompt_cost": 1.323e-05,
+          "upstream_inference_completions_cost": 1.43e-06
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483635-igX81efU3HZM5oZIhsJy",
+      "provider": "Alibaba",
+      "served_model": "qwen/qwen3.7-flash",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 812
+    },
+    {
+      "player_id": "p0",
+      "model": "qwen/qwen3.7-flash",
+      "phase": "paper_round_11_action",
+      "usage": {
+        "prompt_tokens": 442,
+        "completion_tokens": 11,
+        "total_tokens": 453,
+        "cost": 1.469e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 1.469e-05,
+          "upstream_inference_prompt_cost": 1.326e-05,
+          "upstream_inference_completions_cost": 1.43e-06
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483636-83S81CuIMYedB0I6HYuj",
+      "provider": "Alibaba",
+      "served_model": "qwen/qwen3.7-flash",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 969
+    },
+    {
+      "player_id": "p1",
+      "model": "qwen/qwen3.7-flash",
+      "phase": "paper_round_11_action",
+      "usage": {
+        "prompt_tokens": 441,
+        "completion_tokens": 12,
+        "total_tokens": 453,
+        "cost": 1.479e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 1.479e-05,
+          "upstream_inference_prompt_cost": 1.323e-05,
+          "upstream_inference_completions_cost": 1.56e-06
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483637-vUrPDtvZnFZTvl7XvsjF",
+      "provider": "Alibaba",
+      "served_model": "qwen/qwen3.7-flash",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 828
+    }
+  ],
+  "8c34b4ed1274": [
+    {
+      "player_id": "p0",
+      "model": "mistralai/mistral-nemo",
+      "phase": "paper_round_1_action",
+      "usage": {
+        "prompt_tokens": 435,
+        "completion_tokens": 8,
+        "total_tokens": 443,
+        "cost": 8.505e-06,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 8.505e-06,
+          "upstream_inference_prompt_cost": 8.265e-06,
+          "upstream_inference_completions_cost": 2.4e-07
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483546-tqvsWjWetODnXdi5CzoR",
+      "provider": "DeepInfra",
+      "served_model": "mistralai/mistral-nemo",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 625
+    },
+    {
+      "player_id": "p1",
+      "model": "mistralai/mistral-nemo",
+      "phase": "paper_round_1_action",
+      "usage": {
+        "prompt_tokens": 434,
+        "completion_tokens": 7,
+        "total_tokens": 441,
+        "cost": 2.0216e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 2.0216e-05,
+          "upstream_inference_prompt_cost": 1.9096e-05,
+          "upstream_inference_completions_cost": 1.12e-06
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483547-0hrmCvdIiQSP0tyxEoLB",
+      "provider": "Io Net",
+      "served_model": "mistralai/mistral-nemo",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 1375
+    },
+    {
+      "player_id": "p0",
+      "model": "mistralai/mistral-nemo",
+      "phase": "paper_round_2_action",
+      "usage": {
+        "prompt_tokens": 441,
+        "completion_tokens": 7,
+        "total_tokens": 448,
+        "cost": 8.148e-06,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 8.148e-06,
+          "upstream_inference_prompt_cost": 7.938e-06,
+          "upstream_inference_completions_cost": 2.1e-07
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483548-Z1B1IJzdIsryrKaLMQWa",
+      "provider": "DekaLLM",
+      "served_model": "mistralai/mistral-nemo",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 953
+    },
+    {
+      "player_id": "p1",
+      "model": "mistralai/mistral-nemo",
+      "phase": "paper_round_2_action",
+      "usage": {
+        "prompt_tokens": 441,
+        "completion_tokens": 8,
+        "total_tokens": 449,
+        "cost": 8.178e-06,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 8.178e-06,
+          "upstream_inference_prompt_cost": 7.938e-06,
+          "upstream_inference_completions_cost": 2.4e-07
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483549-O9jITdkClT8VIGn7PKQv",
+      "provider": "DekaLLM",
+      "served_model": "mistralai/mistral-nemo",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 813
+    },
+    {
+      "player_id": "p0",
+      "model": "mistralai/mistral-nemo",
+      "phase": "paper_round_3_action",
+      "usage": {
+        "prompt_tokens": 441,
+        "completion_tokens": 7,
+        "total_tokens": 448,
+        "cost": 8.148e-06,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 8.148e-06,
+          "upstream_inference_prompt_cost": 7.938e-06,
+          "upstream_inference_completions_cost": 2.1e-07
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483550-JRQOdyf8APQARdcLZmCF",
+      "provider": "DekaLLM",
+      "served_model": "mistralai/mistral-nemo",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 781
+    },
+    {
+      "player_id": "p1",
+      "model": "mistralai/mistral-nemo",
+      "phase": "paper_round_3_action",
+      "usage": {
+        "prompt_tokens": 441,
+        "completion_tokens": 7,
+        "total_tokens": 448,
+        "cost": 8.148e-06,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 8.148e-06,
+          "upstream_inference_prompt_cost": 7.938e-06,
+          "upstream_inference_completions_cost": 2.1e-07
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483551-lm0KInO67UtMDebLWPu9",
+      "provider": "DekaLLM",
+      "served_model": "mistralai/mistral-nemo",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 1219
+    },
+    {
+      "player_id": "p0",
+      "model": "mistralai/mistral-nemo",
+      "phase": "paper_round_4_action",
+      "usage": {
+        "prompt_tokens": 440,
+        "completion_tokens": 8,
+        "total_tokens": 448,
+        "cost": 8.16e-06,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 8.16e-06,
+          "upstream_inference_prompt_cost": 7.92e-06,
+          "upstream_inference_completions_cost": 2.4e-07
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483552-dUGK2lu5WAgTRyJaWAOc",
+      "provider": "DekaLLM",
+      "served_model": "mistralai/mistral-nemo",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 781
+    },
+    {
+      "player_id": "p1",
+      "model": "mistralai/mistral-nemo",
+      "phase": "paper_round_4_action",
+      "usage": {
+        "prompt_tokens": 440,
+        "completion_tokens": 8,
+        "total_tokens": 448,
+        "cost": 8.16e-06,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 8.16e-06,
+          "upstream_inference_prompt_cost": 7.92e-06,
+          "upstream_inference_completions_cost": 2.4e-07
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483553-jEkkSnenv2cKI1I1uarN",
+      "provider": "DekaLLM",
+      "served_model": "mistralai/mistral-nemo",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 640
+    },
+    {
+      "player_id": "p0",
+      "model": "mistralai/mistral-nemo",
+      "phase": "paper_round_5_action",
+      "usage": {
+        "prompt_tokens": 442,
+        "completion_tokens": 7,
+        "total_tokens": 449,
+        "cost": 8.166e-06,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 8.166e-06,
+          "upstream_inference_prompt_cost": 7.956e-06,
+          "upstream_inference_completions_cost": 2.1e-07
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483553-s6ZGkv102Mo8n8uQijYc",
+      "provider": "DekaLLM",
+      "served_model": "mistralai/mistral-nemo",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 829
+    },
+    {
+      "player_id": "p1",
+      "model": "mistralai/mistral-nemo",
+      "phase": "paper_round_5_action",
+      "usage": {
+        "prompt_tokens": 442,
+        "completion_tokens": 7,
+        "total_tokens": 449,
+        "cost": 8.166e-06,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 8.166e-06,
+          "upstream_inference_prompt_cost": 7.956e-06,
+          "upstream_inference_completions_cost": 2.1e-07
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483554-Hi2GtYggyJWBYonIO2jm",
+      "provider": "DekaLLM",
+      "served_model": "mistralai/mistral-nemo",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 796
+    },
+    {
+      "player_id": "p0",
+      "model": "mistralai/mistral-nemo",
+      "phase": "paper_round_6_action",
+      "usage": {
+        "prompt_tokens": 440,
+        "completion_tokens": 8,
+        "total_tokens": 448,
+        "cost": 8.16e-06,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 8.16e-06,
+          "upstream_inference_prompt_cost": 7.92e-06,
+          "upstream_inference_completions_cost": 2.4e-07
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483555-h09ZDRgTva64d6ws2Wcj",
+      "provider": "DekaLLM",
+      "served_model": "mistralai/mistral-nemo",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 969
+    },
+    {
+      "player_id": "p1",
+      "model": "mistralai/mistral-nemo",
+      "phase": "paper_round_6_action",
+      "usage": {
+        "prompt_tokens": 440,
+        "completion_tokens": 8,
+        "total_tokens": 448,
+        "cost": 8.16e-06,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 8.16e-06,
+          "upstream_inference_prompt_cost": 7.92e-06,
+          "upstream_inference_completions_cost": 2.4e-07
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483556-L6yaFRv6Xy43qSiSwf6P",
+      "provider": "DekaLLM",
+      "served_model": "mistralai/mistral-nemo",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 3469
+    },
+    {
+      "player_id": "p0",
+      "model": "mistralai/mistral-nemo",
+      "phase": "paper_round_7_action",
+      "usage": {
+        "prompt_tokens": 442,
+        "completion_tokens": 7,
+        "total_tokens": 449,
+        "cost": 8.166e-06,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 8.166e-06,
+          "upstream_inference_prompt_cost": 7.956e-06,
+          "upstream_inference_completions_cost": 2.1e-07
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483560-XJ1vcPst7igaLtSEOUvb",
+      "provider": "DekaLLM",
+      "served_model": "mistralai/mistral-nemo",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 890
+    },
+    {
+      "player_id": "p1",
+      "model": "mistralai/mistral-nemo",
+      "phase": "paper_round_7_action",
+      "usage": {
+        "prompt_tokens": 442,
+        "completion_tokens": 7,
+        "total_tokens": 449,
+        "cost": 8.166e-06,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 8.166e-06,
+          "upstream_inference_prompt_cost": 7.956e-06,
+          "upstream_inference_completions_cost": 2.1e-07
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483560-ma4XQEBTtYuOnFTyThoB",
+      "provider": "DekaLLM",
+      "served_model": "mistralai/mistral-nemo",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 860
+    },
+    {
+      "player_id": "p0",
+      "model": "mistralai/mistral-nemo",
+      "phase": "paper_round_8_action",
+      "usage": {
+        "prompt_tokens": 442,
+        "completion_tokens": 8,
+        "total_tokens": 450,
+        "cost": 8.196e-06,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 8.196e-06,
+          "upstream_inference_prompt_cost": 7.956e-06,
+          "upstream_inference_completions_cost": 2.4e-07
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483561-XquMRsVXFJJgy8QeaqxV",
+      "provider": "DekaLLM",
+      "served_model": "mistralai/mistral-nemo",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 656
+    },
+    {
+      "player_id": "p1",
+      "model": "mistralai/mistral-nemo",
+      "phase": "paper_round_8_action",
+      "usage": {
+        "prompt_tokens": 442,
+        "completion_tokens": 8,
+        "total_tokens": 450,
+        "cost": 8.196e-06,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 8.196e-06,
+          "upstream_inference_prompt_cost": 7.956e-06,
+          "upstream_inference_completions_cost": 2.4e-07
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483562-guUPMA5siiUEzJHOO69i",
+      "provider": "DekaLLM",
+      "served_model": "mistralai/mistral-nemo",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 1312
+    },
+    {
+      "player_id": "p0",
+      "model": "mistralai/mistral-nemo",
+      "phase": "paper_round_9_action",
+      "usage": {
+        "prompt_tokens": 446,
+        "completion_tokens": 7,
+        "total_tokens": 453,
+        "cost": 8.238e-06,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 8.238e-06,
+          "upstream_inference_prompt_cost": 8.028e-06,
+          "upstream_inference_completions_cost": 2.1e-07
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483563-8dJf3poIvO2Odry94hSw",
+      "provider": "DekaLLM",
+      "served_model": "mistralai/mistral-nemo",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 719
+    },
+    {
+      "player_id": "p1",
+      "model": "mistralai/mistral-nemo",
+      "phase": "paper_round_9_action",
+      "usage": {
+        "prompt_tokens": 446,
+        "completion_tokens": 7,
+        "total_tokens": 453,
+        "cost": 8.238e-06,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 8.238e-06,
+          "upstream_inference_prompt_cost": 8.028e-06,
+          "upstream_inference_completions_cost": 2.1e-07
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483564-oH4EggH03v10jnufoQ23",
+      "provider": "DekaLLM",
+      "served_model": "mistralai/mistral-nemo",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 625
+    },
+    {
+      "player_id": "p0",
+      "model": "mistralai/mistral-nemo",
+      "phase": "paper_round_10_action",
+      "usage": {
+        "prompt_tokens": 445,
+        "completion_tokens": 8,
+        "total_tokens": 453,
+        "cost": 8.25e-06,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 8.25e-06,
+          "upstream_inference_prompt_cost": 8.01e-06,
+          "upstream_inference_completions_cost": 2.4e-07
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483565-p1rwVbnNiVFnFRg0EmZM",
+      "provider": "DekaLLM",
+      "served_model": "mistralai/mistral-nemo",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 641
+    },
+    {
+      "player_id": "p1",
+      "model": "mistralai/mistral-nemo",
+      "phase": "paper_round_10_action",
+      "usage": {
+        "prompt_tokens": 445,
+        "completion_tokens": 8,
+        "total_tokens": 453,
+        "cost": 8.25e-06,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 8.25e-06,
+          "upstream_inference_prompt_cost": 8.01e-06,
+          "upstream_inference_completions_cost": 2.4e-07
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483565-fgpwPV8rVqsMQsIDHRz6",
+      "provider": "DekaLLM",
+      "served_model": "mistralai/mistral-nemo",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 750
+    }
+  ],
+  "9f6e7f7c7200": [
+    {
+      "player_id": "p0",
+      "model": "qwen/qwen3.7-flash",
+      "phase": "paper_round_1_action",
+      "usage": {
+        "prompt_tokens": 433,
+        "completion_tokens": 11,
+        "total_tokens": 444,
+        "cost": 1.442e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 1.442e-05,
+          "upstream_inference_prompt_cost": 1.299e-05,
+          "upstream_inference_completions_cost": 1.43e-06
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483638-x09NOzLZN7TjZ5J6uinR",
+      "provider": "Alibaba",
+      "served_model": "qwen/qwen3.7-flash",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 891
+    },
+    {
+      "player_id": "p1",
+      "model": "qwen/qwen3.7-flash",
+      "phase": "paper_round_1_action",
+      "usage": {
+        "prompt_tokens": 433,
+        "completion_tokens": 11,
+        "total_tokens": 444,
+        "cost": 1.442e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 1.442e-05,
+          "upstream_inference_prompt_cost": 1.299e-05,
+          "upstream_inference_completions_cost": 1.43e-06
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483639-VuT0Zccew6uqRraFJr5n",
+      "provider": "Alibaba",
+      "served_model": "qwen/qwen3.7-flash",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 1094
+    },
+    {
+      "player_id": "p0",
+      "model": "qwen/qwen3.7-flash",
+      "phase": "paper_round_2_action",
+      "usage": {
+        "prompt_tokens": 436,
+        "completion_tokens": 11,
+        "total_tokens": 447,
+        "cost": 1.451e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 1.451e-05,
+          "upstream_inference_prompt_cost": 1.308e-05,
+          "upstream_inference_completions_cost": 1.43e-06
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483640-X30mf5eovdO4lHCib8Cq",
+      "provider": "Alibaba",
+      "served_model": "qwen/qwen3.7-flash",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 922
+    },
+    {
+      "player_id": "p1",
+      "model": "qwen/qwen3.7-flash",
+      "phase": "paper_round_2_action",
+      "usage": {
+        "prompt_tokens": 436,
+        "completion_tokens": 10,
+        "total_tokens": 446,
+        "cost": 1.438e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 1.438e-05,
+          "upstream_inference_prompt_cost": 1.308e-05,
+          "upstream_inference_completions_cost": 1.3e-06
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483641-KfX9uliczTMe8Y0KMS4k",
+      "provider": "Alibaba",
+      "served_model": "qwen/qwen3.7-flash",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 906
+    },
+    {
+      "player_id": "p0",
+      "model": "qwen/qwen3.7-flash",
+      "phase": "paper_round_3_action",
+      "usage": {
+        "prompt_tokens": 435,
+        "completion_tokens": 11,
+        "total_tokens": 446,
+        "cost": 1.448e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 1.448e-05,
+          "upstream_inference_prompt_cost": 1.305e-05,
+          "upstream_inference_completions_cost": 1.43e-06
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483642-2Ib4wIya19CWrl0Ts06n",
+      "provider": "Alibaba",
+      "served_model": "qwen/qwen3.7-flash",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 703
+    },
+    {
+      "player_id": "p1",
+      "model": "qwen/qwen3.7-flash",
+      "phase": "paper_round_3_action",
+      "usage": {
+        "prompt_tokens": 435,
+        "completion_tokens": 12,
+        "total_tokens": 447,
+        "cost": 1.461e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 1.461e-05,
+          "upstream_inference_prompt_cost": 1.305e-05,
+          "upstream_inference_completions_cost": 1.56e-06
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483643-JxuVWCH9u58TUG895iAr",
+      "provider": "Alibaba",
+      "served_model": "qwen/qwen3.7-flash",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 891
+    },
+    {
+      "player_id": "p0",
+      "model": "qwen/qwen3.7-flash",
+      "phase": "paper_round_4_action",
+      "usage": {
+        "prompt_tokens": 436,
+        "completion_tokens": 12,
+        "total_tokens": 448,
+        "cost": 1.464e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 1.464e-05,
+          "upstream_inference_prompt_cost": 1.308e-05,
+          "upstream_inference_completions_cost": 1.56e-06
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483644-aElvodwFAmtV77iNxdAM",
+      "provider": "Alibaba",
+      "served_model": "qwen/qwen3.7-flash",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 968
+    },
+    {
+      "player_id": "p1",
+      "model": "qwen/qwen3.7-flash",
+      "phase": "paper_round_4_action",
+      "usage": {
+        "prompt_tokens": 436,
+        "completion_tokens": 11,
+        "total_tokens": 447,
+        "cost": 1.451e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 1.451e-05,
+          "upstream_inference_prompt_cost": 1.308e-05,
+          "upstream_inference_completions_cost": 1.43e-06
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483645-ewROaCxETkjY71TphZas",
+      "provider": "Alibaba",
+      "served_model": "qwen/qwen3.7-flash",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 891
+    },
+    {
+      "player_id": "p0",
+      "model": "qwen/qwen3.7-flash",
+      "phase": "paper_round_5_action",
+      "usage": {
+        "prompt_tokens": 436,
+        "completion_tokens": 12,
+        "total_tokens": 448,
+        "cost": 1.464e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 1.464e-05,
+          "upstream_inference_prompt_cost": 1.308e-05,
+          "upstream_inference_completions_cost": 1.56e-06
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483646-wmSECHI6tMptz7gUvs8d",
+      "provider": "Alibaba",
+      "served_model": "qwen/qwen3.7-flash",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 938
+    },
+    {
+      "player_id": "p1",
+      "model": "qwen/qwen3.7-flash",
+      "phase": "paper_round_5_action",
+      "usage": {
+        "prompt_tokens": 436,
+        "completion_tokens": 12,
+        "total_tokens": 448,
+        "cost": 1.464e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 1.464e-05,
+          "upstream_inference_prompt_cost": 1.308e-05,
+          "upstream_inference_completions_cost": 1.56e-06
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483647-374woHfIoPt4SWeBc8K1",
+      "provider": "Alibaba",
+      "served_model": "qwen/qwen3.7-flash",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 1000
+    },
+    {
+      "player_id": "p0",
+      "model": "qwen/qwen3.7-flash",
+      "phase": "paper_round_6_action",
+      "usage": {
+        "prompt_tokens": 437,
+        "completion_tokens": 11,
+        "total_tokens": 448,
+        "cost": 1.454e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 1.454e-05,
+          "upstream_inference_prompt_cost": 1.311e-05,
+          "upstream_inference_completions_cost": 1.43e-06
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483648-rHYGwvqilwimJt7TYtKF",
+      "provider": "Alibaba",
+      "served_model": "qwen/qwen3.7-flash",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 828
+    },
+    {
+      "player_id": "p1",
+      "model": "qwen/qwen3.7-flash",
+      "phase": "paper_round_6_action",
+      "usage": {
+        "prompt_tokens": 437,
+        "completion_tokens": 10,
+        "total_tokens": 447,
+        "cost": 1.441e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 1.441e-05,
+          "upstream_inference_prompt_cost": 1.311e-05,
+          "upstream_inference_completions_cost": 1.3e-06
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483648-whJ8Wp8DBTHsUjTJnjdL",
+      "provider": "Alibaba",
+      "served_model": "qwen/qwen3.7-flash",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 1109
+    },
+    {
+      "player_id": "p0",
+      "model": "qwen/qwen3.7-flash",
+      "phase": "paper_round_7_action",
+      "usage": {
+        "prompt_tokens": 436,
+        "completion_tokens": 12,
+        "total_tokens": 448,
+        "cost": 1.464e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 1.464e-05,
+          "upstream_inference_prompt_cost": 1.308e-05,
+          "upstream_inference_completions_cost": 1.56e-06
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483650-uWMJCmXA9Ef3j56EDM6h",
+      "provider": "Alibaba",
+      "served_model": "qwen/qwen3.7-flash",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 875
+    },
+    {
+      "player_id": "p1",
+      "model": "qwen/qwen3.7-flash",
+      "phase": "paper_round_7_action",
+      "usage": {
+        "prompt_tokens": 436,
+        "completion_tokens": 12,
+        "total_tokens": 448,
+        "cost": 1.464e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 1.464e-05,
+          "upstream_inference_prompt_cost": 1.308e-05,
+          "upstream_inference_completions_cost": 1.56e-06
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483650-y7PzCsKjPz6bxydLLxo4",
+      "provider": "Alibaba",
+      "served_model": "qwen/qwen3.7-flash",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 781
+    },
+    {
+      "player_id": "p0",
+      "model": "qwen/qwen3.7-flash",
+      "phase": "paper_round_8_action",
+      "usage": {
+        "prompt_tokens": 439,
+        "completion_tokens": 11,
+        "total_tokens": 450,
+        "cost": 1.46e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 1.46e-05,
+          "upstream_inference_prompt_cost": 1.317e-05,
+          "upstream_inference_completions_cost": 1.43e-06
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483651-7PooflGAvdnHz8mKoVWw",
+      "provider": "Alibaba",
+      "served_model": "qwen/qwen3.7-flash",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 969
+    },
+    {
+      "player_id": "p1",
+      "model": "qwen/qwen3.7-flash",
+      "phase": "paper_round_8_action",
+      "usage": {
+        "prompt_tokens": 439,
+        "completion_tokens": 11,
+        "total_tokens": 450,
+        "cost": 1.46e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 1.46e-05,
+          "upstream_inference_prompt_cost": 1.317e-05,
+          "upstream_inference_completions_cost": 1.43e-06
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483652-UoJdhnP3VpSzA3exgsfJ",
+      "provider": "Alibaba",
+      "served_model": "qwen/qwen3.7-flash",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 1641
+    },
+    {
+      "player_id": "p0",
+      "model": "qwen/qwen3.7-flash",
+      "phase": "paper_round_9_action",
+      "usage": {
+        "prompt_tokens": 440,
+        "completion_tokens": 12,
+        "total_tokens": 452,
+        "cost": 1.476e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 1.476e-05,
+          "upstream_inference_prompt_cost": 1.32e-05,
+          "upstream_inference_completions_cost": 1.56e-06
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483654-H3S2A2tHhAoUdTHws9Ae",
+      "provider": "Alibaba",
+      "served_model": "qwen/qwen3.7-flash",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 781
+    },
+    {
+      "player_id": "p1",
+      "model": "qwen/qwen3.7-flash",
+      "phase": "paper_round_9_action",
+      "usage": {
+        "prompt_tokens": 440,
+        "completion_tokens": 11,
+        "total_tokens": 451,
+        "cost": 1.463e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 1.463e-05,
+          "upstream_inference_prompt_cost": 1.32e-05,
+          "upstream_inference_completions_cost": 1.43e-06
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "response_id": "gen-1789483655-CZy4iYdSVvVtsrcsLXhr",
+      "provider": "Alibaba",
+      "served_model": "qwen/qwen3.7-flash",
+      "finish_reason": "stop",
+      "reasoning_mode": "none",
+      "attempt": 1,
+      "max_tokens": 160,
+      "latency_ms": 844
+    }
+  ]
+}

@@ -10,6 +10,16 @@ node_modules/
 out/
 next-env.d.ts
 *.tsbuildinfo
+tmp/
+# Raw research traces are published together in a compressed, downloadable archive.
+docs/results/reproduction-*/races/
+docs/results/reproduction-*/calls/
+docs/results/reproduction-*/audit/
+docs/results/reproduction-*/replays/
+docs/results/reproduction-*/ledger.json
+docs/results/reproduction-*/ledger.jsonl
+*.db-wal
+*.db-shm
 
 # Entorno
 .env

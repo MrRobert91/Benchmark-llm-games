@@ -1,0 +1,13 @@
+{
+  "campaign": "reproduction-20261005",
+  "contributor": {"nick": "RustyRoboz", "url": "https://www.rustyrobozlabs.com"},
+  "execution": "One process owns the shared USD 5 ledger at a time. Parallel threads run independent jobs.",
+  "resumes": [
+    {"from_race_workers": 3, "to_race_workers": 12, "reason": "Increase independent-job throughput; retry transient Windows file replacement locks."},
+    {"from_race_workers": 12, "to_race_workers": 32, "date": "2026-10-05", "reason": "Provider calls often take roughly 15 seconds. Increase independent-job throughput; parallelise independent audit variants and frozen-state queries."},
+    {"from_race_workers": 32, "to_race_workers": 32, "date": "2026-10-05", "reason": "Full trace serialisation was saturating CPU. Persist each reservation/settlement in an fsynced append-only journal, with a complete ledger snapshot at phase completion. Preserve prior ledger entries and unresolved reservations."}
+  ],
+  "final_concurrency": {"primary_races": 32, "direct_audit_models": 12, "additional_qwen_audit_variants": 3, "frozen_state_queries": 16, "supplement_races": 32},
+  "accounting": "Completed race files are reused. Pending allowances from interrupted attempts remain charged in full; all transmitted request traces remain in ledger.json. Original infrastructure-failed race cells are retained.",
+  "protocol": "Concurrency changes do not change prompts, seeds, temperature, engine rules, response parsing or evidence admission. This remains exploratory reconstructed evidence."
+}

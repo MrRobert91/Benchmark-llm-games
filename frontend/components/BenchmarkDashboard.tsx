@@ -46,8 +46,8 @@ export function BenchmarkDashboard({ initialData }: { initialData: LeaderboardDa
       {refreshState === "live" ? "Resultados actualizados automáticamente" : "Mostrando los últimos resultados disponibles; reintentando conexión"}
     </div>
     <div className="grid grid-3" style={{ marginBottom: 28 }}>
-      <div className="card metric"><span className="metric-label">Partidas comparables</span><span className="metric-value">{summary.admitted_games}/{summary.games}</span><p className="metric-note">{summary.trajectories} resultados individuales guardados.</p></div>
-      <div className="card metric"><span className="metric-label">Decisiones UNSAFE</span><span className="metric-value" style={{ color: "var(--fast)" }}>{percent(summary.avg_unsafe_rate)}</span><p className="metric-note">Solo en partidas comparables.</p></div>
+      <div className="card metric"><span className="metric-label">Partidas admitidas por formato</span><span className="metric-value">{summary.admitted_games}/{summary.games}</span><p className="metric-note">{summary.trajectories} resultados individuales guardados.</p></div>
+      <div className="card metric"><span className="metric-label">Decisiones UNSAFE</span><span className="metric-value" style={{ color: "var(--fast)" }}>{percent(summary.avg_unsafe_rate)}</span><p className="metric-note">Promedio global descriptivo de partidas admitidas.</p></div>
       <div className="card metric"><span className="metric-label">Pago medio</span><span className="metric-value" style={{ color: "var(--accent)" }}>{summary.avg_payoff?.toFixed(2) ?? "—"}</span><p className="metric-note">{summary.requested_models} modelos solicitados.</p></div>
     </div>
 
@@ -59,7 +59,7 @@ export function BenchmarkDashboard({ initialData }: { initialData: LeaderboardDa
           const color = RISK_COLOR[String(row.risk_treatment)] ?? "var(--accent)";
           const hasComparableResults = row.admitted_trajectories > 0;
           return <div className="benchmark-chart-row" key={`${row.model}-${row.protocol_version}-${row.n_players}-${row.risk_treatment}`}>
-            <div><strong>{shortModel(row.model)}</strong><small>{row.n_players}P · riesgo {Math.round(row.risk_treatment * 100)}% · {row.games} carreras{hasComparableResults ? "" : " · sin muestra admitida"}</small></div>
+            <div><strong>{shortModel(row.model)}</strong><small>{row.n_players}P · riesgo {Math.round(row.risk_treatment * 100)}% · {row.games} carreras{hasComparableResults ? "" : " · sin muestra admitida"}</small><small>{row.protocol_version}</small></div>
             <AverageBar value={row.avg_unsafe_rate} color={color} /><b>{percent(row.avg_unsafe_rate)}</b>
           </div>;
         }) : <p>Todavía no hay carreras V1 guardadas.</p>}
@@ -93,10 +93,10 @@ export function BenchmarkDashboard({ initialData }: { initialData: LeaderboardDa
       <tbody>{data.paper_backends.map((row) => <tr key={`${row.provider}-${row.backend}-${row.protocol_version}-${row.n_players}-${row.risk_treatment}`}><td style={{ paddingLeft: 22 }}><strong>{row.provider}</strong><small style={{ display: "block" }}>{row.n_players}P · riesgo {Math.round(row.risk_treatment * 100)}% · {row.served_models} modelos servidos</small></td><td>{row.backend}</td><td className="num">{row.games}</td><td className="num">{row.admitted_trajectories}/{row.trajectories}</td><td className="num">{percent(row.avg_unsafe_rate)}</td><td className="num">{row.avg_payoff?.toFixed(2) ?? "—"}</td><td className="num">{row.calls}</td><td className="num" style={{ paddingRight: 22 }}>${row.cost_usd.toFixed(4)}</td></tr>)}</tbody></table></div>
     </section>
 
-    {data.contributors.length > 0 && <section><p className="eyebrow">Ejecuciones web</p><h2>Aportaciones recientes</h2><div className="card scroll-x" style={{ padding: 0 }}><table><thead><tr><th style={{ paddingLeft: 22 }}>Aportación</th><th>Partida</th><th>Estado</th><th className="num">Riesgo</th><th className="num">UNSAFE</th><th className="num" style={{ paddingRight: 22 }}>Pago medio</th></tr></thead>
+    {data.contributors.length > 0 && <section><p className="eyebrow">Ejecuciones web</p><h2>Aportaciones recientes</h2><div className="card scroll-x" style={{ padding: 0 }}><table><thead><tr><th style={{ paddingLeft: 22 }}>Aportación</th><th>Web</th><th>Partida</th><th>Estado</th><th className="num">Riesgo</th><th className="num">UNSAFE</th><th className="num" style={{ paddingRight: 22 }}>Pago medio</th></tr></thead>
       <tbody>{data.contributors.map((row) => {
         const admitted = row.admission_status === "admitted";
-        return <tr key={row.game_id}><td style={{ paddingLeft: 22 }}><strong>{row.url ? <a className="link" href={row.url} target="_blank" rel="nofollow noreferrer">{row.nick} ↗</a> : row.nick}</strong></td><td><a className="archive-game-id" href={`/arena/${row.game_id}`}>{row.game_id}</a></td><td style={{ color: admitted ? "var(--safe)" : "var(--warn)" }}>{admitted ? "Admitida" : "Excluida"}</td><td className="num">{Math.round(row.risk_treatment * 100)}%</td><td className="num">{admitted ? percent(row.unsafe_rate) : "—"}</td><td className="num" style={{ paddingRight: 22 }}>{admitted ? row.mean_payoff.toFixed(2) : "—"}</td></tr>;
+        return <tr key={row.game_id}><td style={{ paddingLeft: 22 }}><strong>{row.url ? <a className="link" href={row.url} target="_blank" rel="nofollow noreferrer">{row.nick} ↗</a> : row.nick}</strong></td><td>{row.url ? <a className="link" href={row.url} target="_blank" rel="nofollow noreferrer">{row.url} ↗</a> : "Sin URL aportada"}</td><td><a className="archive-game-id" href={`/arena/${row.game_id}`}>{row.game_id}</a></td><td style={{ color: admitted ? "var(--safe)" : "var(--warn)" }}>{admitted ? "Admitida" : "Excluida"}</td><td className="num">{Math.round(row.risk_treatment * 100)}%</td><td className="num">{admitted ? percent(row.unsafe_rate) : "—"}</td><td className="num" style={{ paddingRight: 22 }}>{admitted ? row.mean_payoff.toFixed(2) : "—"}</td></tr>;
       })}</tbody>
     </table></div></section>}
   </>;
