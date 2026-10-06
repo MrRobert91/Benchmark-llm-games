@@ -881,3 +881,13 @@ code {
   .result-round { grid-template-columns: 1fr; }
 }
 @media(prefers-reduced-motion:reduce) { .stage-panel { animation: none; } }
+.replay-traces { margin: 24px 0; padding: 20px; background: var(--panel, #111822); border: 1px solid var(--border, #354050); border-radius: 12px; min-width: 0; }
+.replay-traces h3 { margin-top: 0; }
+.replay-traces select { display: block; max-width: 100%; margin: 8px 0 18px; padding: 10px; background: #111822; color: #eee; border: 1px solid #536070; border-radius: 6px; }
+.trace-player { margin: 14px 0; min-width: 0; }
+.trace-player summary { padding: 12px 0; font-weight: 600; cursor: pointer; overflow-wrap: anywhere; }
+.trace-call { padding: 16px; margin: 10px 0; border: 1px solid #354050; border-radius: 8px; min-width: 0; }
+.trace-call header { display: flex; gap: 12px; flex-wrap: wrap; overflow-wrap: anywhere; }
+.trace-call pre { white-space: pre-wrap; overflow-wrap: anywhere; word-break: break-word; max-height: 480px; overflow-y: auto; padding: 14px; background: #090e15; border-radius: 6px; font-size: 13px; line-height: 1.65; }
+.trace-call details summary { cursor: pointer; padding: 8px 0; }
+@media (max-width: 600px) { .replay-traces { padding: 12px; } .trace-call { padding: 10px; } }

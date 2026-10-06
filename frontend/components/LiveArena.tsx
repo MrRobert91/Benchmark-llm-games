@@ -138,6 +138,7 @@ export function LiveArena({ initialRun }: { initialRun: WebRun }) {
           replay={run.replay as Replay}
           live={run.status !== "completed"}
           completed={run.status === "completed"}
+          tracesAvailable={terminal}
           thinking={run.status === "running" && liveEvents.at(-1)?.event_type === "thinking"}
           liveEvents={liveEvents}
         />

@@ -211,6 +211,27 @@ def game(game_id: str) -> dict:
     return replay
 
 
+@app.get("/api/games/{game_id}/traces")
+def game_traces(game_id: str) -> dict:
+    from .traces import public_trace
+
+    conn = _conn()
+    try:
+        run = db.get_web_run(conn, game_id)
+        if run and run.get("status") not in ("completed", "failed"):
+            raise HTTPException(status_code=409, detail="Las trazas se publican al terminar la ejecución.")
+        if db.get_game(conn, game_id) is None and not (run and run.get("status") == "failed"):
+            raise HTTPException(status_code=404, detail="partida no encontrada")
+        rows = conn.execute(
+            "SELECT call_index, trace_json FROM provider_calls WHERE game_id = ? ORDER BY call_index",
+            (game_id,),
+        ).fetchall()
+        calls = [public_trace(json.loads(row["trace_json"]), row["call_index"]) for row in rows]
+        return {"game_id": game_id, "calls": calls, "source": "provider-records"}
+    finally:
+        conn.close()
+
+
 @app.get("/api/leaderboard")
 def leaderboard() -> dict:
     conn = _conn()

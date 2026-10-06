@@ -18,6 +18,7 @@ import { buildTimeline } from "@/lib/replay-timeline";
 import { arenaReplay } from "@/lib/arena-identity";
 import { describeLiveEvent, liveEventTitle } from "@/lib/live-narration";
 import { ReplayResults } from "./ReplayResults";
+import { ReplayTraces } from "./ReplayTraces";
 import { robotGesture, GESTURE_LABEL } from "@/lib/robot-performance";
 
 const Arena3D = dynamic(() => import("./Arena3D").then((m) => m.Arena3D), {
@@ -41,12 +42,14 @@ export function ReplayViewer({
   live = false,
   completed = false,
   thinking = false,
+  tracesAvailable = false,
   liveEvents = [],
 }: {
   replay: Replay;
   live?: boolean;
   completed?: boolean;
   thinking?: boolean;
+  tracesAvailable?: boolean;
   liveEvents?: LiveRunEvent[];
 }) {
   const replay = useMemo(() => arenaReplay(recordedReplay), [recordedReplay]);
@@ -448,6 +451,7 @@ export function ReplayViewer({
           })}
         </div>
       </div>
+      <ReplayTraces gameId={replay.game_id} players={replay.players} round={beat.round} available={!live || completed || tracesAvailable} final={resolved || (live && tracesAvailable)} />
       {resolved && (
         <div id="resultado-partida" data-testid="replay-results" aria-label="Resultado completo de la partida">
           <ReplayResults replay={replay} />
