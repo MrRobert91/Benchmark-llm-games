@@ -175,6 +175,21 @@ export async function getReplay(gameId: string): Promise<Replay | null> {
   }
 }
 
+export async function getReplayTraces(gameId: string) {
+  if (!/^[a-zA-Z0-9_-]{1,100}$/.test(gameId)) return null;
+  type Traces = import("./replay-traces").ReplayTraces;
+  const snapshot = () => readJson<Traces | null>(`traces/${gameId}.json`, null);
+  try {
+    const upstream = await fetchFromApi<Traces>(`/api/games/${encodeURIComponent(gameId)}/traces`);
+    // Research deployments previously seeded compact usage records only.
+    if (upstream.calls.some(c => c.response_content || c.reasoning || c.request_messages.length)) return upstream;
+    return snapshot() ?? upstream;
+  } catch (error) {
+    if (error instanceof Error && error.message.includes("returned 409")) throw error;
+    return snapshot();
+  }
+}
+
 export async function getWebRun(gameId: string): Promise<WebRun | null> {
   try {
     return await fetchFromApi<WebRun>(`/api/runs/${encodeURIComponent(gameId)}`);
